@@ -1,0 +1,132 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card" *ngIf="action.CanCreate || (action.CanEdit && Transfer.TransferId > 0)">
+            <div class="card-body">
+                <form #formTransfer="ngForm">
+                    <div class="container">
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>From Account </mat-label>
+                                <mat-select name="FromAccountId"
+                                    [(ngModel)]="Transfer.FromAccountId" required>
+                                    <mat-option [value]="p1.AccountId"
+                                        *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>To Account </mat-label>
+                                <mat-select name="ToAccountId"
+                                    [(ngModel)]="Transfer.ToAccountId" required>
+                                    <mat-option [value]="p1.AccountId"
+                                        *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Amount</mat-label>
+                                <input type="number" matInput name="Amount" [(ngModel)]="Transfer.Amount" required>
+                                <mat-error>
+                                    required !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Date</mat-label>
+                                <input matInput name="TransferDate" [(ngModel)]="Transfer.TransferDateString" required
+                                    [matDatepicker]="TransferDatePicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="TransferDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #TransferDatePicker></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Narration</mat-label>
+                                <input type="text" matInput name="Remarks" [(ngModel)]="Transfer.Remarks">
+                                <mat-error>
+                                    required !!
+                                </mat-error>
+                            </mat-form-field>
+                            <div class="col-sm-12 mb-3 text-center">
+                                <button mat-flat-button color="primary" (click)="saveTransfer()">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body" *ngIf="TransferList.length > 0">
+                <h3 class="header-text">Past Deposite List</h3>
+                <!-- <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div> -->
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                <th (click)="sort('TransferDate')">Date</th>
+                                <th (click)="sort('FromAccountNo')">From</th>
+                                <th (click)="sort('ToAccountNo')">To</th>
+                                <th (click)="sort('Amount')">Amount</th>
+                                <th (click)="sort('Remarks')">Narration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of TransferList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td class="no-wrap" *ngIf="action.CanEdit || action.CanDelete">
+                                    <a ngbTooltip="Edit Transfer" *ngIf="action.CanEdit" class="icon-edit"
+                                        data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        (click)="editTransfer(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a ngbTooltip="Delete Transfer" *ngIf="action.CanDelete" class="icon-delete"
+                                        (click)="deleteTransfer(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <td class="no-wrap">{{item.TransferDate|date:'dd-MM-yyyy'}}</td>
+                                <td>{{item.FromAccountNo}}</td>
+                                <td>{{item.ToAccountNo}}</td>
+                                <td class="no-wrap">{{item.Amount|money}}</td>
+                                <td>{{item.Remarks}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div> -->
+
+
+            </div>
+        </div>
+
+    </section>
+</main>

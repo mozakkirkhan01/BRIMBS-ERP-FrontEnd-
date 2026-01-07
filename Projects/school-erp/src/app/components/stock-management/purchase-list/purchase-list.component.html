@@ -1,0 +1,378 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <!-- <div class="col-sm-4 mb-3">
+            <a href="/#/admin/purchase" mat-raised-button color="primary" *ngIf="action.CanCreate"
+                class="float-right">New Purchase</a>
+        </div> -->
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-4">
+                        <mat-label>Select Supplier</mat-label>
+                        <input matInput #SupplierId="ngModel" name="SupplierId"
+                            (ngModelChange)="filterSupplierList($event)"
+                            placeholder="Search By Supplier Name / Code / Mobile No"
+                            [(ngModel)]="FilterModel.SearchSupplier" [matAutocomplete]="autoSupplier">
+                        <mat-autocomplete #autoSupplier="matAutocomplete"
+                            (optionSelected)="afterSupplierSelected($event)">
+                            <mat-option id="0" value="All Suppliers">All Suppliers</mat-option>
+                            <mat-option *ngFor="let option of SupplierList" id="{{option.SupplierId}}"
+                                [value]="option.SearchSupplier">{{option.SearchSupplier}}</mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix *ngIf="FilterModel.SupplierId" color="primary"
+                            (click)="clearSupplier()">
+                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                        </button>
+                        <mat-error>Required field !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-3">
+                        <mat-label>From Date</mat-label>
+                        <input matInput name="FromDate" [(ngModel)]="FilterModel.FromDate"
+                            [matDatepicker]="FromDatePicker">
+                        <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #FromDatePicker></mat-datepicker>
+                        <mat-error>required !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-3">
+                        <mat-label>To Date</mat-label>
+                        <input matInput name="ToDate" [(ngModel)]="FilterModel.ToDate"
+                            [matDatepicker]="ToDatePicker">
+                        <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #ToDatePicker></mat-datepicker>
+                        <mat-error>required !!</mat-error>
+                    </mat-form-field>
+
+                    <div class="col-sm-2">
+                        <button mat-flat-button color="primary" (click)="getPurchaseList()"><i class="bi bi-search"></i>
+                            Search</button>
+                    </div>
+                </div>
+                <hr>
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <a class="text-link-sm" (click)="exportToExcel()">Export to Excel</a>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" #table_1>
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="!isExporting">Action</th>
+                                <th (click)="sort('PurchaseDate')">Date</th>
+                                <th (click)="sort('InvoiceNo')">Invoice No</th>
+                                <th (click)="sort('SupplierName')">Supplier Name</th>
+                                <th class="text-right" (click)="sort('BasicAmount')">Amount</th>
+                                <th class="text-right" (click)="sort('DiscountAmount')">Discount Amount</th>
+                                <th class="text-right" (click)="sort('TaxableAmount')">Taxable Amount</th>
+                                <th class="text-right" (click)="sort('CGSTAmount')">CGST Amount</th>
+                                <th class="text-right" (click)="sort('SGSTAmount')">SGST Amount</th>
+                                <th class="text-right" (click)="sort('IGSTAmount')">IGST Amount</th>
+                                <th class="text-right" (click)="sort('FinalAmount')">Total Amount</th>
+                                <th class="text-right" (click)="sort('PaidAmount')">Paid Amount</th>
+                                <th class="text-right" (click)="sort('DuesAmount')">Due Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of PurchaseList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td *ngIf="!isExporting" class="no-wrap">
+                                    <!-- <a data-bs-toggle="modal" ngbTooltip="Print Purchase" class="icon-print"
+                                        (click)="getPurchase(item.PurchaseId,true,1)"> <i
+                                            class="bi bi-printer-fill"></i>
+                                    </a>
+                                    <a data-bs-toggle="modal" *ngIf="action.CanDelete" ngbTooltip="Download Purchase"
+                                        class="icon-delete" (click)="getPurchase(item.PurchaseId,false,1)"> <i
+                                            class="bi bi-file-earmark-pdf-fill"></i>
+                                    </a> 
+                                    <a data-bs-toggle="modal" ngbTooltip="Download Purchase"
+                                        class="icon-edit" (click)="getPurchase(item.PurchaseId,false,2)"> <i
+                                            class="bi bi-file-earmark-word-fill"></i>
+                                    </a>-->
+                                    <a class="icon-detail" ngbTooltip="View Details" (click)="getPurchaseDetail(item)">
+                                        <i class="bi bi-file-text"></i>
+                                    </a>
+                                    <a *ngIf="action.CanEdit" ngbTooltip="Edit Purchase" class="icon-edit"
+                                        (click)="editPurchase(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a *ngIf="action.CanDelete" (click)="deletePurchase(item)"
+                                        ngbTooltip="Delete Purchase" class="icon-delete">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+
+                                </td>
+                                <td class="no-wrap">{{item.PurchaseDate|date:'dd-MM-yyyy'}}</td>
+                                <td>{{item.InvoiceNo}}</td>
+                                <td>{{item.SupplierName}}</td>
+                                <td class="text-right">{{item.BasicAmount|money}}</td>
+                                <td class="text-right">{{item.DiscountAmount|money}}</td>
+                                <td class="text-right">{{item.TaxableAmount|money}}</td>
+                                <td class="text-right">{{item.CGSTAmount|money}}</td>
+                                <td class="text-right">{{item.SGSTAmount|money}}</td>
+                                <td class="text-right">{{item.IGSTAmount|money}}</td>
+                                <td class="text-right">{{item.FinalAmount|money}}</td>
+                                <td class="text-right text-success">{{item.PaidAmount|money}}</td>
+                                <td class="text-right text-danger">{{item.DuesAmount|money}}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th class="text-right" [colSpan]="isExporting?4:5">TOTAL</th>
+                                <th class="text-right">{{Purchase.BasicAmount|money}}</th>
+                                <th class="text-right">{{Purchase.DiscountAmount|money}}</th>
+                                <th class="text-right">{{Purchase.TaxableAmount|money}}</th>
+                                <th class="text-right">{{Purchase.CGSTAmount|money}}</th>
+                                <th class="text-right">{{Purchase.SGSTAmount|money}}</th>
+                                <th class="text-right">{{Purchase.IGSTAmount|money}}</th>
+                                <th class="text-right">{{Purchase.FinalAmount|money}}</th>
+                                <th class="text-right text-success">{{Purchase.PaidAmount|money}}</th>
+                                <th class="text-right text-danger">{{Purchase.DuesAmount|money}}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="modal_detail" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Purchase Details</h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body mb-4">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="card-title mb-3">Supplier Details</h3>
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Supplier Name</mat-label>
+                                    <input matInput name="SupplierId" [(ngModel)]="Supplier.SupplierName" disabled>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>State Code</mat-label>
+                                    <input type="number" matInput name="StateCode" [(ngModel)]="Supplier.StateCode"
+                                        disabled>
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Mobile No</mat-label>
+                                    <input type="number" matInput name="MobileNo" [(ngModel)]="Supplier.MobileNo"
+                                        disabled>
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Alternate No</mat-label>
+                                    <input type="number" matInput name="AlternateNo" [(ngModel)]="Supplier.AlternateNo" disabled>
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>Full Address</mat-label>
+                                    <input matInput name="FullAddress" [(ngModel)]="Supplier.FullAddress" disabled>
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <h3 class="card-title mb-3">Product List</h3>
+                            <div class="col-sm-12 table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Product</th>
+                                            <th>Manufacturer</th>
+                                            <th>Batch No</th>
+                                            <th>HSN</th>
+                                            <th>Manufactured Date</th>
+                                            <th>Expiry Date</th>
+                                            <th class="text-right">Qty.</th>
+                                            <th class="text-right">Free Qty.</th>
+                                            <th class="text-right">Unit</th>
+                                            <th class="text-right">MRP</th>
+                                            <th class="text-right">Cost Price</th>
+                                            <th class="text-right">Discount (%)</th>
+                                            <th class="text-right">Discount Amount</th>
+                                            <th class="text-right">Bill Discount</th>
+                                            <th class="text-right">Taxable Amount</th>
+                                            <th class="text-right">GST (%)</th>
+                                            <th class="text-right" *ngIf="SelectedPurchase.CGSTAmount>0">CGST Amount
+                                            </th>
+                                            <th class="text-right" *ngIf="SelectedPurchase.SGSTAmount>0">SGST Amount
+                                            </th>
+                                            <th class="text-right" *ngIf="SelectedPurchase.IGSTAmount>0">IGST Amount
+                                            </th>
+                                            <th class="text-right">Total Amount</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let t1 of PurchaseProductList;let i1 = index">
+                                            <td>{{i1+1}}</td>
+                                            <td> {{t1.Product.ProductName}}</td>
+                                            <td>{{t1.Product.ManufacturerName}}</td>
+                                            <td>{{t1.BatchNo}}</td>
+                                            <td>{{t1.HSNCode}}</td>
+                                            <td>{{t1.ManufacturedDate|date:'dd-MM-yyyy'}}</td>
+                                            <td>{{t1.ExpiredDate|date:'dd-MM-yyyy'}}</td>
+                                            <td class="text-right"> {{t1.Quantity}}</td>
+                                            <td class="text-right"> {{t1.FreeQunatity}}</td>
+                                            <td> {{t1.Product.UnitName}}</td>
+                                            <td class="text-right"> {{t1.MRP|money}}</td>
+                                            <td class="text-right"> {{t1.CostPrice|money}}</td>
+                                            <td class="text-right"> {{t1.DiscountPercentage|money}}</td>
+                                            <td class="text-right"> {{t1.DiscountAmount|money}}</td>
+                                            <td class="text-right">{{t1.BillDiscountAmount|money}}</td>
+                                            <td class="text-right">{{t1.TaxableAmount|money}}</td>
+                                            <td class="text-right">{{t1.GSTValue|money}}</td>
+                                            <td class="text-right" *ngIf="SelectedPurchase.CGSTAmount>0">
+                                                {{t1.CGSTAmount|money}}
+                                            </td>
+                                            <td class="text-right" *ngIf="SelectedPurchase.SGSTAmount>0">
+                                                {{t1.SGSTAmount|money}}
+                                            </td>
+                                            <td class="text-right" *ngIf="SelectedPurchase.IGSTAmount>0">
+                                                {{t1.IGSTAmount|money}}
+                                            </td>
+                                            <td class="text-right">{{t1.TotalAmount|money}}</td>
+
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="7">Total</th>
+                                            <th class="text-right">{{SelectedPurchase.Quantity}}</th>
+                                            <th class="text-right">{{SelectedPurchase.FreeQunatity}}</th>
+                                            <th colspan="4"></th>
+                                            <th class="text-right">{{SelectedPurchase.ItemDiscountAmount|money}}</th>
+                                            <th class="text-right">{{SelectedPurchase.BillDiscountAmount|money}}</th>
+                                            <th class="text-right">{{SelectedPurchase.TaxableAmount|money}}</th>
+                                            <th></th>
+                                            <th class="text-right" *ngIf="SelectedPurchase.CGSTAmount>0">
+                                                {{(SelectedPurchase.CGSTAmount)|money}}
+                                            </th>
+                                            <th class="text-right" *ngIf="SelectedPurchase.SGSTAmount>0">
+                                                {{(SelectedPurchase.SGSTAmount)|money}}
+                                            </th>
+                                            <th class="text-right" *ngIf="SelectedPurchase.IGSTAmount>0">
+                                                {{(SelectedPurchase.IGSTAmount)|money}}
+                                            </th>
+                                            <th class="text-right">{{SelectedPurchase.TotalAmount|money}}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <h3 class="card-title mb-3">Purchase Details</h3>
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Purchase Date</mat-label>
+                                    <input matInput value="{{SelectedPurchase.PurchaseDate|date:'dd-MM-yyyy'}}" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>Invoice No</mat-label>
+                                    <input matInput name="InvoiceNo" [(ngModel)]="SelectedPurchase.InvoiceNo" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>Bill Amount</mat-label>
+                                    <input type="number" matInput name="BillAmount"
+                                        [value]="SelectedPurchase.TotalAmount +SelectedPurchase.BillDiscountAmount" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Bill Discount (%)</mat-label>
+                                    <input type="number" matInput
+                                        name="BillDiscountPercentage" [(ngModel)]="SelectedPurchase.BillDiscountPercentage"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Bill Discount (₹)</mat-label>
+                                    <input type="number" matInput
+                                        [(ngModel)]="SelectedPurchase.BillDiscountAmount" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>Total Amt.</mat-label>
+                                    <input type="number" matInput name="TotalAmount" [(ngModel)]="SelectedPurchase.TotalAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>Final Amt.</mat-label>
+                                    <input type="number" matInput name="FinalAmount" [(ngModel)]="SelectedPurchase.FinalAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>Paid Amt.</mat-label>
+                                    <input type="number" matInput name="PaidAmount" [(ngModel)]="SelectedPurchase.PaidAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-1">
+                                    <mat-label>Due Amt.</mat-label>
+                                    <input type="number" matInput name="DuesAmount" [(ngModel)]="SelectedPurchase.DuesAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

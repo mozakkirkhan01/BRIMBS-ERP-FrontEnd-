@@ -1,0 +1,161 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="menutitle shortcut col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-shortcut">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Shortcut</button>
+        </div>
+    </div>
+
+
+    <section class="section shortcut">
+        <div class="card" *ngIf="ShortcutList.length > 0">
+            <div class="card-body">
+                <!-- <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSizes" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per shortcut</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div> -->
+                <div class="row mb-3">
+                    <div class="col-sm-1 text-center"
+                        *ngFor="let item of ShortcutList">
+                        <div class="shortcut_icon">
+                            <img [src]="imageUrl+item.ImgFile" alt="Profile" class="mb-2"
+                                *ngIf="item.ImgFile">
+                            <i [ngClass]="item.MenuIcon" *ngIf="item.MenuIcon"></i>
+                            <h6 [ngClass]="item.Status == 1 ? 'text-success':'text-danger'">{{item.MenuTitle}}</h6>
+                        </div>
+                        <a *ngIf="action.CanEdit" ngbTooltip="Edit Record" class="icon-edit"
+                            (click)="editShortcut(item)">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <a *ngIf="action.CanDelete" ngbTooltip="Delete Record" class="icon-delete"
+                            (click)="deleteShortcut(item)">
+                            <i class="bi bi-trash-fill"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="p=$event" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div> -->
+
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" *ngIf="action.CanEdit || action.CanCreate" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Shortcut.ShortcutId > 0
+                        ?'Update':'New'}} Shortcut Item
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formShortcut="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Select Page</mat-label>
+                                    <input matInput #SearchMenu="ngModel" name="StaffName"
+                                        (ngModelChange)="filterMenu($event)" [(ngModel)]="Shortcut.SearchMenu"
+                                        [matAutocomplete]="autoSearchMenu" required>
+                                    <mat-autocomplete #autoSearchMenu="matAutocomplete"
+                                        (optionSelected)="afterMenuSelected($event.option.id)">
+                                        <mat-option *ngFor="let option of MenuList" [id]="option.MenuId"
+                                            [value]="option.SearchMenu">
+                                            {{option.SearchMenu}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Shortcut.SearchMenu" color="primary"
+                                        (click)="clearMenu()">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Title</mat-label>
+                                    <input matInput name="MenuTitle" [(ngModel)]="Shortcut.MenuTitle" required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Shortcut No.</mat-label>
+                                    <input type="number" matInput name="Position" [(ngModel)]="Shortcut.Position"
+                                        required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="Shortcut.Status" required>
+                                        <mat-option [value]="m1.Key"
+                                            *ngFor="let m1 of StatusList">{{m1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <div class="col-sm-6 text-center shortcut_icon">
+                                    <i [ngClass]="Shortcut.MenuIcon" *ngIf="Shortcut.MenuIcon"></i>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Icon Class</mat-label>
+                                        <input type="text" matInput name="MenuIcon" [(ngModel)]="Shortcut.MenuIcon">
+                                        <mat-error>Required Field !!</mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-sm-6 text-center">
+                                    <img [src]="ImgFilePhoto" alt="Profile" class="img-120 mb-4" *ngIf="ImgFilePhoto">
+                                    <input accept="image/png,image/jpg,image/jpeg" hidden #fileImgFile #ImgFileFile="ngModel"
+                                        [(ngModel)]="Shortcut.ImgFileFile" name="fileImgFile"
+                                        (change)="setImgFile($event)" type="file" id="file">
+                                    <mat-form-field appearance="outline" class="form-group file_input"
+                                        (click)="fileImgFile.click()">
+                                        <mat-label>Shortcut Image</mat-label>
+                                        <input matInput #ImgFileName="ngModel" readonly="true" name="ImgFile"
+                                            [(ngModel)]="Shortcut.ImgFileName">
+                                        <button mat-icon-button matSuffix>
+                                            <mat-icon>attach_file</mat-icon>
+                                        </button>
+                                        <mat-error>Required Field !!</mat-error>
+                                    </mat-form-field>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveShortcut()">{{Shortcut.ShortcutId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

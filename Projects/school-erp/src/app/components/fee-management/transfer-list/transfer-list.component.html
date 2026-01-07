@@ -1,0 +1,124 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formTransfer="ngForm">
+                    <div class="row mt-2">
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>From Account </mat-label>
+                            <mat-select name="AccountId" [(ngModel)]="Transfer.AccountId">
+                                <mat-option [value]="0">--All Account--</mat-option>
+                                <mat-option [value]="p1.AccountId"
+                                    *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                            </mat-select>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>From Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="Transfer.FromDateString"
+                                [matDatepicker]="FromDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>To Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="Transfer.ToDateString"
+                                [matDatepicker]="ToDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-2">
+                            <button mat-flat-button color="primary" (click)="getTransferList()">Search</button>
+                        </div>
+                    </div>
+                </form>
+                <div *ngIf="TransferList.length > 0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    <!-- &nbsp;|| &nbsp;
+                    <a class="text-link text-link-sm" (click)="printTransferHistory(2,false)">Export To Word</a>
+                    &nbsp;|| &nbsp;
+                    <a class="text-link text-link-sm" (click)="printTransferHistory(1,false)">Export To PDF</a>
+                    &nbsp;|| &nbsp;
+                    <a class="text-link text-link-sm" (click)="printTransferHistory(1,true)">Print Report</a> -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                    <th (click)="sort('TransferDate')">Date</th>
+                                    <th (click)="sort('FromAccountNo')">From</th>
+                                    <th (click)="sort('ToAccountNo')">To</th>
+                                    <th (click)="sort('Remarks')">Narration</th>
+                                    <th class="text-right" (click)="sort('Amount')">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of TransferList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td class="no-wrap" *ngIf="action.CanEdit || action.CanDelete">
+                                        <a ngbTooltip="Edit Transfer" *ngIf="action.CanEdit" class="icon-edit"
+                                            data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                            (click)="editTransfer(item)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a ngbTooltip="Delete Transfer" *ngIf="action.CanDelete" class="icon-delete"
+                                            (click)="deleteTransfer(item)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </td>
+                                    <td class="no-wrap">{{item.TransferDate|date:'dd-MM-yyyy'}}</td>
+                                    <td>{{item.FromAccountNo}}</td>
+                                    <td>{{item.ToAccountNo}}</td>
+                                    <td>{{item.Remarks}}</td>
+                                    <td class="no-wrap text-right">{{item.Amount|money}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th [colSpan]="(!isExporting &&(action.CanEdit || action.CanDelete))? 6:5">Total
+                                    </th>
+                                    <th class="no-wrap text-right">{{Transfer.Amount|money}}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

@@ -1,0 +1,92 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-lg-6">
+                        <mat-label>Select Pupil</mat-label>
+                        <input matInput #SearchPupil="ngModel" name="SearchPupil" (ngModelChange)="filterPupilList($event)"
+                            [(ngModel)]="filterModel.SearchPupil" placeholder="Enter Pupil Name/ Admission No"
+                            [matAutocomplete]="autoSearchPupil" required autofocus>
+                        <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                            (optionSelected)="afterPupilSeleted($event)">
+                            <mat-option *ngFor="let option of PupilList" [id]="option.PupilId"
+                                [value]="option.SearchPupil">
+                                {{option.SearchPupil}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Action</th>
+                                <th (click)="sort('SessionName')">Session</th>
+                                <th (click)="sort('ClassName')">Class</th>
+                                <th (click)="sort('ExamName')">Exam</th>
+                                <th (click)="sort('PublishDate')">Publish Date</th>
+                                <th (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of PupilAdmitCardList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>
+                                    <a ngbTooltip="Print Admit Card" (click)="printAdmitCard(item.AdmitCardId)"
+                                        class="icon-print">
+                                        <i class="bi bi-printer-fill"></i>
+                                    </a>
+                                </td>
+                                <td>{{item.SessionName}}</td>
+                                <td>{{item.ClassName}} - {{item.SectionName}}</td>
+                                <td>{{item.ExamName}}</td>
+                                <td>{{item.PublishDate|date:'dd-MM-yyyy'}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="p=$event" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+</main>

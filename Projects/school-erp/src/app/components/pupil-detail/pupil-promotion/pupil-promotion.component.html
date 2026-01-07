@@ -1,0 +1,125 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body mt-3" style="padding-bottom: 15px;">
+                <form #formPupil="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Select Pupil</mat-label>
+                            <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                                (ngModelChange)="filterPupilList($event)" [(ngModel)]="Pupil.SearchPupil"
+                                [matAutocomplete]="autoSearchPupil" required>
+                            <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSeleted($event)">
+                                <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                    [value]="option.SearchPupil">
+                                    {{option.SearchPupil}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="Pupil.SearchPupil" color="primary"
+                                (click)="clearPupil()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required Field !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div *ngIf="Pupil.PupilId">
+                        <div class="row">
+                            <div class="col-lg-2 col-md-3 label text-bold">Full Name :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.PupilName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Father's Name :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.FatherName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Session :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.SessionName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Class :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.ClassName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Section :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.SectionName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Roll No :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.OldRollNo}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Mobile No :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.MobileNo}}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-12">
+                                <h5 class="header-text">Promotion Details</h5>
+                            </div>
+                            <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                <mat-label>Session</mat-label>
+                                <mat-select name="SessionId" [(ngModel)]="Pupil.SessionId" required>
+                                    <mat-option [value]="session.SessionId"
+                                        *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                                </mat-select>
+                                <mat-error>
+                                    Session is required !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                <mat-label>Class</mat-label>
+                                <mat-select name="ClassId" (selectionChange)="changeClass()" [(ngModel)]="Pupil.ClassId"
+                                    required>
+                                    <mat-option [value]="class.ClassId"
+                                        *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                                </mat-select>
+                                <mat-error>
+                                    Class is required !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                <mat-label>Section</mat-label>
+                                <mat-select name="SectionId" [(ngModel)]="Pupil.SectionId" required>
+                                    <mat-option [value]="Section.SectionId"
+                                        *ngFor="let Section of SectionList">{{Section.SectionName}}</mat-option>
+                                </mat-select>
+                                <mat-error>
+                                    Required field !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-4 form-group">
+                                <mat-label>Admission Type</mat-label>
+                                <mat-select name="AdmissionType" [(ngModel)]="Pupil.AdmissionType" required>
+                                    <mat-option [value]="option.Key"
+                                        *ngFor="let option of AdmissionTypeList">{{option.Value}}</mat-option>
+                                </mat-select>
+                                <mat-error>
+                                    Required field !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                                <mat-label>Roll No</mat-label>
+                                <input type="text" matInput placeholder="Enter Roll No" name="RollNo"
+                                    [(ngModel)]="Pupil.RollNo">
+                                <mat-error>
+                                    Required field !!
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="card-footer" style="text-align: center;"
+                *ngIf="Pupil.PupilId > 0 && (action.CanEdit || action.CanCreate)">
+                <button mat-flat-button color="primary" (click)="pupilPromotion()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

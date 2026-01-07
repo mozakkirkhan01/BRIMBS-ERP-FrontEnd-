@@ -1,0 +1,36 @@
+export interface PupilValidationModel {
+    SelectAll:boolean;
+    AdmissionNo: boolean;
+    PupilName: boolean;
+    ClassName:boolean;
+    SectionName:boolean;
+    RollNo: boolean;
+    FatherName: boolean;
+    MotherName: boolean;
+    DOB: boolean;
+    Gender: boolean;
+    Category: boolean;
+    BloodGroup: boolean;
+    Religion: boolean;
+    Nationality: boolean;
+    MobileNo: boolean;
+    AlternateNo: boolean;
+    Email: boolean;
+    AadhaarNo: boolean;
+    Pen: boolean;
+    Height: boolean;
+    Weight: boolean;
+    FatherOccupation: boolean;
+    MotherOccupation: boolean;
+    FamilyAnnualIncome: boolean;
+    GuardianMobileNo: boolean;
+    CorrespondenceAddress: boolean;
+    PermanentAddress: boolean;
+    PreviousSchoolName: boolean;
+    Remarks: boolean;
+    PupilTypeName:boolean;
+    AdmissionType: boolean;
+    AdmissionDate: boolean;
+    JoinDate: boolean;
+    PupilStatus: boolean;
+}

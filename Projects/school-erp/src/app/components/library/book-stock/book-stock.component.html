@@ -1,0 +1,90 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-container overflow-auto">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th (click)="sort('BookNo')">Accession No</th>
+                                <th (click)="sort('BookName')">{{recordTitle}}</th>
+                                <th (click)="sort('Author')">Author</th>
+                                <th (click)="sort('Edition')">Edition</th>
+                                <th (click)="sort('Publisher')">Publisher</th>
+                                <th (click)="sort('PublishingYear')">Publishing Year</th>
+                                <th (click)="sort('TotalPages')">Total Pages</th>
+                                <th (click)="sort('Volumne')">Volumne</th>
+                                <th (click)="sort('BookTypeNames')">Book Types</th>
+                                <th (click)="sort('ClassNames')">{{recordClass}}</th>
+                                <th (click)="sort('SubjectNames')">Subjects</th>
+                                <th (click)="sort('RackNames')">Racks</th>
+                                <th (click)="sort('BookStockStatus')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of BookStockList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>{{item.BookNo}}</td>
+                                <td>{{item.Book.BookName}}</td>
+                                <td>{{item.Book.Author}}</td>
+                                <td>{{item.Book.Edition}}</td>
+                                <td>{{item.Book.Publisher}}</td>
+                                <td>{{item.Book.PublishingYear}}</td>
+                                <td>{{item.Book.TotalPages}}</td>
+                                <td>{{item.Book.Volumne}}</td>
+                                <td>{{item.Book.BookTypeNames}}</td>
+                                <td>{{item.Book.ClassNames}}</td>
+                                <td>{{item.Book.SubjectNames}}</td>
+                                <td>{{item.Book.RackNames}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.BookStockStatus == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllBookStockStatusList[item.BookStockStatus]}}
+                                    </span>
+                                </td>
+                               
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</main>

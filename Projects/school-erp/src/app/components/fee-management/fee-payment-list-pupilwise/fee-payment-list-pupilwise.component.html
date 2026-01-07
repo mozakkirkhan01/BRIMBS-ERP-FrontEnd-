@@ -1,0 +1,199 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                        <mat-form-field appearance="outline" class="col-lg-6">
+                            <mat-label>Select Pupil</mat-label>
+                            <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                (ngModelChange)="filterPupilList($event)" [(ngModel)]="filterModel.SearchPupil" placeholder="Enter Pupil Name/ Admission No"
+                                [matAutocomplete]="autoSearchPupil" required autofocus>
+                            <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSeleted($event)">
+                                <mat-option *ngFor="let option of PupilList" [id]="option.PupilId"
+                                    [value]="option.SearchPupil">
+                                    {{option.SearchPupil}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-error
+                                *ngIf="(SearchPupil.dirty  || SearchPupil.touched) || (SearchPupil.invalid && isSubmitted)">
+                                Pupil is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                    <div class="col-lg-3 form-group float-right">
+                        <button *ngIf="FeePaymentList.length > 0" color="primary" mat-raised-button (click)="exportToExcel()"><i
+                                class="bi bi-file-earmark-text"></i>Export To Excel</button>
+                    </div>
+                </div>
+                <hr class="mt-3">
+                <div class="table-container" *ngIf="FeePaymentList.length > 0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <!-- <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a> -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th *ngIf="!isExporting">Receipt</th>
+                                    <!-- <th *ngIf="!isExporting">Edit</th> -->
+                                    <th (click)="sort('SessionName')">Session</th>
+                                    <th (click)="sort('ClassName')">Class</th>
+                                    <th (click)="sort('SectionName')">Section</th>
+                                    <th (click)="sort('PaymentDate')">Payment Date</th>
+                                    <th (click)="sort('ReceiptNo')">Receipt No</th>
+                                    <th (click)="sort('PaymentFor')">Payment For</th>
+                                    <th (click)="sort('PaymentMode')">Payment Mode</th>
+                                    <th (click)="sort('TransactionNo')">Transaction No</th>
+                                    <th (click)="sort('ChequeNo')">Cheque No</th>
+                                    <th (click)="sort('ChequeDate')">Cheque Date</th>
+                                    <th (click)="sort('ChequeBank')">Cheque Bank</th>
+                                    <th (click)="sort('ChequeBankBranch')">Branch</th>
+                                    <th (click)="sort('PaidMonths')">Paid Months</th>
+                                    <th (click)="sort('Remarks')">Remarks</th>
+                                    <th class="text-right" (click)="sort('FeeAmount')">Fee Amount</th>
+                                    <th class="text-right" (click)="sort('WaiveOffAmount')">Waive Off Amount</th>
+                                    <th class="text-right" (click)="sort('PaidAmount')">Paid Amount</th>
+                                    <th *ngIf="!isExporting">View Details</th>
+                                    <th *ngIf="!isExporting && action.CanDelete">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of FeePaymentList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td *ngIf="!isExporting"> <a class="btn btn-sm btn-primary" (click)="printReport(item.FeePaymentId)"><i class="bi bi-printer"></i></a></td>
+                                    <td class="no-wrap">{{item.SessionName }}</td>
+                                    <td>{{item.ClassName }}</td>
+                                    <td>{{item.SectionName }}</td>
+                                    <td class="no-wrap">{{item.PaymentDate|date:'dd-MM-yyyy' }}
+                                        <br>&nbsp;
+                                        {{item.PaymentDate|date:'HH:mm a' }}
+                                    </td>
+                                    <td>{{item.ReceiptNo }}</td>
+                                    <td>{{PaymentForList[item.PaymentFor]}}</td>
+                                    <td>{{PaymentModeList[item.PaymentMode]}}</td>
+                                    <td>{{item.TransactionNo }}</td>
+                                    <td>{{item.ChequeNo }}</td>
+                                    <td>{{item.ChequeDate|date:'dd-MM-yyyy' }}</td>
+                                    <td>{{item.ChequeBank }}</td>
+                                    <td>{{item.ChequeBankBranch }}</td>
+                                    <td>{{item.PaidPeriod }}</td>
+                                    <td>{{item.Remarks }}</td>
+                                    <td class="text-right">{{item.FeeAmount|number:'1.2-2' }}</td>
+                                    <td class="text-right">{{item.WaiveOffAmount|number:'1.2-2' }}</td>
+                                    <td class="text-right">{{item.PaidAmount|number:'1.2-2' }}</td>
+                                    <td *ngIf="!isExporting">
+                                        <button class="btn btn-sm btn-success" (click)="getFeePaymentDetailList(item)">
+                                            <i class="bi bi-upc-scan"></i>
+                                        </button>
+                                    </td>
+                                    <td *ngIf="!isExporting && action.CanDelete">
+                                        <button class="btn btn-sm btn-danger" (click)="deleteFeePayment(item)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th *ngIf="!isExporting"></th>
+                                    <th></th>
+                                    <th colspan="13"></th>
+                                    <th>Total</th>
+                                    <th class="text-right">{{FooterObj.FeeAmount|number:'1.2-2' }}</th>
+                                    <th class="text-right">{{FooterObj.WaiveOffAmount|number:'1.2-2' }}</th>
+                                    <th class="text-right">{{FooterObj.PaidAmount|number:'1.2-2' }}</th>
+                                    <th *ngIf="!isExporting"></th>
+                                    <th *ngIf="!isExporting && action.CanDelete"></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="modal modal-lg fade" id="modal_popup" data-bs-backdrop="static" data-bs-keyboard="false"
+            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Fee Payment Detail</h1>
+                        <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-reponsive ">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Head</th>
+                                        <th>Fee For</th>
+                                        <th class="text-right">Fee Amount</th>
+                                        <th class="text-right">Waive Off Amount</th>
+                                        <th class="text-right">Line Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let fee of FeePaymentDetailList;let i1 = index">
+                                        <td>{{i1+1}}</td>
+                                        <td>{{fee.HeadName}}</td>
+                                        <td>{{FeeForList[fee.FeeFor]}}</td>
+                                        <td class="text-right">{{fee.FeeAmount| number:'1.2-2'}}</td>
+                                        <td class="text-right">{{fee.WaiveOffAmount| number:'1.2-2'}}</td>
+                                        <th class="text-right">{{fee.TotalAmount | number:'1.2-2'}}</th>
+                                    </tr>
+                                </tbody>
+                                <!-- <tfoot>
+                                    <tr>
+                                        <th colspan="2">Total</th>
+                                        <th>{{FeePayment.FeeAmount | number :'1.2-2'}}</th>
+                                        <th>{{FeePayment.WaiveOffAmount | number :'1.2-2'}}</th>
+                                        <th>{{FeePayment.TotalAmount | number :'1.2-2'}}</th>
+                                    </tr>
+                                </tfoot> -->
+                            </table>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer mt-2">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</main>

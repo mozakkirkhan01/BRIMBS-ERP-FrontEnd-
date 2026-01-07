@@ -1,0 +1,141 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+        
+    </div>
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form #formFilter="ngForm">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-4 mb-1">
+                                    <mat-label>Select Session</mat-label>
+                                    <mat-select #SessionId="ngModel" (selectionChange)="getGradingSystemList()" name="SessionId"
+                                        [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                                        <mat-option [value]="e1.SessionId"
+                                            *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                                    </mat-select>
+                                   
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-4 mb-1">
+                                    <mat-label>Select Class</mat-label>
+                                    <mat-select #ClassId="ngModel" (selectionChange)="getGradingSystemList()" name="ClassId"
+                                        [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                                        <mat-option [value]="e1.ClassId"
+                                            *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                                    </mat-select>
+                                   
+                                </mat-form-field>
+                                <div class="col-sm-4 mb-1">
+                                    <button mat-flat-button color="primary" *ngIf="action.CanCreate && FilterModel.ClassId && FilterModel.SessionId"
+                                        data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New Grade</button>
+                                </div>
+                            </div>
+                        </form>
+        
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th (click)="sort('FromMarks')">From Marks</th>
+                                        <th (click)="sort('ToMarks')">To Marks</th>
+                                        <th (click)="sort('GradeName')">Grade</th>
+                                        <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of GradingSystemList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                        <td>{{item.FromMarks}}</td>
+                                        <td>{{item.ToMarks}}</td>
+                                        <td>{{item.GradeName}}</td>
+                                        <td *ngIf="action.CanEdit || action.CanDelete">
+                                            <a ngbTooltip="Edit GradingSystem" *ngIf="action.CanEdit" class="icon-edit"
+                                                data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                                (click)="editGradingSystem(item)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <a ngbTooltip="Delete GradingSystem" *ngIf="action.CanDelete" class="icon-delete"
+                                                (click)="deleteGradingSystem(item)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{GradingSystem.GradingSystemId > 0 ?
+                        'Update':'New'}} Grade
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formGradingSystem="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-12 mb-2">
+                                    <mat-label>From Marks</mat-label>
+                                    <input type="number" matInput #FromMarks="ngModel" name="FromMarks"
+                                        [(ngModel)]="GradingSystem.FromMarks" required autofocus>
+                                    <mat-error>
+                                        From marks is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-12 mb-2">
+                                    <mat-label>To Marks</mat-label>
+                                    <input type="number" matInput #ToMarks="ngModel" name="ToMarks"
+                                        [(ngModel)]="GradingSystem.ToMarks" required autofocus>
+                                    <mat-error>
+                                        To marks is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-12 mb-2">
+                                    <mat-label>Grade Name</mat-label>
+                                    <input type="text" matInput #GradeName="ngModel" name="GradeName"
+                                        [(ngModel)]="GradingSystem.GradeName" required autofocus>
+                                    <mat-error>
+                                        Grade Name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveGradingSystem()">{{GradingSystem.GradingSystemId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

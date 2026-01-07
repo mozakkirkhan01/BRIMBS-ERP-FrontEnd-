@@ -1,0 +1,70 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body mt-2">
+                <form #SelectStaffClassForm="ngForm">
+                    <div class="row">
+
+                        <mat-form-field appearance="outline" class="col-6 mt-3">
+                            <mat-label>--Select Staff--</mat-label>
+                            <input matInput #SearchStaff="ngModel" name="SearchStaff"
+                                (ngModelChange)="filterStaffList()" [(ngModel)]="Staffobj.SearchStaff"
+                                [matAutocomplete]="autoSearchStaff" required>
+                            <mat-autocomplete #autoSearchStaff="matAutocomplete"
+                                (optionSelected)="afterStaffSeleted($event)">
+                                <mat-option *ngFor="let option of StaffList" [id]="option.StaffId"
+                                    [value]="option.SearchStaff">
+                                    {{option.SearchStaff}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <mat-error
+                                *ngIf="(SearchStaff.dirty  || SearchStaff.touched) || (SearchStaff.invalid && isSubmitted)">
+                                Staff Name is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                </form>
+
+                <div *ngIf="StaffClass.StaffId">
+                    <div class="row">
+                    <div *ngFor="let class of AllStaffClassList" class="col-sm-2 mb-4">
+                        <div class="mb-2">
+                            <input class="form-check-input me-2" type="checkbox" id="cl_{{class.ClassId}}"
+                                #IsSelectAll="ngModel" [(ngModel)]="class.IsSelectAll"
+                                (ngModelChange)="selectAllSection(class)" />
+                            <label for="cl_{{class.ClassId}}" class="text-head-select">{{class.ClassName}}</label>
+                        </div>
+                        <div *ngFor="let section of class.SectionList">
+                            <span class="mx-3">
+                                <input class="form-check-input me-2" type="checkbox" id="sc_{{section.SectionId}}"
+                                    name="IsSelected" [(ngModel)]="section.IsSelected">
+                                <label for="sc_{{section.SectionId}}">{{section.SectionName}}</label>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+            <div class="card-footer" style="text-align: center;" *ngIf="AllStaffClassList.length > 0 && (action.CanEdit || action.CanCreate)">
+                <button class="btn btn-primary" (click)="saveStaffClass(SelectStaffClassForm)">Submit</button>
+            </div>
+        </div>
+
+    </section>
+
+</main>

@@ -1,0 +1,114 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #formSubjectGradingScale="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Session</mat-label>
+                            <mat-select #SessionId="ngModel" (selectionChange)="SubjectGradingScaleList = [];"
+                                name="SessionId" [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                                <mat-option [value]="e1.SessionId"
+                                    *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Class</mat-label>
+                            <mat-select #ClassId="ngModel" (selectionChange)="SubjectGradingScaleList = [];"
+                                name="ClassId" [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                                <mat-option [value]="e1.ClassId"
+                                    *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Class is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-4 mb-1">
+                            <button mat-flat-button color="accent" class="mr-10"
+                                (click)="getSubjectGradingScaleList()">Search</button>
+                            <button mat-flat-button color="primary" *ngIf="SubjectGradingScaleList.length > 0"
+                                (click)="saveSubjectGradingScale()">Submit</button>
+                        </div>
+                        <div class="col-sm-4 mb-1 text-right">
+                            <label class="text-link text-blue text-bold">Settings :-</label>
+                            <br>
+                            <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                            <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                        </div>
+
+                    </div>
+                </form>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dataTable-top">
+                            <div class="dataTable-dropdown d-flex">
+                                <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                    <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                                </select>
+                                <span class="ms-2">Entries per page</span>
+                            </div>
+                            <div class="dataTable-search">
+                                <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                    placeholder="Search..." type="text">
+                            </div>
+                        </div>
+
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th (click)="sort('SubjectName')">Subject</th>
+                                        <th (click)="sort('GradingScaleId')">Grading Scale</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of SubjectGradingScaleList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i2 = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i2+ 1}}</td>
+                                        <td>{{item.SubjectName}}</td>
+                                        <td>
+                                            <select style="width: 200px;" (change)="changeGradingScale(i2, item)" class="form-select"
+                                                [(ngModel)]="item.GradingScaleId">
+                                                <option value="0">--Select Grading Scale--</option>
+                                                <option [value]="p1.GradingScaleId" *ngFor="let p1 of GradingScaleList">{{p1.GradingScaleName}}</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dataTable-bottom">
+                            <pagination-controls (pageChange)="p=$event" style="float:right;"
+                                class="my-pagination"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="SubjectGradingScaleList.length > 0">
+                <button type="button" mat-raised-button (click)="SubjectGradingScaleList =[]" color="warn"
+                    class="me-2">Cancel</button>
+                <button mat-raised-button color="primary" (click)="saveSubjectGradingScale()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

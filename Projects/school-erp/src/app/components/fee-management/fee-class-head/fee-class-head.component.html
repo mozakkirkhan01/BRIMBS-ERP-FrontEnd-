@@ -1,0 +1,91 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body mt-3">
+                <form #formFeeClassHead="ngForm">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="row mt-2">
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Class</mat-label>
+                                        <mat-select name="ClassId" [(ngModel)]="FeeClassHead.ClassId" required>
+                                            <mat-option [value]="class.ClassId"
+                                                *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Session</mat-label>
+                                        <mat-select name="SessionId" [(ngModel)]="FeeClassHead.SessionId" required>
+                                            <mat-option [value]="session.SessionId"
+                                                *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Pupil Type</mat-label>
+                                        <mat-select name="PupilTypeId" [(ngModel)]="FeeClassHead.PupilTypeId" required>
+                                            <mat-option [value]="pupil.PupilTypeId"
+                                                *ngFor="let pupil of PupilTypeList">{{pupil.PupilTypeName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <div class="col-sm-3">
+                                        <button mat-flat-button color="primary"
+                                            (click)="getAllFeeClassHeadList()">Search</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-4 mb-1 text-right border-left">
+                                <label class="text-link text-blue text-bold">Settings :-</label>
+                                <br>
+                                <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                    [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                                <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="card" *ngFor="let month of MonthList;let i = index" style="margin-bottom: 10px;padding-bottom: 10px;">
+                    <div class="card-body">
+                        <span>
+                            <label for="id-month_{{month.MonthId}}" class="form-check-label text-link mb-2"
+                                style="font-weight: 600;color: blue;">{{month.MonthName
+                                }}</label>
+                        </span>
+                        <div class="row">
+                            <div class="col-lg-4 col-3" *ngFor="let head of month.FeeClassHeadList">
+                                <input id="id{{head.HeadId}}_month_{{month.MonthId}}" [(ngModel)]="head.IsSelected"
+                                    (change)="changeSelection(i,head)" class="form-check-input me-2" type="checkbox">
+                                <label for="id{{head.HeadId}}_month_{{month.MonthId}}"
+                                    class="form-check-label text-link">{{head.HeadName}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer" style="text-align: center;"
+                *ngIf="MonthList.length > 0 && (action.CanEdit || action.CanCreate)">
+                <button mat-flat-button color="primary" (click)="saveFeeClassHead()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

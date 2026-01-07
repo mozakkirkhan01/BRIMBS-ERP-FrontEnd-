@@ -1,0 +1,166 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body">
+                <form #formPupilLeft="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-5">
+                            <mat-label>Select Pupil</mat-label>
+                            <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                (ngModelChange)="filterPupilList($event)"
+                                placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                                [(ngModel)]="PupilLeft.SearchPupil" [matAutocomplete]="autoSearchPupil" required>
+                            <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSeleted($event)">
+                                <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                    [value]="option.SearchPupil">
+                                    {{option.SearchPupil}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="PupilLeft.SearchPupil" color="primary"
+                                (click)="clearPupil()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Left Date</mat-label>
+                            <input matInput name="LeftDate" [(ngModel)]="PupilLeft.LeftDate" required
+                                [matDatepicker]="LeftDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="LeftDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #LeftDatePicker touchUi="true"></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-5">
+                            <mat-label>Reason</mat-label>
+                            <textarea matInput name="LeftReason" [(ngModel)]="PupilLeft.LeftReason"></textarea>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="row" *ngIf="PupilLeft.PupilAdmissionId">
+                        <div class="col-sm-6">
+                            <h5 class="header-text">Pupil Details</h5>
+                            <div class="row" *ngIf="Pupil.PupilName">
+                                <div class="col-lg-4 col-md-5 label text-bold">Full Name :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.PupilName}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.FatherName">
+                                <div class="col-lg-4 col-md-5 label text-bold">Father's Name :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.FatherName}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.MotherName">
+                                <div class="col-lg-4 col-md-5 label text-bold">Mother's Name :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.MotherName}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.DOB">
+                                <div class="col-lg-4 col-md-5 label text-bold">Date of Birth :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.DOB|date:'dd-MM-yyyy'}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.AlternateNo">
+                                <div class="col-lg-4 col-md-5 label text-bold">Alternate No :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.AlternateNo}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.MobileNo">
+                                <div class="col-lg-4 col-md-5 label text-bold">Mobile No :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.MobileNo}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Email">
+                                <div class="col-lg-4 col-md-5 label text-bold">Email :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.Email}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.AadhaarNo">
+                                <div class="col-lg-4 col-md-5 label text-bold">Aadhaar No :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.AadhaarNo}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Gender">
+                                <div class="col-lg-4 col-md-5 label text-bold">Gender :</div>
+                                <div class="col-lg-8 col-md-7">{{AllGenderList[Pupil.Gender]}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Category">
+                                <div class="col-lg-4 col-md-5 label text-bold">Category :</div>
+                                <div class="col-lg-8 col-md-7">{{AllCategoryList[Pupil.Category]}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.BloodGroup">
+                                <div class="col-lg-4 col-md-5 label text-bold">Blood Group :</div>
+                                <div class="col-lg-8 col-md-7">{{AllBloodGroupList[Pupil.BloodGroup]}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Religion">
+                                <div class="col-lg-4 col-md-5 label text-bold">Religion :</div>
+                                <div class="col-lg-8 col-md-7">{{AllReligionList[Pupil.Religion]}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Nationality">
+                                <div class="col-lg-4 col-md-5 label text-bold">Nationality :</div>
+                                <div class="col-lg-8 col-md-7">{{AllNationalityList[Pupil.Nationality]}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Height">
+                                <div class="col-lg-4 col-md-5 label text-bold">Height :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.Height}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.Weight">
+                                <div class="col-lg-4 col-md-5 label text-bold">Weight :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.Weight}}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <h5 class="header-text">Admission Details</h5>
+                            <div class="row" *ngIf="Pupil.AdmissionNo">
+                                <div class="col-lg-4 col-md-5 label text-bold">Admission No :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.AdmissionNo}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.ClassName">
+                                <div class="col-lg-4 col-md-5 label text-bold">Class :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.ClassName}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.SectionName">
+                                <div class="col-lg-4 col-md-5 label text-bold">Section :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.SectionName}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.RollNo">
+                                <div class="col-lg-4 col-md-5 label text-bold">Roll No :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.RollNo}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.PupilTypeName">
+                                <div class="col-lg-4 col-md-5 label text-bold">Pupil Type :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.PupilTypeName}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.AdmissionType">
+                                <div class="col-lg-4 col-md-5 label text-bold">Admission Type :</div>
+                                <div class="col-lg-8 col-md-7">{{AllAdmissionTypeList[Pupil.AdmissionType]}}</div>
+                            </div>
+                            <div class="row" *ngIf="Pupil.JoinDate">
+                                <div class="col-lg-4 col-md-5 label text-bold">Join Date :</div>
+                                <div class="col-lg-8 col-md-7">{{Pupil.JoinDate|date:'dd-MM-yyyy'}}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 col-md-5 label text-bold">Due Amount :</div>
+                                <div class="col-lg-8 col-md-7" style="color: red;font-weight: bold;">{{PupilLeft.DueAmount |money}}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 col-md-5 label text-bold">Due Months :</div>
+                                <div class="col-lg-8 col-md-7">{{PupilLeft.DueMonths}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <button mat-raised-button color="primary" (click)="savePupilLeft()">{{PupilLeft.PupilLeftId >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+        </div>
+    </section>
+</main>

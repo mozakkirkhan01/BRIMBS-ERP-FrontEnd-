@@ -1,0 +1,145 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="dashboardtitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Dashboard</button>
+        </div>
+    </div>
+
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSizes" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per dashboard</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Action</th>
+                                <th (click)="sort('DashboardItem')">Item</th>
+                                <th (click)="sort('ItemName')">Name</th>
+                                <th (click)="sort('DashboardTitle')">Title</th>
+                                <th (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of DashboardList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ;let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td *ngIf="action.CanEdit || action.CanDelete" class="no-wrap">
+                                    <a *ngIf="action.CanEdit" ngbTooltip="Edit Record" class="icon-edit"
+                                        (click)="editDashboard(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a *ngIf="action.CanDelete" ngbTooltip="Delete Record" class="icon-delete"
+                                        (click)="deleteDashboard(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <td>{{AllDashboardItems[item.DashboardItem]|enumCase}}</td>
+                                <td>{{item.ItemName}}</td>
+                                <td>{{item.DashboardTitle}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]|enumCase}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="p=$event" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <div class="modal fade" *ngIf="action.CanEdit || action.CanCreate" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Dashboard.DashboardId > 0
+                        ?'Update':'New'}} Dashboard Item
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formDashboard="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Item</mat-label>
+                                    <mat-select name="DashboardItem" [(ngModel)]="Dashboard.DashboardItem" required>
+                                        <mat-option [value]="m1.Key"
+                                            *ngFor="let m1 of DashboardItems">{{m1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Name</mat-label>
+                                    <input matInput name="ItemName" [(ngModel)]="Dashboard.ItemName"
+                                        required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Title</mat-label>
+                                    <input matInput name="DashboardTitle" [(ngModel)]="Dashboard.DashboardTitle"
+                                        required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                               
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="Dashboard.Status" required>
+                                        <mat-option [value]="m1.Key"
+                                            *ngFor="let m1 of StatusList">{{m1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveDashboard()">{{Dashboard.DashboardId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

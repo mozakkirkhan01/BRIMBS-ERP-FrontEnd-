@@ -1,0 +1,182 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+  <div class="pagetitle">
+    <h1>{{action.MenuTitle}}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+        <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+        <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-sm-6 form-group">
+            <mat-label>Select Pupil</mat-label>
+            <input matInput #SearchPupil="ngModel" name="SearchPupil" (ngModelChange)="filterPupilList($event)"
+              [(ngModel)]="TransportPupilobj.SearchPupil" [matAutocomplete]="autoSearchPupil" required>
+            <mat-autocomplete #autoSearchPupil="matAutocomplete" (optionSelected)="afterPupilSeleted($event)">
+              <mat-option *ngFor="let option of PupilList" [id]="option.PupilId" [value]="option.SearchPupil">
+                {{option.SearchPupil}}
+              </mat-option>
+            </mat-autocomplete>
+            <button mat-icon-button matSuffix *ngIf="TransportPupilobj.SearchPupil" color="primary"
+              (click)="clearPupil()">
+              <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+            </button>
+            <mat-error *ngIf="(SearchPupil.dirty  || SearchPupil.touched) || (SearchPupil.invalid && isSubmitted)">
+              Pupil is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+
+          <span *ngIf="SearchPupil.value != null && action.CanCreate" class="col-sm-6 form-group">
+            <button mat-raised-button color="primary" class="float-right" (click)="newTransportPupil()">New Transport
+              Pupil</button>
+          </span>
+        </div>
+
+        <div *ngIf="TransportPupilList.length  > 0">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th (click)="sort('PupilName')">Pupil Name</th>
+                <th (click)="sort('BatchName')">Batch Name</th>
+                <th (click)="sort('VehicleName')">Vehicle Name</th>
+                <th (click)="sort('PickupAddress')">Pickup Address</th>
+                <th (click)="sort('PickupTime')">Pickup Time</th>
+                <th (click)="sort('StartDate')">Start Date</th>
+                <th (click)="sort('EndDate')">End Date</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of TransportPupilList">
+                <td>{{item.PupilName}}</td>
+                <td>{{item.BatchName}}</td>
+                <td>{{item.VehicleName}}</td>
+                <td>{{item.PickupAddress}}</td>
+                <td>{{item.PickupTime}}</td>
+                <td>{{item.StartDate | date : "dd-MM-yyyy"}}</td>
+                <td>{{item.EndDate | date : "dd-MM-yyyy"}}</td>
+                <td *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" (click)="editTransportPupil(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="deleteTransportPupil(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+    data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">{{TransportPupil.TransportPupilId > 0 ?
+            'Update':'New'}}
+            Pupil Transport
+          </h1>
+          <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            (click)="resetForm()"></button>
+        </div>
+        <div class="modal-body">
+
+          <form #formTransportPupil="ngForm" class="d-flex justify-content-evenly flex-wrap">
+            <div class="container">
+              <div class="row">
+
+                <!--<mat-form-field appearance="outline" class="col-sm-6 form-group">
+                <mat-label>Pupil</mat-label>
+                <mat-select #Pupil="ngModel" name="Pupil" [(ngModel)]="TransportPupil.PupilId" required autofocus>
+                  <mat-option [value]="option.PupilId" *ngFor="let option of PupilList;">
+                    {{option.PupilName}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="(Pupil.dirty  || Pupil.touched) || (Pupil.invalid && isSubmitted)">
+                  Pupil Name is <strong>required</strong>
+                </mat-error>
+              </mat-form-field> -->
+
+                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                  <mat-label>Transport Batch</mat-label>
+                  <mat-select #TransportBatch="ngModel" name="TransportBatch"
+                    [(ngModel)]="TransportPupil.TransportBatchId" required autofocus>
+                    <mat-option [value]="option.TransportBatchId" *ngFor="let option of TransportBatchList;">
+                      {{option.BatchName}}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>Required filed !!</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                  <mat-label>Vehicle</mat-label>
+                  <mat-select #Vehicle="ngModel" name="Vehicle" [(ngModel)]="TransportPupil.VehicleId" required
+                    autofocus>
+                    <mat-option [value]="option.VehicleId" *ngFor="let option of VehicleList;">
+                      {{option.VehicleName}}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>Required filed !!</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                  <mat-label>Pickup Address</mat-label>
+                  <input matInput type="text" #PickupAddress="ngModel" name="PickupAddress"
+                    [(ngModel)]="TransportPupil.PickupAddress" autofocus>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                  <mat-label>Pickup Time</mat-label>
+                  <input matInput type="time" #PickupTime="ngModel" name="PickupTime"
+                    [(ngModel)]="TransportPupil.PickupTime" autofocus>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                  <mat-label>Start Date</mat-label>
+                  <input matInput #StartDate="ngModel" name="StartDate" [(ngModel)]="TransportPupil.StartDate" required
+                    autofocus [matDatepicker]="StartDatePicker">
+                  <mat-datepicker-toggle matIconSuffix [for]="StartDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #StartDatePicker></mat-datepicker>
+                  <mat-error>Required filed !!</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                  <mat-label>End Date</mat-label>
+                  <input matInput #EndDate="ngModel" name="EndDate" [(ngModel)]="TransportPupil.EndDate"
+                    [matDatepicker]="EndDatePicker">
+                  <mat-datepicker-toggle matIconSuffix [for]="EndDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #EndDatePicker></mat-datepicker>
+                </mat-form-field>
+
+              </div>
+            </div>
+
+          </form>
+        </div>
+        <div class="modal-footer mt-2">
+          <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+            (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveTransportPupil()">{{TransportPupil.TransportPupilId >
+            0 ? 'Update':'Submit'}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>

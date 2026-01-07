@@ -1,0 +1,71 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+
+            <div class="card-body ">
+                <form #formRoleDashboard="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-4 form-group">
+                            <mat-label>Role</mat-label>
+                            <input matInput #Role="ngModel" name="Role"
+                                (ngModelChange)="filterRoleList($event)" placeholder="Enter Role Name"
+                                [(ngModel)]="RoleDashboard.RoleTitle" [matAutocomplete]="autoRole" required>
+                            <mat-autocomplete #autoRole="matAutocomplete"
+                                (optionSelected)="getRoleDashboardList($event.option)">
+                                <mat-option *ngFor="let option of filterRole" [id]="option.RoleId"
+                                    [value]="option.RoleTitle">{{option.RoleTitle}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="RoleDashboard.RoleTitle" color="primary"
+                                (click)="resetForm()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                        </mat-form-field>
+                        <div class="col-sm-5"></div>
+
+                        <mat-form-field *ngIf="AllRoleDashboardList.length > 0" appearance="outline" class="col-sm-3 float-right">
+                            <mat-label>Search</mat-label>
+                            <input matInput type="text" #SearchData="ngModel" name="Search" [(ngModel)]="Search"
+                                placeholder="Search......">
+                        </mat-form-field>
+                    </div>
+
+                </form>
+
+                <div *ngIf="RoleDashboard.RoleId">
+                    <div class="menu mb-3 row">
+                        <div class="col-sm-4">
+                            <input class="form-check-input me-2" id="SelectAll" [(ngModel)]="RoleDashboard.SelectAll" (change)="changeSelectAll()"
+                                type="checkbox">
+                            <label class="form-check-label text-link"
+                                for="SelectAll">Select All</label>
+                        </div>
+                        <div class="col-sm-4" *ngFor="let menu of AllRoleDashboardList|filter:Search">
+                            <input class="form-check-input me-2" id="selc_{{menu.DashboardId}}" [(ngModel)]="menu.IsSelected"
+                                type="checkbox">
+                            <label class="form-check-label text-link"
+                                for="selc_{{menu.DashboardId}}">{{menu.DashboardTitle}}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer" style="text-align: center;"
+                *ngIf="AllRoleDashboardList.length > 0 && (action.CanEdit || action.CanCreate)">
+                <button mat-flat-button color="primary" (click)="saveRoleDashboard()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

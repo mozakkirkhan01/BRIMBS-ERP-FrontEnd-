@@ -1,0 +1,184 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+	<div class="row">
+		<div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+		<div class="col-sm-4">
+			<button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+				data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+				Vehicle</button>
+		</div>
+	</div>
+
+	<section class="section dashboard">
+		<div class="card">
+			<div class="card-body ">
+				<div class="dataTable-top">
+					<div class="dataTable-dropdown d-flex">
+						<select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+							<option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+						</select>
+						<span class="ms-2">Entries per page</span>
+					</div>
+					<div class="dataTable-search">
+						<input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+							placeholder="Search..." type="text">
+					</div>
+				</div>
+				<div class="table-container overflow-auto">
+					<table class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<th>S.No</th>
+								<th (click)="sort('VehicleTypeName')">Vehicle Type</th>
+								<th (click)="sort('VehicleNo')">Vehicle No.</th>
+								<th (click)="sort('VehicleName')">Vehicle</th>
+								<th (click)="sort('OwnerName')">Owner</th>
+								<th (click)="sort('OwnerMobileNo')">Owner Mobile</th>
+								<th (click)="sort('NoOfSeats')">No. Of Seats</th>
+								<th (click)="sort('Status')">Status</th>
+								<th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								*ngFor="let item of VehicleList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+								<td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+								<td>{{item.VehicleTypeName}}</td>
+								<td>{{item.VehicleNo}}</td>
+								<td>{{item.VehicleName}}</td>
+								<td>{{item.OwnerName}}</td>
+								<td>{{item.OwnerMobileNo}}</td>
+								<td>{{item.NoOfSeats}}</td>
+								<td>
+									<span class="p-1"
+										[ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+										{{AllStatusList[item.Status]}}
+									</span>
+								</td>
+								<td *ngIf="action.CanEdit || action.CanDelete">
+									<button *ngIf="action.CanEdit" class="btn btn-sm btn-warning" data-bs-toggle="modal"
+										data-bs-target="#staticBackdrop" (click)="editVehicle(item)">
+										<i class="bi bi-pencil-square"></i>
+									</button>
+									<button *ngIf="action.CanDelete" class="btn btn-sm btn-danger ml-10" (click)="deleteVehicle(item)">
+										<i class="bi bi-trash-fill"></i>
+									</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="dataTable-bottom">
+					<pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+						class="my-pagination"></pagination-controls>
+				</div>
+
+
+			</div>
+		</div>
+
+	</section>
+
+	<div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+		data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="staticBackdropLabel">{{Vehicle.VehicleId > 0 ?
+						'Update':'New'}}
+						Vehicle
+					</h1>
+					<button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+						(click)="resetForm()"></button>
+				</div>
+				<div class="modal-body">
+
+					<form #formVehicle="ngForm" class="d-flex justify-content-evenly flex-wrap">
+						<div class="container">
+							<div class="row">
+
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>Vehicle Name</mat-label>
+									<input matInput name="VehicleName"
+										[(ngModel)]="Vehicle.VehicleName" required autofocus>
+									<mat-error>required field !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>Vehicle No.</mat-label>
+									<input matInput name="VehicleNo"
+										[(ngModel)]="Vehicle.VehicleNo" required>
+									<mat-error>
+										Vehicle No is required !!
+									</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>Owner Name</mat-label>
+									<input matInput name="OwnerName"
+										[(ngModel)]="Vehicle.OwnerName">
+									<mat-error>
+										Owner name is required !!
+									</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>Owner Mobile No</mat-label>
+									<input matInput type="number" name="OwnerMobileNo"
+										[(ngModel)]="Vehicle.OwnerMobileNo">
+									<mat-error>
+										Owner mobile no is required !!
+									</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>No. of Seats</mat-label>
+									<input type="number" matInput name="NoOfSeats"
+										[(ngModel)]="Vehicle.NoOfSeats">
+								</mat-form-field>
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>Vehicle Type</mat-label>
+									<mat-select name="VehicleTypeId"
+										[(ngModel)]="Vehicle.VehicleTypeId" required>
+										<mat-option [value]="option.VehicleTypeId"
+											*ngFor="let option of VehicleTypeList;">{{option.VehicleTypeName}}</mat-option>
+									</mat-select>
+									<mat-error>
+										Vehicle type is required !!
+									</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-6 form-group">
+									<mat-label>Status</mat-label>
+									<mat-select name="Status" [(ngModel)]="Vehicle.Status" required>
+										<mat-option [value]="status.Key"
+											*ngFor="let status of StatusList">{{status.Value}}</mat-option>
+									</mat-select>
+									<mat-error>
+										Status is required !!
+									</mat-error>
+								</mat-form-field>
+							</div>
+						</div>
+
+					</form>
+				</div>
+				<div class="modal-footer mt-2">
+					<button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+						(click)="resetForm()">Cancel</button>
+					<button mat-raised-button color="primary" (click)="saveVehicle()">{{Vehicle.VehicleId >
+						0 ? 'Update':'Submit'}}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>

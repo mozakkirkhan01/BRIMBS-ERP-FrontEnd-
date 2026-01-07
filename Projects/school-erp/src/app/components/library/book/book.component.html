@@ -1,0 +1,269 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4 mb-3">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                (click)="newBook()">New {{recordTitle}}</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-container overflow-auto">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                <th (click)="sort('BookName')">{{recordTitle}}</th>
+                                <th (click)="sort('Author')">Author</th>
+                                <th (click)="sort('Edition')">Edition</th>
+                                <th (click)="sort('Publisher')">Publisher</th>
+                                <th (click)="sort('PublishingYear')">Publishing Year</th>
+                                <th (click)="sort('TotalPages')">Total Pages</th>
+                                <th (click)="sort('Volumne')">Volumne</th>
+                                <!-- <th (click)="sort('BookNos')">Book Nos</th> -->
+                                <th (click)="sort('BookTypeNames')">Book Types</th>
+                                <th (click)="sort('ClassNames')">{{recordClass}}</th>
+                                <th (click)="sort('SubjectNames')">Subjects</th>
+                                <th (click)="sort('RackNames')">Racks</th>
+                                <th (click)="sort('AvailableStock')">Available Stock</th>
+                                <th (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of BookList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td class="no-wrap" *ngIf="action.CanEdit || action.CanDelete">
+                                    <button *ngIf="action.CanEdit" class="btn btn-sm btn-warning"
+                                        (click)="editBook(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button *ngIf="action.CanDelete" class="btn btn-sm btn-danger ml-10"
+                                        (click)="deleteBook(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                                <td>{{item.BookName}}</td>
+                                <td>{{item.Author}}</td>
+                                <td>{{item.Edition}}</td>
+                                <td>{{item.Publisher}}</td>
+                                <td>{{item.PublishingYear}}</td>
+                                <td>{{item.TotalPages}}</td>
+                                <td>{{item.Volumne}}</td>
+                                <!-- <td>{{item.BookNos}}</td> -->
+                                <td>{{item.BookTypeNames}}</td>
+                                <td>{{item.ClassNames}}</td>
+                                <td>{{item.SubjectNames}}</td>
+                                <td>{{item.RackNames}}</td>
+                                <td>{{item.AvailableStock}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                               
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="modal fade" *ngIf="action.CanEdit || action.CanCreate" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Book.BookId > 0
+                        ?'Update':'New'}} {{recordTitle}}
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form #formBook="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>{{recordTitle}} Name</mat-label>
+                                    <input matInput name="BookName" [(ngModel)]="Book.BookName" required>
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Author</mat-label>
+                                    <input matInput name="Author" (ngModelChange)="filterAuthorList($event)"
+                                        placeholder="Author Name" [(ngModel)]="Book.Author"
+                                        [matAutocomplete]="autoAuthor">
+                                    <mat-autocomplete #autoAuthor="matAutocomplete">
+                                        <mat-option *ngFor="let option of AuthorList" [id]="option"
+                                            [value]="option">{{option}}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Book.Author" color="primary"
+                                        (click)="Book.Author=null">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Edition</mat-label>
+                                    <input matInput name="Edition" (ngModelChange)="filterEditionList($event)"
+                                        placeholder="Edition Name" [(ngModel)]="Book.Edition"
+                                        [matAutocomplete]="autoEdition">
+                                    <mat-autocomplete #autoEdition="matAutocomplete">
+                                        <mat-option *ngFor="let option of EditionList" [id]="option"
+                                            [value]="option">{{option}}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Book.Edition" color="primary"
+                                        (click)="Book.Edition=null">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Publisher</mat-label>
+                                    <input matInput name="Publisher" (ngModelChange)="filterPublisherList($event)"
+                                        placeholder="Publisher Name" [(ngModel)]="Book.Publisher"
+                                        [matAutocomplete]="autoPublisher">
+                                    <mat-autocomplete #autoPublisher="matAutocomplete">
+                                        <mat-option *ngFor="let option of PublisherList" [id]="option"
+                                            [value]="option">{{option}}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Book.Publisher" color="primary"
+                                        (click)="Book.Publisher=null">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-3">
+                                    <mat-label>Publishing Year</mat-label>
+                                    <input matInput name="PublishingYear"
+                                        (ngModelChange)="filterPublishingYearList($event)" placeholder="Publishing Year"
+                                        [(ngModel)]="Book.PublishingYear" [matAutocomplete]="autoPublishingYear">
+                                    <mat-autocomplete #autoPublishingYear="matAutocomplete">
+                                        <mat-option *ngFor="let option of PublishingYearList" [id]="option"
+                                            [value]="option">{{option}}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Book.PublishingYear" color="primary"
+                                        (click)="Book.PublishingYear=null">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Total Pages</mat-label>
+                                    <input type="number" matInput name="TotalPages" [(ngModel)]="Book.TotalPages">
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Volumne</mat-label>
+                                    <input type="text" matInput name="Volumne" [(ngModel)]="Book.Volumne">
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="Book.Status" required>
+                                        <mat-option [value]="m1.Key"
+                                            *ngFor="let m1 of StatusList">{{m1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !! </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <div class="row mb-3">
+                                <span class="text-header-sm mb-2">{{recordClass}}</span>
+                                <div class="col-lg-2" *ngFor="let m1 of ClassList;let i1 = index">
+                                    <input [id]="'class_'+m1.ClassId+'_i1'" [name]="'class_'+m1.ClassId+'_i1'"
+                                        [(ngModel)]="m1.IsSelected" class="form-check-input me-2" type="checkbox">
+                                    <label [for]="'class_'+m1.ClassId+'_i1'"
+                                        class="form-check-label text-link">{{m1.ClassName}}</label>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <span class="text-header-sm mb-2">Subjects</span>
+                                <div class="col-lg-3" *ngFor="let m1 of SubjectList;let i1 = index">
+                                    <input [id]="'subject_'+m1.SubjectId+'_i1'" [name]="'subject_'+m1.SubjectId+'_i1'"
+                                        [(ngModel)]="m1.IsSelected" class="form-check-input me-2" type="checkbox">
+                                    <label [for]="'subject_'+m1.SubjectId+'_i1'"
+                                        class="form-check-label text-link">{{m1.SubjectName}}</label>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+
+                                <span class="text-header-sm mb-2">Book Type</span>
+                                <div class="col-2" *ngFor="let m1 of BookTypeList;let i1 = index">
+                                    <input [id]="'bookType_'+m1.BookTypeId+'_i1'"
+                                        [name]="'bookType_'+m1.BookTypeId+'_i1'" [(ngModel)]="m1.IsSelected"
+                                        class="form-check-input me-2" type="checkbox">
+                                    <label [for]="'bookType_'+m1.BookTypeId+'_i1'"
+                                        class="form-check-label text-link">{{m1.BookTypeName}}</label>
+                                </div>
+
+                            </div>
+                            <div class="row mb-3">
+                                <span class="text-header-sm mb-2">Rack</span>
+                                <div class="col-2" *ngFor="let m1 of RackList;let i1 = index">
+                                    <input [id]="'rack_'+m1.RackId+'_i1'" [name]="'rack_'+m1.RackId+'_i1'"
+                                        [(ngModel)]="m1.IsSelected" class="form-check-input me-2" type="checkbox">
+                                    <label [for]="'rack_'+m1.RackId+'_i1'"
+                                        class="form-check-label text-link">{{m1.RackName}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer mt-4">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveBook()">{{Book.BookId >0 ?
+                        'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

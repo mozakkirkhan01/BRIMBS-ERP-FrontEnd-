@@ -1,0 +1,199 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                        <mat-label>Select Pupil</mat-label>
+                        <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                            (ngModelChange)="filterPupilList($event)"
+                            placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                            [(ngModel)]="PupilChargeobj.SearchPupil" [matAutocomplete]="autoSearchPupil" required>
+                        <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                            (optionSelected)="afterPupilSeleted($event)">
+                            <mat-option *ngFor="let option of PupilList" [id]="option.PupilId"
+                                [value]="option.SearchPupil">
+                                {{option.SearchPupil}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix *ngIf="PupilChargeobj.SearchPupil" color="primary"
+                            (click)="clearPupil()">
+                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                        </button>
+                        <mat-error
+                            *ngIf="(SearchPupil.dirty  || SearchPupil.touched) || (SearchPupil.invalid && isSubmitted)">
+                            Pupil is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+
+                    <span *ngIf="PupilChargeobj.PupilId && action.CanCreate" class="col-sm-6 form-group">
+                        <button mat-raised-button style="float: right;" color="primary" data-bs-toggle="modal"
+                            data-bs-target="#staticBackdrop">New Charge</button>
+                    </span>
+                </div>
+
+                <div *ngIf="PupilChargeList.length > 0" class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sl. No.</th>
+                                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                <!-- <th>Pupil Name</th> -->
+                                <th>Head</th>
+                                <th>Fee For</th>
+                                <th>Fee Amount</th>
+                                <th>Charge Date</th>
+                                <th>Compulsory</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let pupil of PupilChargeList;let i = index">
+                                <td>{{i+1}}</td>
+                                <td *ngIf="action.CanEdit || action.CanDelete">
+                                    <a ngbTooltip="Edit Expense" *ngIf="action.CanEdit" class="icon-edit"
+                                        data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        (click)="editPupilCharge(pupil)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <a ngbTooltip="Delete Expense" *ngIf="action.CanDelete" class="icon-delete"
+                                        (click)="deletePupilCharge(pupil)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <!-- <td>{{pupil.PupilName}}</td> -->
+                                <td>{{pupil.HeadName}}</td>
+                                <td>{{AllFeeForList[pupil.FeeFor]|enumCase}}</td>
+                                <td>{{pupil.FeeAmount}}</td>
+                                <td>{{pupil.ChargeDate | date : "dd-MM-yyyy"}}</td>
+                                <td>{{pupil.IsCompulsory ? "Yes" : "No" }}</td>
+                                <td>{{pupil.Remarks}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{PupilCharge.PupilChargeId > 0 ?
+                        'Update':'New'}}
+                        Charge
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formPupilCharge="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                        <div class="container">
+                            <div class="row">
+
+                                <!--<mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                <mat-label>Pupil</mat-label>
+                                <mat-select #Pupil="ngModel" name="Pupil" [(ngModel)]="PupilCharge.PupilId"
+                                    required autofocus>
+                                    <mat-option [value]="option.PupilId" *ngFor="let option of PupilList;">
+                                        {{option.PupilName}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="(Pupil.dirty  || Pupil.touched) || (Pupil.invalid && isSubmitted)">
+                                    Pupil Name is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>-->
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Head</mat-label>
+                                    <mat-select #Head="ngModel" name="Head" [(ngModel)]="PupilCharge.HeadId" required
+                                        autofocus>
+                                        <mat-option [value]="option.HeadId" *ngFor="let option of HeadList;">
+                                            {{option.HeadName}}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="(Head.dirty  || Head.touched) || (Head.invalid && isSubmitted)">
+                                        Head Name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Fee For</mat-label>
+                                    <mat-select #FeeFor="ngModel" name="FeeFor" [(ngModel)]="PupilCharge.FeeFor"
+                                        required [autofocus]="true">
+                                        <mat-option [value]="feeFor.Key"
+                                            *ngFor="let feeFor of FeeForList">{{feeFor.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Fee For is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Fee Amount</mat-label>
+                                    <input matInput type="number" #FeeAmount="ngModel" name="FeeAmount"
+                                        [(ngModel)]="PupilCharge.FeeAmount" required autofocus>
+                                    <mat-error>
+                                        Fee Amount is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Charge Date</mat-label>
+                                    <input matInput #ChargeDate="ngModel" name="ChargeDate"
+                                        [(ngModel)]="PupilCharge.ChargeDate" required autofocus
+                                        [matDatepicker]="ChargeDatePicker">
+                                    <mat-datepicker-toggle matIconSuffix
+                                        [for]="ChargeDatePicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #ChargeDatePicker></mat-datepicker>
+                                    <mat-error>
+                                        Charge date is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <div class="col-sm-4 form-group mb-3">
+                                    <mat-checkbox color="primary" class="example-margin" #IsCompulsory="ngModel"
+                                        name="IsCompulsory" [(ngModel)]="PupilCharge.IsCompulsory"
+                                        (ngModelChange)="selectChange(IsCompulsory)">Compulsory</mat-checkbox>
+                                </div>
+
+                                <mat-form-field appearance="outline" class="col-sm-8 form-group">
+                                    <mat-label>Remarks</mat-label>
+                                    <textarea matInput type="text" #Remarks="ngModel" name="Remarks"
+                                        [(ngModel)]="PupilCharge.Remarks" autofocus></textarea>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="savePupilCharge()">{{PupilCharge.PupilChargeId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

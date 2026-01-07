@@ -1,0 +1,143 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #form1="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Select Product</mat-label>
+                            <input matInput name="ProductId" (ngModelChange)="filterProductList($event)"
+                                placeholder="Search By Product Name / HSN / Manufacturer Name"
+                                [(ngModel)]="FilterModel.SearchProduct" [matAutocomplete]="autoProduct" required>
+                            <mat-autocomplete #autoProduct="matAutocomplete"
+                                (optionSelected)="afterProductSelected($event)">
+                                <mat-option *ngFor="let option of ProductList" [id]="option.ProductId"
+                                    [value]="option.SearchProduct">{{option.SearchProduct}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="FilterModel.SearchProduct" color="primary"
+                                (click)="clearProduct()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>From Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="FilterModel.FromDate"
+                                [ngxMatDatetimePicker]="FromDatePicker">
+                            <ngx-mat-datepicker-toggle matSuffix [for]="FromDatePicker"></ngx-mat-datepicker-toggle>
+                            <ngx-mat-datetime-picker #FromDatePicker [hideTime]="true"></ngx-mat-datetime-picker>
+                            <mat-error>Required Filed !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>To Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="FilterModel.ToDate"
+                                [ngxMatDatetimePicker]="ToDatePicker">
+                            <ngx-mat-datepicker-toggle matSuffix [for]="ToDatePicker"></ngx-mat-datepicker-toggle>
+                            <ngx-mat-datetime-picker #ToDatePicker [hideTime]="true"></ngx-mat-datetime-picker>
+                            <mat-error>Required Filed !!</mat-error>
+                        </mat-form-field> -->
+
+                        <div class="col-sm-2">
+                            <button mat-flat-button color="primary" (click)="getProductHistory()"><i
+                                    class="bi bi-search"></i>
+                                Search</button>
+                        </div>
+                    </div>
+                </form>
+                <hr>
+                <div *ngIf="ProductHistory.length !=0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link-sm" (click)="exportToExcel()">Export to Excel</a>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th (click)="sort('Date')">Date</th>
+                                    <th>Particulars</th>
+                                    <th class="text-center">Purchase Qty.</th>
+                                    <th class="text-center">Issue Qty.</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of ProductHistory |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td class="no-wrap">{{item.Date|date:'dd-MM-yyyy HH:mm a'}}</td>
+                                    <!-- <td>{{AllProductHistoryType[item.ProductHistoryType]}}</td> -->
+                                    <td>
+                                        {{
+                                        (item.BatchNo? 'Batch No. :' +item.BatchNo:'')
+                                        +(item.CostPrice? ' Cost Price :' +item.CostPrice:'')
+                                        +(item.MRP? ' MRP :' +item.MRP:'')
+                                        +(item.ManufacturedDate? ' Manufactured Date :' +(item.ManufacturedDate
+                                        |date:'dd-MM-yyyy'):'')
+                                        +(item.ExpiredDate? ' Expired Date :' +(item.ExpiredDate |date:'dd-MM-yyyy'):'')
+                                        }}
+                                    </td>
+                                    <th *ngIf="item.ProductHistoryType == 2"></th>
+
+
+                                    <th class="text-right"
+                                        [ngClass]="item.ProductHistoryType == 1 ?'text-success':'text-danger'">
+                                        {{item.Quantity}} Pc.
+                                        <span *ngIf="item.Quantity ==  item.PieceValue">(
+                                            {{ (item.UnitValue >0?(item.UnitValue + ' ' +item.UnitName):'')
+                                            +(item.PieceValue > 0 ?(' ' + item.PieceValue + ' Pc.'):'')
+                                            }})
+                                        </span>
+                                    </th>
+
+                                    <th *ngIf="item.ProductHistoryType == 1"></th>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>TOTAL </th>
+                                    <th class="text-right text-success" colspan="2">Closing Stock :
+                                        {{Product.PurchaseQuantity-Product.IssueQuantity}} Pc.</th>
+                                    <th class="text-right text-success">{{Product.PurchaseQuantity}} Pc.</th>
+                                    <th class="text-right text-danger">{{Product.IssueQuantity}} Pc.</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

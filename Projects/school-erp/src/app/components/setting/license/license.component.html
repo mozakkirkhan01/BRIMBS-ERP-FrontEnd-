@@ -1,0 +1,59 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main login-backgrouond" *ngIf="action.ResponseReceived">
+
+    <!-- <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div> -->
+
+    <section class="section dashboard">
+        <div class="row" style="padding-top: 40px;">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body ">
+                        <form #formLicense="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                            <div class="container">
+                                <h5 class="text-center mb-5"
+                                [ngClass]="LastLicense.IsValid?'text-success':'text-danger'">
+                                {{LastLicense.Message}}</h5>
+                                <div class="row" *ngIf="action.CanCreate">
+                                    <div class="col-sm-2"></div>
+                                    <div class="col-sm-8">
+                                        <div class="row">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Software Key</mat-label>
+                                                <input matInput name="SoftwareKey" [(ngModel)]="License.SoftwareKey"
+                                                    required>
+                                                <mat-error>Required Field !!</mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>License Key</mat-label>
+                                                <input matInput name="LicenseKey" [(ngModel)]="License.LicenseKey"
+                                                    required>
+                                                <mat-error>Required Field !!</mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center" *ngIf="action.CanCreate">
+                        <button mat-flat-button color="primary" (click)="saveLicense()">Update</button>
+                        <button mat-flat-button color="warn" class="ml-10" onclick="history.back()">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

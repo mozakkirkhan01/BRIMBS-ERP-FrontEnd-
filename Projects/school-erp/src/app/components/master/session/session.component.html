@@ -1,0 +1,151 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main">
+
+  <div class="row">
+    <div class="pagetitle col-sm-8">
+      <h1>{{action.MenuTitle}}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+          <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right" (click)="newSession()">New
+        Session</button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body ">
+        <div class="dataTable-top">
+          <div class="dataTable-dropdown d-flex">
+            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+              <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+            </select>
+            <span class="ms-2">Entries per page</span>
+          </div>
+          <div class="dataTable-search">
+            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search" placeholder="Search..."
+              type="text">
+          </div>
+        </div>
+
+        <div class="table-container overflow-auto">
+          <table class="table table-sm table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th (click)="sort('SessionName')">Session</th>
+                <th (click)="sort('SessionStartDate')">Start Date</th>
+                <th (click)="sort('SessionEndDate')">End Date</th>
+                <th (click)="sort('Status')">Status</th>
+                <th *ngIf="action.CanEdit">Edit</th>
+                <th *ngIf="action.CanDelete">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let item of SessionList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                <td>{{item.SessionName}}</td>
+                <td>{{item.SessionStartDate|date:'dd-MM-yyyy'}}</td>
+                <td>{{item.SessionEndDate|date:'dd-MM-yyyy'}}</td>
+                <td>
+                  <span class="p-1" [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                    {{AllStatusList[item.Status]}}
+                  </span>
+                </td>
+                <td *ngIf="action.CanEdit">
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                    (click)="editSession(item)">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </td>
+                <td *ngIf="action.CanDelete">
+                  <button class="btn btn-sm btn-danger" (click)="deleteSession(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dataTable-bottom">
+          <pagination-controls (pageChange)="p=$event" style="float:right;" class="my-pagination"></pagination-controls>
+        </div>
+      </div>
+    </div>
+
+  </section>
+  <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="modal_popup" data-bs-backdrop="static"
+    data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Session.SessionId > 0 ? 'Update':'New'}}
+            Session
+          </h1>
+          <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form #formSession="ngForm">
+            <div class="row">
+              <div class="col-md-6 form-group">
+                <label class="form-label">Session Name <span class="text-danger">*</span></label>
+                <input type="text" #SessionName="ngModel" name="SessionName" [(ngModel)]="Session.SessionName"
+                  class="form-control" placeholder="Enter Session Name *"
+                  [ngClass]="{'is-invalid':isSubmitted && SessionName.invalid}" required autofocus>
+                <div
+                  *ngIf="SessionName.errors?.['required'] && SessionName.invalid && (SessionName.dirty || SessionName.touched || isSubmitted)"
+                  class="invalid-feedback">Session Name is required !!</div>
+              </div>
+              <div class="col-md-6 form-group">
+                <label class="form-label">Start Date</label>
+                <input type="date" #SessionStartDate="ngModel" name="SessionStartDate"
+                  [(ngModel)]="Session.SessionStartDate" class="form-control" placeholder="Enter Start Date *"
+                  [ngClass]="{'is-invalid':isSubmitted && SessionStartDate.invalid}" required="required" autofocus>
+                <div
+                  *ngIf="SessionStartDate.errors?.['required'] && SessionStartDate.invalid && (SessionStartDate.dirty || SessionStartDate.touched || isSubmitted)"
+                  class="invalid-feedback">Start Date is required !!</div>
+              </div>
+              <div class="col-md-6 form-group">
+                <label class="form-label">End Date <span class="text-danger">*</span></label>
+                <input type="date" #SessionEndDate="ngModel" name="SessionEndDate" [(ngModel)]="Session.SessionEndDate"
+                  class="form-control" placeholder="Enter End Date *"
+                  [ngClass]="{'is-invalid':isSubmitted && SessionEndDate.invalid}" required autofocus>
+                <div
+                  *ngIf="SessionEndDate.errors?.['required'] && SessionEndDate.invalid && (SessionEndDate.dirty || SessionEndDate.touched || isSubmitted)"
+                  class="invalid-feedback">End Date is required !!</div>
+              </div>
+
+              <div class="col-md-6 form-group">
+                <label class="form-label">Status <span class="text-danger">*</span></label>
+                <select class="form-select" #Status="ngModel" [(ngModel)]="Session.Status" name="Status"
+                  [ngClass]="{'is-invalid':isSubmitted && Status.invalid}" required autofocus>
+                  <option value="">--Select Status--</option>
+                  <option [value]="model.Key" *ngFor="let model of StatusList">
+                    {{model.Value}}</option>
+                </select>
+                <div *ngIf="Status.invalid && (Status.dirty || Status.touched || isSubmitted)" class="text-danger">
+                  <div *ngIf="Status.errors?.['required']">
+                    Status is required.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer mt-2">
+          <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+            (click)="resetForm()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveSession()">{{Session.SessionId >
+            0 ? 'Update':'Submit'}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

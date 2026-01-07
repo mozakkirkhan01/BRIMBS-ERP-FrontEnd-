@@ -1,0 +1,145 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4 mb-3">
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formStaff="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Taken By</mat-label>
+                            <mat-select name="TakenBy" (selectionChange)="changeTakenBy()" [(ngModel)]="Issue.TakenBy"
+                                required>
+                                <mat-option [value]="m1.Key" *ngFor="let m1 of TakenByList">{{m1.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4" *ngIf="Issue.TakenBy == 1">
+                            <mat-label>Select Staff</mat-label>
+                            <input matInput #StaffId="ngModel" name="StaffId" (ngModelChange)="filterStaffList($event)"
+                                placeholder="Search By Staff Name / Mobile No" [(ngModel)]="Staff.SearchStaff"
+                                [matAutocomplete]="autoStaff" required>
+                            <mat-autocomplete #autoStaff="matAutocomplete"
+                                (optionSelected)="afterStaffSelected($event)">
+                                <mat-option *ngFor="let option of StaffList" id="{{option.StaffId}}"
+                                    [value]="option.SearchStaff">{{option.SearchStaff}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="Staff.SearchStaff" color="primary"
+                                (click)="clearStaff()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4" *ngIf="Issue.TakenBy == 2">
+                            <mat-label>Select {{recordPupil}}</mat-label>
+                            <input matInput #PupilId="ngModel" name="PupilId" (ngModelChange)="filterPupilList($event)"
+                                placeholder="Search By Admission No - {{recordPupil}} Name "
+                                [(ngModel)]="Pupil.SearchPupil" [matAutocomplete]="autoPupil" required>
+                            <mat-autocomplete #autoPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSelected($event)">
+                                <mat-option *ngFor="let option of PupilList" id="{{option.PupilId}}"
+                                    [value]="option.SearchPupil">{{option.SearchPupil}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="Pupil.SearchPupil" color="primary"
+                                (click)="clearPupil()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Remarks</mat-label>
+                            <input matInput name="Remarks" [(ngModel)]="Issue.Remarks">
+                            <mat-error>Required Field !! </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Issue Date</mat-label>
+                            <input matInput name="IssueDate" [(ngModel)]="Issue.IssueDate"
+                                [matDatepicker]="IssueDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="IssueDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #IssueDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                </form>
+
+                <h3 class="header-text">Books</h3>
+                <form #formIssueBook="ngForm" class="row">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Select Book</mat-label>
+                            <input matInput name="BookStockId" (ngModelChange)="filterBookStockList($event)"
+                                placeholder="Search By Accession No / Book Name / Publisher / Author"
+                                [(ngModel)]="IssueBook.BookStock.SearchBook" [matAutocomplete]="autoBook" required>
+                            <mat-autocomplete #autoBook="matAutocomplete" (optionSelected)="afterBookSelected($event)">
+                                <mat-option *ngFor="let option of BookStockList" id="{{option.BookStockId}}"
+                                    [value]="option.SearchBook">{{option.SearchBook}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="IssueBook.BookStock.SearchBook" color="primary"
+                                (click)="clearBook()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-1">
+                            <button mat-flat-button color="primary" (click)="addIssueBook()">Add</button>
+                        </div>
+
+                    </div>
+                </form>
+                <div class="col-sm-12 table-responsive" *ngIf="IssueBookList.length > 0">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th *ngIf="action.CanDelete">Remove</th>
+                                <th>Accession No</th>
+                                <th>Book Name</th>
+                                <th>Author</th>
+                                <th>Edition</th>
+                                <th>Publisher</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let t1 of IssueBookList;let i1 = index">
+                                <td>{{i1+1}}</td>
+                                <td *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger ml-10" *ngIf="action.CanDelete"
+                                        (click)="removeBook(i1,t1)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                                <td>{{t1.BookStock.BookNo}}</td>
+                                <td>{{t1.BookStock.Book.BookName}}</td>
+                                <td>{{t1.BookStock.Book.Author}}</td>
+                                <td>{{t1.BookStock.Book.Edition}}</td>
+                                <td>{{t1.BookStock.Book.Publisher}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="IssueBookList.length > 0">
+                <button mat-raised-button color="primary" (click)="saveIssueBook()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

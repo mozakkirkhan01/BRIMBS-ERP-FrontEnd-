@@ -1,0 +1,114 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th style="cursor:pointer;" (click)="sort('SessionName')">Session Name</th>
+                                <th style="cursor:pointer;" (click)="sort('ClassName')">Class Name</th>
+                                <th style="cursor:pointer;" (click)="sort('Title')">Title</th>
+                                <!-- <th style="cursor:pointer;" (click)="sort('Description')">Description</th> -->
+                                <th style="cursor:pointer;" (click)="sort('StartDate')">Start Date</th>
+                                <th style="cursor:pointer;" (click)="sort('EndDate')">End Date</th>
+                                <th style="cursor:pointer;" (click)="sort('FromDOB')">From DOB</th>
+                                <th style="cursor:pointer;" (click)="sort('ToDOB')">To DOB</th>
+                                <th style="cursor:pointer;" (click)="sort('StudentSingnatureRequired')">
+                                    Student Singnature</th>
+                                <th style="cursor:pointer;" (click)="sort('StudentPhotoRequired')">Student Photo</th>
+                                <th style="cursor:pointer;" (click)="sort('FatherPhotoRequired')">Father's Photo</th>
+                                <th style="cursor:pointer;" (click)="sort('MotherPhotoRequired')">Mother's Required
+                                </th>
+                                <th style="cursor:pointer;" (click)="sort('FormFor')">Form For</th>
+                                <th style="cursor:pointer;" (click)="sort('SameSchoolFeeAmount')">Fee (Same School)</th>
+                                <th style="cursor:pointer;" (click)="sort('FeeAmount')">Fee (Others)</th>
+                                <th style="cursor:pointer;" (click)="sort('ThumbnailPhoto')">Thumbnail</th>
+                                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                                <th *ngIf="action.CanEdit">Edit</th>
+                                <th *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of RegistrationFormList|filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{i+1}}</td>
+                                <td style="white-space: nowrap;">{{item.SessionName}}</td>
+                                <td>{{item.ClassName}}</td>
+                                <td>{{item.Title}}</td>
+                                <!-- <td [innerHTML]="item.Description"></td> -->
+                                <td style="white-space: nowrap;">{{item.StartDate | date: "dd-MM-yyyy"}}</td>
+                                <td style="white-space: nowrap;">{{item.EndDate | date: "dd-MM-yyyy"}}</td>
+                                <td style="white-space: nowrap;">{{item.FromDOB | date: "dd-MM-yyyy"}}</td>
+                                <td style="white-space: nowrap;">{{item.ToDOB | date: "dd-MM-yyyy"}}</td>
+
+                                <td>{{item.StudentSingnatureRequired?"Yes":"No"}}</td>
+                                <td>{{item.StudentPhotoRequired?"Yes":"No"}}</td>
+                                <td>{{item.FatherPhotoRequired?"Yes":"No"}}</td>
+                                <td>{{item.MotherPhotoRequired?"Yes":"No"}}</td>
+                                <td>{{AllFormForList[item.FormFor]|enumCase}}</td>
+                                <td style="white-space: nowrap;">{{item.SameSchoolFeeAmount|money}}</td>
+                                <td style="white-space: nowrap;">{{item.FeeAmount|money}}</td>
+                                <td>
+                                    <label class="text-danger" *ngIf="!item.ThumbnailPhoto">N/A</label>
+                                    <a [href]="imageUrl + item.ThumbnailPhoto" target="_blank">
+                                        <img height="80" [src]="imageUrl + item.ThumbnailPhoto">
+                                    </a>
+                                </td>
+                                <td>
+                                    <span [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                                <td *ngIf="action.CanEdit">
+                                    <a class="btn btn-sm btn-warning" [routerLink]="'/admin/registration-form/' + item.RegistrationFormId">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+                                <td *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteRegistrationForm(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</main>

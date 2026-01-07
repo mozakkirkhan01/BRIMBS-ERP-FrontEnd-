@@ -1,0 +1,237 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" class="float-right" [routerLink]="'/admin/admit-card-list'">Admit
+                Card List</button>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formAdmitCard="ngForm">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-3 mb-1">
+                                    <mat-label>Select Session</mat-label>
+                                    <mat-select #SessionId="ngModel" (selectionChange)="getClassSubjectList()"
+                                        name="SessionId" [(ngModel)]="AdmitCard.SessionId" required [autofocus]="true">
+                                        <mat-option [value]="e1.SessionId"
+                                            *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Session is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-3 mb-1">
+                                    <mat-label>Select Class</mat-label>
+                                    <mat-select #ClassId="ngModel" (selectionChange)="getClassSubjectList()"
+                                        name="ClassId" [(ngModel)]="AdmitCard.ClassId" required [autofocus]="true">
+                                        <mat-option [value]="e1.ClassId"
+                                            *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Class is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 mb-1">
+                                    <mat-label>Select Exam</mat-label>
+                                    <mat-select #ExamId="ngModel" name="ExamId" [(ngModel)]="AdmitCard.ExamId" required
+                                        [autofocus]="true">
+                                        <mat-option [value]="e1.ExamId" *ngFor="let e1 of ExamList">{{e1.ExamName +' ( '
+                                            +
+                                            e1.ExamTypeName + ")"}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Exam is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                                    <mat-label>Publish Date</mat-label>
+                                    <input matInput #PublishDate="ngModel" name="PublishDate"
+                                        [(ngModel)]="AdmitCard.PublishDate" required
+                                        [matDatepicker]="PublishDatePicker">
+                                    <mat-datepicker-toggle matIconSuffix
+                                        [for]="PublishDatePicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #PublishDatePicker></mat-datepicker>
+                                    <mat-error>
+                                        Publish date is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="AdmitCard.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field> -->
+                            </div>
+
+                        </div>
+                        <div class="col-sm-4 mb-1 text-right border-left">
+                            <label class="text-link text-blue text-bold">Settings :-</label>
+                            <br>
+                            <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                [(ngModel)]="setting.isChangeAll" id="isChangeAll">
+                            <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3 class="header-text">Mark Subjects</h3>
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <!-- <th>S.No</th> -->
+                                        <th>Subject</th>
+                                        <th>Exam Date</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th *ngIf="action.CanDelete">X</th>
+                                    </tr>
+                                </thead>
+                                <tbody *ngFor="let item of AdmitCardSubjectList;  let i = index;">
+                                    <tr *ngIf="item.IsGrade == false">
+                                        <!-- <td>{{i+ 1}}</td> -->
+                                        <td>{{item.SubjectName}}</td>
+
+                                        <!--Editable-->
+                                        <td *ngIf="action.CanEdit">
+                                            <input type="date" (change)="changeExamDate(i,item)"
+                                                [ngClass]="{'ng-pristine ng-invalid is-invalid ng-touched':submitted && !item.ExamDate}"
+                                                class="form-control" [(ngModel)]="item.ExamDate" required autofocus>
+                                            <div *ngIf="submitted && !item.ExamDate" class="invalid-feedback">required
+                                                !!</div>
+                                        </td>
+                                        <td *ngIf="action.CanEdit">
+                                            <input type="time" (change)="changeStartTime(i,item)" class="from-control"
+                                                [(ngModel)]="item.StartTime"
+                                                [ngClass]="{'ng-pristine ng-invalid is-invalid ng-touched':submitted && !item.StartTime}"
+                                                required autofocus>
+                                            <div *ngIf="submitted && !item.StartTime" class="invalid-feedback">required
+                                                !!</div>
+                                        </td>
+                                        <td *ngIf="action.CanEdit">
+                                            <input type="time" (change)="changeEndTime(i,item)" class="from-control"
+                                                [(ngModel)]="item.EndTime"
+                                                [ngClass]="{'ng-pristine ng-invalid is-invalid ng-touched':submitted && !item.EndTime}"
+                                                required autofocus>
+                                            <div *ngIf="submitted && !item.EndTime" class="invalid-feedback">required !!
+                                            </div>
+                                        </td>
+
+                                        <!--Not Editable-->
+                                        <td *ngIf="!action.CanEdit">{{item.ExamDate}}</td>
+                                        <td *ngIf="!action.CanEdit">{{item.StartTime}}</td>
+                                        <td *ngIf="!action.CanEdit">{{item.EndTime}}</td>
+
+                                        <!--Others-->
+                                        <td *ngIf="action.CanDelete">
+                                            <a ngbTooltip="Remove" (click)="removeAdmitCardSubject(i)"
+                                                *ngIf="action.CanDelete" class="icon-delete">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <h3 class="header-text">Grade Subjects</h3>
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <!-- <th>S.No</th> -->
+                                        <th>Subject</th>
+                                        <th>Exam Date</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th *ngIf="action.CanDelete">X</th>
+                                    </tr>
+                                </thead>
+                                <tbody *ngFor="let item of AdmitCardSubjectList;  let i = index;">
+                                    <tr *ngIf="item.IsGrade">
+                                        <!-- <td>{{i+ 1}}</td> -->
+                                        <td>{{item.SubjectName}}</td>
+
+                                        <!--Editable-->
+                                        <td *ngIf="action.CanEdit">
+                                            <input type="date" (change)="changeExamDate(i,item)"
+                                                [ngClass]="{'ng-pristine ng-invalid is-invalid ng-touched':submitted && !item.ExamDate}"
+                                                class="form-control" [(ngModel)]="item.ExamDate" required autofocus>
+                                            <div *ngIf="submitted && !item.ExamDate" class="invalid-feedback">required
+                                                !!</div>
+                                        </td>
+                                        <td *ngIf="action.CanEdit">
+                                            <input type="time" (change)="changeStartTime(i,item)" class="from-control"
+                                                [(ngModel)]="item.StartTime"
+                                                [ngClass]="{'ng-pristine ng-invalid is-invalid ng-touched':submitted && !item.StartTime}"
+                                                required autofocus>
+                                            <div *ngIf="submitted && !item.StartTime" class="invalid-feedback">required
+                                                !!</div>
+                                        </td>
+                                        <td *ngIf="action.CanEdit">
+                                            <input type="time" (change)="changeEndTime(i,item)" class="from-control"
+                                                [(ngModel)]="item.EndTime"
+                                                [ngClass]="{'ng-pristine ng-invalid is-invalid ng-touched':submitted && !item.EndTime}"
+                                                required autofocus>
+                                            <div *ngIf="submitted && !item.EndTime" class="invalid-feedback">required !!
+                                            </div>
+                                        </td>
+
+                                        <!--Not Editable-->
+                                        <td *ngIf="!action.CanEdit">{{item.ExamDate}}</td>
+                                        <td *ngIf="!action.CanEdit">{{item.StartTime}}</td>
+                                        <td *ngIf="!action.CanEdit">{{item.EndTime}}</td>
+
+                                        <!--Others-->
+                                        <td *ngIf="action.CanDelete">
+                                            <a ngbTooltip="Remove" (click)="removeAdmitCardSubject(i)"
+                                                *ngIf="action.CanDelete" class="icon-delete">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer text-center" *ngIf="AdmitCardSubjectList.length > 0">
+                <button *ngIf="AdmitCard.AdmitCardId==null" type="button" mat-raised-button color="warn" class="me-2"
+                    data-bs-dismiss="modal" (click)="resetForm()">Cancel</button>
+                <button *ngIf="AdmitCard.AdmitCardId>0" type="button" mat-raised-button color="warn" class="me-2"
+                    data-bs-dismiss="modal" onclick="history.back()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="saveAdmitCard()">{{AdmitCard.AdmitCardId
+                    >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+        </div>
+    </section>
+</main>

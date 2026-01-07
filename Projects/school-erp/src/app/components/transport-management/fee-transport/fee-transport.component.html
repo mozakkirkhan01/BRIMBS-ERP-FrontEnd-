@@ -1,0 +1,98 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-4">
+                        <mat-label [ariaSetSize]="8">Transport Duration</mat-label>
+                        <mat-select #TransportDurationId="ngModel" name="TransportDurationIdId"
+                            [(ngModel)]="FeeTransport.TransportDurationId" (selectionChange)="getFeeTransportList()">
+                            <mat-option [value]="option.TransportDurationId"
+                                *ngFor="let option of TransportDurationList;">{{option.FromDate | date : "dd/MM/yyyy"}}
+                                to {{option.ToDate | date : "dd/MM/yyyy"}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Transport Duration is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="table-container ">
+                    <div class="row" *ngFor="let Batch of FeeTransportList;let i1 = index">
+                        <span *ngIf="Batch.FeeTransportList.length > 0">
+                            <h3 class="header-text">{{(i1+1) +". " + Batch.BatchName}}</h3>
+                            <!-- <strong style="white-space: nowrap;" #BatchId="ngModel"
+                                [(ngModel)]="Batch.TransportBatchId">{{(i1+1) +". " + Batch.BatchName}}</strong> -->
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Fee Head</th>
+                                        <th>Amount</th>
+                                        <th>Compulsory</th>
+                                        <th>Active</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody *ngIf="action.CanEdit || action.CanCreate">
+                                    <tr *ngFor="let FeeTransport of Batch.FeeTransportList;let i = index ">
+                                        <td>{{i+1}}</td>
+                                        <td>{{FeeTransport.HeadName}}</td>
+                                        <td><input class="form-control" type="number" #FeeAmount="ngModel"
+                                                [(ngModel)]="FeeTransport.FeeAmount" style="max-width: 120px;" /></td>
+                                        <td>
+                                            <mat-checkbox [(ngModel)]="FeeTransport.IsCompulsory"
+                                                color="primary"></mat-checkbox>
+                                        </td>
+                                        <td>
+                                            <mat-checkbox [(ngModel)]="FeeTransport.IsActive"
+                                                color="primary"></mat-checkbox>
+                                        </td>
+                                        <td><input class="form-control" #Remarks="ngModel"
+                                                [(ngModel)]="FeeTransport.Remarks" /></td>
+                                    </tr>
+                                </tbody>
+
+                                <tbody *ngIf="!action.CanEdit && !action.CanCreate">
+                                    <tr *ngFor="let FeeTransport of Batch.FeeTransportList;let i = index ">
+                                        <td>{{i+1}}</td>
+                                        <td>{{FeeTransport.HeadName}}</td>
+                                        <td>{{FeeTransport.FeeAmount|money}}</td>
+                                        <td>{{FeeTransport.IsCompulsory?'Yes':'No'}}</td>
+                                        <td>{{FeeTransport.IsActive?'Yes':'No'}}</td>
+                                        <td>{{FeeTransport.Remarks}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </span>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div *ngIf="FeeTransportList.length > 0 && (action.CanEdit || action.CanCreate)" class="card-footer">
+                <div style="text-align:center;">
+                    <button class="btn btn-primary" (click)="saveFeeTransport(TransportDurationId)">Submit</button>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>

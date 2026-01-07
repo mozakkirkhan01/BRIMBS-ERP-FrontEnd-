@@ -1,0 +1,133 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <!-- <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>From Date</mat-label>
+                        <input matInput name="FromDate" [(ngModel)]="FilterModel.FromDate"
+                            [ngxMatDatetimePicker]="FromDatePicker">
+                        <ngx-mat-datepicker-toggle matSuffix [for]="FromDatePicker"></ngx-mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #FromDatePicker [hideTime]="true"></ngx-mat-datetime-picker>
+                        <mat-error>Required Filed !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>To Date</mat-label>
+                        <input matInput name="ToDate" [(ngModel)]="FilterModel.ToDate"
+                            [ngxMatDatetimePicker]="ToDatePicker">
+                        <ngx-mat-datepicker-toggle matSuffix [for]="ToDatePicker"></ngx-mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #ToDatePicker [hideTime]="true"></ngx-mat-datetime-picker>
+                        <mat-error>Required Filed !!</mat-error>
+                    </mat-form-field>
+
+                    <div class="col-sm-2">
+                        <button mat-flat-button color="primary" (click)="getProductStockList()"><i class="bi bi-search"></i>
+                            Search</button>
+                    </div>
+                </div>
+                <hr> -->
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <a class="text-link-sm" (click)="exportToExcel()">Export to Excel</a>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" #table_1>
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <!-- <th *ngIf="!isExporting">Action</th> -->
+                                <th (click)="sort('ProductName')">Product Name</th>
+                                <th (click)="sort('ManufacturerName')">Manufacturer</th>
+                                <th (click)="sort('HSNCode')">HSN</th>
+                                <th class="text-right" (click)="sort('MRP')">MRP</th>
+                                <th class="text-right" (click)="sort('ExpiredDate')">Expired Date</th>
+                                <th class="text-right" (click)="sort('UnitValue')">Stock</th>
+                                <th class="text-right" (click)="sort('AvailableQuantity')">Stock (in Pc.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of ProductStockList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <!-- <td *ngIf="!isExporting" class="no-wrap">
+                                    <a data-bs-toggle="modal" ngbTooltip="Print ProductStock" class="icon-print"
+                                        (click)="getProductStock(item.ProductStockId,true,1)"> <i
+                                            class="bi bi-printer-fill"></i>
+                                    </a>
+                                    <a data-bs-toggle="modal" *ngIf="action.CanDelete" ngbTooltip="Download ProductStock"
+                                        class="icon-delete" (click)="getProductStock(item.ProductStockId,false,1)"> <i
+                                            class="bi bi-file-earmark-pdf-fill"></i>
+                                    </a>
+                                    <a data-bs-toggle="modal" *ngIf="action.CanEdit" ngbTooltip="Download ProductStock"
+                                        class="icon-edit" (click)="getProductStock(item.ProductStockId,false,2)"> <i
+                                            class="bi bi-file-earmark-word-fill"></i>
+                                    </a>
+                                    <a class="icon-detail" ngbTooltip="View Details" (click)="getProductStockDetail(item)">
+                                        <i class="bi bi-file-text"></i>
+                                    </a>
+                                    <a *ngIf="action.CanEdit" ngbTooltip="Edit ProductStock" class="icon-edit"
+                                        (click)="editProductStock(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a *ngIf="action.CanDelete" (click)="deleteProductStock(item)"
+                                        ngbTooltip="Delete ProductStock" class="icon-delete">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+
+                                </td> -->
+                                <td class="no-wrap">{{item.Product.ProductName}}</td>
+                                <td>{{item.Product.ManufacturerName}}</td>
+                                <td>{{item.Product.HSNCode}}</td>
+                                <td class="text-right">{{item.MRP|money}}</td>
+                                <td class="text-right">{{item.ExpiredDate|date:'dd-MM-yyyy'}}</td>
+                                <td class="text-right">
+                                    <ng-container *ngIf="item.UnitValue != 0">{{item.UnitValue + ' ' +
+                                        item.Product.UnitName}}, </ng-container>
+                                    <ng-container *ngIf="item.PieceValue > 0">{{item.PieceValue}} Pc.</ng-container>
+                                </td>
+                                <td class="text-right">{{item.AvailableQuantity}} Pc.</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th class="text-right" [colSpan]="isExporting?6:7">TOTAL</th>
+                                <th class="text-right">{{ProductStock.AvailableQuantity}} Pc.</th>
+                                <!-- <th class="text-right">{{ProductStock.BasicAmount|money}}</th> -->
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

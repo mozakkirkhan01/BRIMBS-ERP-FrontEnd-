@@ -1,0 +1,242 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <!-- <div class="col-sm-4 mb-3">
+            <a href="/#/admin/issue" mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right">New
+                Issue</a>
+        </div> -->
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-3">
+                        <mat-label>From Date</mat-label>
+                        <input matInput name="FromDate" [(ngModel)]="FilterModel.FromDate"
+                            [matDatepicker]="FromDatePicker">
+                        <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #FromDatePicker></mat-datepicker>
+                        <mat-error>required !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-3">
+                        <mat-label>To Date</mat-label>
+                        <input matInput name="ToDate" [(ngModel)]="FilterModel.ToDate" [matDatepicker]="ToDatePicker">
+                        <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #ToDatePicker></mat-datepicker>
+                        <mat-error>required !!</mat-error>
+                    </mat-form-field>
+
+                    <div class="col-sm-2">
+                        <button mat-flat-button color="primary" (click)="getIssueList()"><i class="bi bi-search"></i>
+                            Search</button>
+                    </div>
+                </div>
+                <hr>
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <a class="text-link-sm" (click)="exportToExcel()">Export to Excel</a>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" #table_1>
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="!isExporting">Action</th>
+                                <th (click)="sort('IssueDate')">Date</th>
+                                <th (click)="sort('ReceiptNo')">Receipt No</th>
+                                <th (click)="sort('StaffName')">Taken By</th>
+                                <th (click)="sort('Remarks')">Remarks</th>
+                                <th (click)="sort('TotalBooks')">Total Books</th>
+                                <th (click)="sort('CreatedByUser')">Created By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of IssueList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td *ngIf="!isExporting" class="no-wrap">
+                                    <!-- <a data-bs-toggle="modal" ngbTooltip="Print Issue" class="icon-print"
+                                        (click)="getIssue(item.IssueId,true,1)"> <i
+                                            class="bi bi-printer-fill"></i>
+                                    </a>
+                                    <a data-bs-toggle="modal" *ngIf="action.CanDelete" ngbTooltip="Download Issue"
+                                        class="icon-delete" (click)="getIssue(item.IssueId,false,1)"> <i
+                                            class="bi bi-file-earmark-pdf-fill"></i>
+                                    </a>
+                                    <a data-bs-toggle="modal" *ngIf="action.CanEdit" ngbTooltip="Download Issue"
+                                        class="icon-edit" (click)="getIssue(item.IssueId,false,2)"> <i
+                                            class="bi bi-file-earmark-word-fill"></i>
+                                    </a> -->
+                                    <a class="icon-detail" ngbTooltip="View Details" (click)="getIssueDetail(item)">
+                                        <i class="bi bi-file-text"></i>
+                                    </a>
+                                    <a *ngIf="action.CanEdit" ngbTooltip="Edit Issue" class="icon-edit"
+                                        (click)="editIssue(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a *ngIf="action.CanDelete" (click)="deleteIssue(item)" ngbTooltip="Delete Issue"
+                                        class="icon-delete">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+
+                                </td>
+                                <td class="no-wrap">{{item.IssueDate|date:'dd-MM-yyyy HH:mm a'}}</td>
+                                <td>{{item.ReceiptNo}}</td>
+                                <td>{{item.StaffName}}</td>
+                                <td>{{item.Remarks}}</td>
+                                <td>{{item.TotalProducts}}</td>
+                                <td>{{item.CreatedByUser}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="modal_detail" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Issue Details</h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body mb-4">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Total Books</mat-label>
+                                    <input matInput value="{{SelectedIssue.TotalProducts}}" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Issue Date</mat-label>
+                                    <input matInput value="{{SelectedIssue.IssueDate|date:'dd-MM-yyyy'}}" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-8">
+                                    <mat-label>Remarks</mat-label>
+                                    <input matInput value="{{SelectedIssue.Remarks}}" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+                            </div>
+                            <ng-container *ngIf="Staff.StaffName">
+                                <h3 class="header-text">Staff Details</h3>
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Staff Name</mat-label>
+                                        <input matInput name="StaffId" [(ngModel)]="Staff.StaffName" disabled>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Staff Code</mat-label>
+                                        <input matInput name="StaffCode" [(ngModel)]="Staff.StaffCode" disabled>
+                                        <mat-error>Required Field !! </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Mobile No</mat-label>
+                                        <input type="number" matInput name="MobileNo" [(ngModel)]="Staff.MobileNo"
+                                            disabled>
+                                        <mat-error>Required Field !! </mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-5">
+                                        <mat-label>Full Address</mat-label>
+                                        <input matInput name="FullAddress" [(ngModel)]="Staff.FullAddress" disabled>
+                                        <mat-error>Required Field !! </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngIf="Pupil.PupilName">
+                                <h3 class="header-text">{{recordPupil}} Details</h3>
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>{{recordPupil}} Name</mat-label>
+                                        <input matInput name="StaffId" [(ngModel)]="Pupil.PupilName" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Admission No.</mat-label>
+                                        <input matInput name="StaffId" [(ngModel)]="Pupil.AdmissionNo" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Mobile No.</mat-label>
+                                        <input matInput name="StaffId" [(ngModel)]="Pupil.MobileNo" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Alternate No.</mat-label>
+                                        <input matInput name="StaffId" [(ngModel)]="Pupil.AlternateNo" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-4">
+                                        <mat-label>Address</mat-label>
+                                        <input matInput name="StaffId" [(ngModel)]="Pupil.CorrespondenceAddress"
+                                            disabled>
+                                    </mat-form-field>
+                                </div>
+                            </ng-container>
+                            <h3 class="header-text">Book List</h3>
+                            <div class="col-sm-12 table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Accession No</th>
+                                            <th>Book Name</th>
+                                            <th>Author</th>
+                                            <th>Edition</th>
+                                            <th>Publisher</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let t1 of IssueBookList;let i1 = index">
+                                            <td>{{i1+1}}</td>
+                                            <td>{{t1.BookStock.BookNo}}</td>
+                                            <td>{{t1.BookStock.Book.BookName}}</td>
+                                            <td>{{t1.BookStock.Book.Author}}</td>
+                                            <td>{{t1.BookStock.Book.Edition}}</td>
+                                            <td>{{t1.BookStock.Book.Publisher}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

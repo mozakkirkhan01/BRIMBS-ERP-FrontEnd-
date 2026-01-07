@@ -1,0 +1,157 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Transport Duration</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th (click)="sort('SchoolName')">School</th>
+                                <th (click)="sort('FromDate')">From Date</th>
+                                <th (click)="sort('ToDate')">To Date</th>
+                                <th *ngIf="action.CanEdit">Edit</th>
+                                <th *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of TransportDurationList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>{{item.SchoolName}}</td>
+                                <td>{{item.FromDate | date : "dd-MM-yyy"}}</td>
+                                <td>{{item.ToDate | date : "dd-MM-yyy"}}</td>
+                                <td *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editTransportDuration(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteTransportDuration(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+
+
+            </div>
+        </div>
+
+    </section>
+
+    
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop"
+    data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                    {{TransportDuration.TransportDurationId > 0 ? 'Update':'New'}}
+                    Transport Duration
+                </h1>
+                <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="resetForm()"></button>
+            </div>
+            <div class="modal-body">
+
+                <form #formTransportDuration="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                    <div class="container">
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>School</mat-label>
+                                <mat-select #SchoolId="ngModel" name="SchoolId"
+                                    [(ngModel)]="TransportDuration.SchoolId">
+                                    <mat-option [value]="option.SchoolId"
+                                        *ngFor="let option of SchoolList;">
+                                        {{option.SchoolName}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="(SchoolId.dirty  || SchoolId.touched) || (SchoolId.invalid && isSubmitted)">
+                                    School is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>From Date</mat-label>
+                                <input matInput #FromDate="ngModel" name="FromDate"
+                                    [(ngModel)]="TransportDuration.FromDate" required
+                                    [matDatepicker]="StartDatePicker">
+                                <mat-datepicker-toggle matIconSuffix
+                                    [for]="StartDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #StartDatePicker></mat-datepicker>
+                                <mat-error
+                                    *ngIf="(FromDate.dirty  || FromDate.touched) || (FromDate.invalid && isSubmitted)">
+                                    From date is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>To Date</mat-label>
+                                <input matInput #ToDate="ngModel" name="ToDate"
+                                    [(ngModel)]="TransportDuration.ToDate" [matDatepicker]="EndDatePicker">
+                                <mat-datepicker-toggle matIconSuffix
+                                    [for]="EndDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #EndDatePicker></mat-datepicker>
+                                <mat-error
+                                    *ngIf="(ToDate.dirty  || ToDate.touched) || (ToDate.invalid && isSubmitted)">
+                                    To date is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer mt-2">
+                <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                    (click)="resetForm()">Cancel</button>
+                <button mat-raised-button color="primary"
+                    (click)="saveTransportDuration()">{{TransportDuration.TransportDurationId >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>

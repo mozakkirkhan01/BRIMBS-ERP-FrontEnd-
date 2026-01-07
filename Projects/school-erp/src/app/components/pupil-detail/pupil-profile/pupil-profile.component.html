@@ -1,0 +1,196 @@
+<main  class="main">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section profile">
+        <div class="card">
+            <div class="card-body mt-3">
+                <div class="row mt-2">
+                    <mat-form-field appearance="outline" class="col-sm-6">
+                        <mat-label>Select Pupil</mat-label>
+                        <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                            placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                            (ngModelChange)="filterPupilList($event)" [(ngModel)]="filterModel.SearchPupil"
+                            [matAutocomplete]="autoSearchPupil" required autofocus>
+                        <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                            (optionSelected)="afterPupilSeleted($event)">
+                            <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                [value]="option.SearchPupil">
+                                {{option.SearchPupil}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix *ngIf="filterModel.SearchPupil" color="primary"
+                            (click)="clearPupil()">
+                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                        </button>
+                        <mat-error>
+                            Pupil is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="Pupil.PupilId">
+            <div class="col-xl-8">
+
+                <div class="card">
+                    <div class="card-body" style="margin-top: 0;">
+                        <!-- Bordered Tabs -->
+                        <!-- <ul class="nav nav-tabs nav-tabs-bordered">
+
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab"
+                                    data-bs-target="#profile-overview">Overview</button>
+                            </li>
+
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit
+                                    Profile</button>
+                            </li>
+
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab"
+                                    data-bs-target="#profile-change-password">Change Password</button>
+                            </li>
+
+                        </ul> -->
+                        <div class="tab-content pt-2">
+                            <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <h5 class="header-text">Pupil Details</h5>
+                                        <h6 class="profile_title" *ngIf="Pupil.PupilName">Full Name : <span class="profile_sub_title">{{Pupil.PupilName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.DOB">Date of Birth : <span class="profile_sub_title">{{Pupil.DOB|date:'dd-MM-yyyy'}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.AlternateNo">Alternate No : <span class="profile_sub_title">{{Pupil.AlternateNo}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.MobileNo">Mobile No : <span class="profile_sub_title">{{Pupil.MobileNo}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Email">Email : <span class="profile_sub_title">{{Pupil.Email}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.AadhaarNo">Aadhaar No : <span class="profile_sub_title">{{Pupil.AadhaarNo}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.AadhaarNo">PEN : <span class="profile_sub_title">{{Pupil.Pen}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Email">Email : <span class="profile_sub_title">{{Pupil.Email}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Gender">Gender : <span class="profile_sub_title">{{AllGenderList[Pupil.Gender]}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Category">Category : <span class="profile_sub_title">{{AllCategoryList[Pupil.Category]}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.BloodGroup">Blood Group : <span class="profile_sub_title">{{AllBloodGroupList[Pupil.BloodGroup]}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Religion">Religion : <span class="profile_sub_title">{{AllReligionList[Pupil.Religion]}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Nationality">Nationality : <span class="profile_sub_title">{{AllNationalityList[Pupil.Nationality]}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Height">Height : <span class="profile_sub_title">{{Pupil.Height}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.Weight">Weight : <span class="profile_sub_title">{{Pupil.Weight}}</span></h6>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h5 class="header-text">Admission Details</h5>
+                                        <h6 class="profile_title" *ngIf="Pupil.AdmissionNo">Admission No : <span class="profile_sub_title">{{Pupil.AdmissionNo}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.ClassName">Class : <span class="profile_sub_title">{{Pupil.ClassName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.SectionName">Section : <span class="profile_sub_title">{{Pupil.SectionName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.RollNo">Roll No : <span class="profile_sub_title">{{Pupil.RollNo}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PupilTypeName">Pupil Type : <span class="profile_sub_title">{{Pupil.PupilTypeName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.AdmissionType">Admission Type : <span class="profile_sub_title">{{AllAdmissionTypeList[Pupil.AdmissionType]}}</span></h6>
+
+                                        <h6 class="profile_title" *ngIf="Pupil.JoinDate">Join Date : <span class="profile_sub_title">{{Pupil.JoinDate|date:'dd-MM-yyyy'}}</span></h6>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h5 class="header-text">Guardian Details</h5>
+                                        <h6 class="profile_title" *ngIf="Pupil.FatherName">Father's Name : <span class="profile_sub_title">{{Pupil.FatherName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.MotherName">Mother's Name : <span class="profile_sub_title">{{Pupil.MotherName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.FatherOccupation">Father's Occupation : <span class="profile_sub_title">{{Pupil.FatherOccupation}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.MotherOccupation">Mother's Occupation : <span class="profile_sub_title">{{Pupil.MotherOccupation}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.FamilyAnnualIncome">Family Annual Income : <span class="profile_sub_title">{{Pupil.FamilyAnnualIncome|money}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.GuardianMobileNo">Guardian Mobile No : <span class="profile_sub_title">{{Pupil.GuardianMobileNo}}</span></h6>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h5 class="header-text">Correspondence Address</h5>
+                                        <h6 class="profile_title" *ngIf="Pupil.CorrespondenceAddress">Address : <span class="profile_sub_title">{{Pupil.CorrespondenceAddress}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.CorrespondenceCityName">City : <span class="profile_sub_title">{{Pupil.CorrespondenceCityName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.CorrespondenceStateName">State : <span class="profile_sub_title">{{Pupil.CorrespondenceStateName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.CorrespondencePinCode">Pin Code : <span class="profile_sub_title">{{Pupil.CorrespondencePinCode}}</span></h6>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h5 class="header-text">Permanent Address</h5>
+                                        <h6 class="profile_title" *ngIf="Pupil.PermanentAddress">Address : <span class="profile_sub_title">{{Pupil.PermanentAddress}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PermanentCityName">City : <span class="profile_sub_title">{{Pupil.PermanentCityName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PermanentStateName">State : <span class="profile_sub_title">{{Pupil.PermanentStateName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PermanentPinCode">Pin Code : <span class="profile_sub_title">{{Pupil.PermanentPinCode}}</span></h6>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h5 class="header-text">Previous School Details</h5>
+                                        <h6 class="profile_title" *ngIf="Pupil.PreviousSchoolName">School : <span class="profile_sub_title">{{Pupil.PreviousSchoolName}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PreviousSchoolBoard">Board : <span class="profile_sub_title">{{Pupil.PreviousSchoolBoard}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PreviousSchoolMedium">Medium : <span class="profile_sub_title">{{Pupil.PreviousSchoolMedium}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PreviousSchoolTCNo">TC No : <span class="profile_sub_title">{{Pupil.PreviousSchoolTCNo}}</span></h6>
+                                        <h6 class="profile_title" *ngIf="Pupil.PreviousSchoolTCDate">TC Date : <span class="profile_sub_title">{{Pupil.PreviousSchoolTCDate|date:'dd-MM-yyyy'}}</span></h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+                                <h5 class="card-title">Comming soon...</h5>
+                            </div>
+
+                            <div class="tab-pane fade pt-3" id="profile-change-password">
+                                <h5 class="card-title">Comming soon...</h5>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+                        <img [src]="Pupil.StudentPhoto ? (imageUrl+ Pupil.StudentPhoto):'assets/img/profile-img.jpg'"
+                            alt="Profile" class="rounded-circle">
+                        <!-- <h2>{{Pupil.PupilName}}</h2>
+                        <h4 class="mb-0">Admission No: {{Pupil.AdmissionNo}}</h4> -->
+                        <h5 class="card-title">Edit Photo</h5>
+
+
+                        <!-- <h4 class="mb-0">Class: {{Pupil.ClassName}} - {{Pupil.SectionName}}</h4>
+                        <h4>Roll No: {{Pupil.RollNo}}</h4>
+                        <h5 class="card-title">Edit Photo</h5> -->
+                        <form #fromPupilPhoto="ngForm">
+                            <input type="file" class="form-control" name="StudentPhoto" #StudentPhoto="ngModel"
+                                [(ngModel)]="Pupil.StudentPhoto2" accept="image/jpeg,image/jpg,image/png"
+                                (change)="setStudentPhotoFile($event)"
+                                [ngClass]="{'is-invalid':isSubmitted && StudentPhoto.invalid}" [required]="true"
+                                [autofocus]="true">
+                            <div *ngIf="StudentPhoto.errors?.['required'] && StudentPhoto.invalid && (StudentPhoto.dirty || StudentPhoto.touched || isSubmitted)"
+                                class="invalid-feedback">Photo is required !!</div>
+                        </form>
+                        <!-- <div *ngIf="Pupil.StudentPhoto2">
+                            <image-cropper style="width: 100%; height: 100%;"  [imageChangedEvent]="imgChangeEvt" [maintainAspectRatio]="true"
+                                [aspectRatio]="3 / 4" [resizeToWidth]="256" format="png"
+                                (imageCropped)="cropImg($event)" (imageLoaded)="imgLoad()"
+                                (cropperReady)="initCropper()" (loadImageFailed)="imgFailed()">
+                            </image-cropper>
+                            <h6 *ngIf="cropImgPreview">Image Preview</h6>
+                            <img *ngIf="cropImgPreview" [src]="cropImgPreview" style="width: 100%;height: 100%;" />
+                        </div> -->
+
+                        <!-- <div class="social-links mt-2">
+                            <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+                            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+                            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+                        </div> -->
+                    </div>
+                    <div class="card-footer text-center mt-4">
+                        <button mat-raised-button (click)="savePupilPhoto()" color="primary">Update Photo</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </section>
+
+</main>

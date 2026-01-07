@@ -1,0 +1,147 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Category</button>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                <th (click)="sort('ExpenseCategoryName')">Category Name</th>
+                                <th (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of ExpenseCategoryList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td *ngIf="action.CanEdit || action.CanDelete">
+                                    <a ngbTooltip="Edit ExpenseCategory" *ngIf="action.CanEdit" class="icon-edit"
+                                        data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        (click)="editExpenseCategory(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a ngbTooltip="Delete ExpenseCategory" *ngIf="action.CanDelete" class="icon-delete"
+                                        (click)="deleteExpenseCategory(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <td>{{item.ExpenseCategoryName}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+
+            </div>
+        </div>
+
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ExpenseCategory.ExpenseCategoryId > 0 ?
+                        'Update':'New'}}
+                        Category
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formExpenseCategory="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <!-- <mat-form-field appearance="outline" class="col-sm-12 mb-2">
+                                    <mat-label>ExpenseCategory Type</mat-label>
+                                    <mat-select #ExpenseCategoryTypeId="ngModel" (selectionChange)="changeExpenseCategoryType()" name="ExpenseCategoryTypeId" [(ngModel)]="ExpenseCategory.ExpenseCategoryTypeId"
+                                        required [autofocus]="true">
+                                        <mat-option [value]="e1.ExpenseCategoryTypeId"
+                                            *ngFor="let e1 of ExpenseCategoryTypeList">{{e1.ExpenseCategoryTypeName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        ExpenseCategory type is required !!
+                                    </mat-error>
+                                </mat-form-field> -->
+
+                                <mat-form-field appearance="outline" class="col-sm-12 mb-2">
+                                    <mat-label>Category Name</mat-label>
+                                    <input matInput name="ExpenseCategoryName"
+                                        [(ngModel)]="ExpenseCategory.ExpenseCategoryName" required>
+                                    <mat-error>
+                                        Category name is required !!
+                                    </mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-12 mb-2">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="ExpenseCategory.Status"
+                                        required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Status is required !!
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary"
+                        (click)="saveExpenseCategory()">{{ExpenseCategory.ExpenseCategoryId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

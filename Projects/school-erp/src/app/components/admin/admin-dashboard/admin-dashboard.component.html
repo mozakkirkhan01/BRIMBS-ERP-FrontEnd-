@@ -1,0 +1,296 @@
+<!-- <app-progress *ngIf="dataLoading"></app-progress> -->
+<main class="main">
+
+  <div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a>Home</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section dashboard">
+    
+
+    <div class="row">
+      <div class="col-sm-6" *ngIf="DashboardDetail.ShowIncomExpenseChart || ShortcutList.length>0">
+        <div class="row mb-3" *ngIf="ShortcutList.length>0">
+          <div class="col-sm-2 col-6 text-center" *ngFor="let item of ShortcutList">
+            <a [routerLink]="item.PageUrl">
+              <div class="shortcut_icon">
+                <img [src]="imageUrl+item.ImgFile" alt="Profile" class="mb-2" *ngIf="item.ImgFile">
+                <i [ngClass]="item.MenuIcon" *ngIf="item.MenuIcon"></i>
+                <h6>{{item.MenuTitle}}</h6>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div class="card" *ngIf="DashboardDetail.ShowIncomExpenseChart">
+          <div class="card-body mt-0">
+            <h5 class="card-title">{{DashboardDetail.TitleIncomExpenseChart}}</h5>
+            <div class="row mt-2">
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>From Date</mat-label>
+                <input matInput name="FromDate" [(ngModel)]="IncomeExpense.FromDateString"
+                  [matDatepicker]="FromDatePicker">
+                <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #FromDatePicker></mat-datepicker>
+                <mat-error>required !!</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>To Date</mat-label>
+                <input matInput name="ToDate" [(ngModel)]="IncomeExpense.ToDateString" [matDatepicker]="ToDatePicker">
+                <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #ToDatePicker></mat-datepicker>
+                <mat-error>required !!</mat-error>
+              </mat-form-field>
+              <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                <mat-label>Category</mat-label>
+                <mat-select name="ExpenseCategoryId" [(ngModel)]="Expense.ExpenseCategoryId">
+                    <mat-option [value]="ExpenseCategory.ExpenseCategoryId"
+                        *ngFor="let ExpenseCategory of ExpenseCategoryList">{{ExpenseCategory.ExpenseCategoryName}}</mat-option>
+                </mat-select>
+                <mat-error>required !!</mat-error>
+            </mat-form-field> -->
+              <div class="col-sm-4">
+                <button mat-flat-button color="primary" (click)="getExpenseIncomeList()">Search</button>
+              </div>
+            </div>
+            <div id="incomeExpenseChart"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6" *ngIf="DashboardDetail.ShowTodayReport || DashboardDetail.ShowCurrentMonthReport">
+        <div class="row">
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowNoOfActiveStudents">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div
+                    class="card-icon rounded-circle d-flex align-items-center justify-content-center text_dark_green">
+                    <i class="bi bi-people"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{DashboardDetail.NoOfActiveStudents}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleNoOfActiveStudents}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowNoOfInactiveStudents">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center text_dark_red">
+                    <i class="bi bi-people"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 class="text_dark_red">{{DashboardDetail.NoOfInactiveStudents}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleNoOfInactiveStudents}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12" *ngIf="DashboardDetail.ShowTodayReport">
+            <h2 class="header-text">Today Report</h2>
+          </div>
+          
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowTodayRegistration">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-journal-text"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{DashboardDetail.TodayRegistration}}</h6>
+                    <span class="text-secoundary small pt-1 fw-bold">{{DashboardDetail.TitleTodayRegistration}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowTodayNewAdmission">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-layout-text-window-reverse"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{DashboardDetail.TodayNewAdmission}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleTodayNewAdmission}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowTodayCollection">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div
+                    class="card-icon rounded-circle d-flex align-items-center justify-content-center text_dark_green">
+                    <i class="bx bx-rupee"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 class="text_dark_green">{{DashboardDetail.TodayCollection}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleTodayCollection}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowTodayExpense">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center text_dark_red">
+                    <i class="bx bx-rupee"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 class="text_dark_red">{{DashboardDetail.TodayExpense}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleTodayExpense}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-12" *ngIf="DashboardDetail.ShowCurrentMonthReport">
+            <h2 class="header-text">Current Month Report</h2>
+          </div>
+
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowCurrentMonthRegistration">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-layout-text-window-reverse"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{DashboardDetail.CurrentMonthRegistration}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleCurrentMonthRegistration}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowCurrentMonthNewAdmission">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi bi-journal-text"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{DashboardDetail.CurrentMonthNewAdmission}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleCurrentMonthNewAdmission}} </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowCurrentMonthCollection">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div
+                    class="card-icon rounded-circle d-flex align-items-center justify-content-center text_dark_green">
+                    <i class="bx bx-rupee"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 class="text_dark_green">{{DashboardDetail.CurrentMonthCollection}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleCurrentMonthCollection}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6" *ngIf="DashboardDetail.ShowCurrentMonthExpense">
+            <div class="card info-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center text_dark_red">
+                    <i class="bx bx-rupee"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6 class="text_dark_red">{{DashboardDetail.CurrentMonthExpense}}</h6>
+                    <span class="small pt-1 fw-bold">{{DashboardDetail.TitleCurrentMonthExpense}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-5" *ngIf="DashboardDetail.ShowStudentChart">
+        <div class="card">
+          <div class="card-body mt-0">
+            <h5 class="card-title">{{DashboardDetail.TitleStudentChart}}</h5>
+            <div id="studentChart"></div>
+          </div>
+        </div>
+        <div class="card" *ngIf="DashboardDetail.ShowRegistrationChart">
+          <div class="card-body mt-0">
+            <h5 class="card-title">{{DashboardDetail.TitleRegistrationChart}} </h5>
+            <div id="formAdmissionChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-7" *ngIf="DashboardDetail.ShowAccountChart">
+        <div class="card">
+          <div class="card-body mt-0">
+            <h5 class="card-title">{{DashboardDetail.TitleAccountChart}}</h5>
+            <form #formCashbook="ngForm">
+              <div class="row mt-2">
+                <mat-form-field appearance="outline" class="col-sm-3">
+                  <mat-label>Account </mat-label>
+                  <mat-select name="AccountId" [(ngModel)]="Cashbook.AccountId"
+                    (selectionChange)="getCashbookBankbookList(true)" required>
+                    <mat-option [value]="p1.AccountId" *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                  </mat-select>
+                  <mat-error>required !!</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="col-sm-3">
+                  <mat-label>From Date</mat-label>
+                  <input matInput name="FromDate" [(ngModel)]="Cashbook.FromDateString"
+                    [matDatepicker]="AccountFromDatePicker" required>
+                  <mat-datepicker-toggle matIconSuffix [for]="AccountFromDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #AccountFromDatePicker></mat-datepicker>
+                  <mat-error>required !!</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-sm-3">
+                  <mat-label>To Date</mat-label>
+                  <input matInput name="ToDate" [(ngModel)]="Cashbook.ToDateString"
+                    [matDatepicker]="AccountToDatePicker" required>
+                  <mat-datepicker-toggle matIconSuffix [for]="AccountToDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #AccountToDatePicker></mat-datepicker>
+                  <mat-error>required !!</mat-error>
+                </mat-form-field>
+
+                <div class="col-sm-2">
+                  <button mat-flat-button color="primary" (click)="getCashbookBankbookList(true)">Search</button>
+                </div>
+              </div>
+            </form>
+
+            <div id="accountChart"></div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

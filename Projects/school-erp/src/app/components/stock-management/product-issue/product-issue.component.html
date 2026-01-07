@@ -1,0 +1,198 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4 mb-3">
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formStaff="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Taken By</mat-label>
+                            <mat-select name="TakenBy" (selectionChange)="changeTakenBy()" [(ngModel)]="Issue.TakenBy" required>
+                                <mat-option [value]="m1.Key" *ngFor="let m1 of TakenByList">{{m1.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4" *ngIf="Issue.TakenBy == 1">
+                            <mat-label>Select Staff</mat-label>
+                            <input matInput #StaffId="ngModel" name="StaffId" (ngModelChange)="filterStaffList($event)"
+                                placeholder="Search By Staff Name / Mobile No" [(ngModel)]="Staff.SearchStaff"
+                                [matAutocomplete]="autoStaff" required>
+                            <mat-autocomplete #autoStaff="matAutocomplete"
+                                (optionSelected)="afterStaffSelected($event)">
+                                <mat-option *ngFor="let option of StaffList" id="{{option.StaffId}}"
+                                    [value]="option.SearchStaff">{{option.SearchStaff}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="Staff.SearchStaff" color="primary"
+                                (click)="clearStaff()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4" *ngIf="Issue.TakenBy == 2">
+                            <mat-label>Select {{recordPupil}}</mat-label>
+                            <input matInput #PupilId="ngModel" name="PupilId" (ngModelChange)="filterPupilList($event)"
+                                placeholder="Search By Admission No - {{recordPupil}} Name " [(ngModel)]="Pupil.SearchPupil"
+                                [matAutocomplete]="autoPupil" required>
+                            <mat-autocomplete #autoPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSelected($event)">
+                                <mat-option *ngFor="let option of PupilList" id="{{option.PupilId}}"
+                                    [value]="option.SearchPupil">{{option.SearchPupil}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="Pupil.SearchPupil" color="primary"
+                                (click)="clearPupil()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Remarks</mat-label>
+                            <input matInput name="Remarks" [(ngModel)]="Issue.Remarks">
+                            <mat-error>Required Field !! </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Issue Date</mat-label>
+                            <input matInput name="IssueDate" [(ngModel)]="Issue.IssueDate"
+                                [matDatepicker]="IssueDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="IssueDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #IssueDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                </form>
+
+                <h3 class="header-text">Add Products</h3>
+                <form #formIssueProduct="ngForm" class="row">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Select Product</mat-label>
+                            <input matInput name="ProductId" (ngModelChange)="filterProductList($event)"
+                                placeholder="Search By Product Name / HSN / Manufacturer Name"
+                                [(ngModel)]="IssueProduct.Product.SearchProduct" [matAutocomplete]="autoProduct" required>
+                            <mat-autocomplete #autoProduct="matAutocomplete"
+                                (optionSelected)="afterProductSelected($event)">
+                                <mat-option *ngFor="let option of ProductList" id="{{option.ProductId}}"
+                                    [value]="option.Product.SearchProduct">{{option.Product.SearchProduct}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="IssueProduct.Product.SearchProduct" color="primary"
+                                (click)="clearProduct()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4 mb-2">
+                            <mat-label>Select Stock</mat-label>
+                            <mat-select name="ProductStockId" [(ngModel)]="IssueProduct.ProductStockId"
+                                (selectionChange)="changeProductStock()" required>
+                                <mat-option [value]="m1.ProductStockId" *ngFor="let m1 of ProductStockList">
+                                    MRP:
+                                    {{m1.MRP}} {{m1.ExpiredDate ?', Expiry: '
+                                    +(m1.ExpiredDate|date:'dd-MM-yyyy'):''}}</mat-option>
+                            </mat-select>
+                            <mat-hint *ngIf="selectedStock.AvailableQuantity">Available Stock :
+                                {{selectedStock.UnitValue + ' ' + selectedStock.Product.UnitName + (selectedStock.PieceValue > 0
+                                ? (', ' + selectedStock.PieceValue + ' Pc.'):'')}}</mat-hint>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-1 mb-2">
+                            <mat-label>Qty.</mat-label>
+                            <input type="number" matInput name="Quantity" [(ngModel)]="IssueProduct.Quantity" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Unit</mat-label>
+                            <mat-select name="UnitId" [(ngModel)]="IssueProduct.UnitId" required>
+                                <mat-option [value]="m1.UnitId" *ngFor="let m1 of UnitList">{{m1.UnitName}}</mat-option>
+                            </mat-select>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+
+                        <div class="col-sm-1">
+                            <button mat-flat-button color="primary" (click)="addIssueProduct()">Add</button>
+                        </div>
+
+                    </div>
+                </form>
+                <form #formIssue="ngForm">
+                    <h3 class="card-title mt-3" *ngIf="IssueProductList.length > 0">Product List</h3>
+                    <div class="col-sm-12 table-responsive" *ngIf="IssueProductList.length > 0">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th class="text-right" *ngIf="action.CanDelete">Remove</th>
+                                    <th>Product</th>
+                                    <th>Manufacturer</th>
+                                    <th>HSN</th>
+                                    <th>MRP</th>
+                                    <th>Expiry Date</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let t1 of IssueProductList;let i1 = index">
+                                    <td>{{i1+1}}</td>
+                                    <td class="text-right" *ngIf="action.CanDelete">
+                                        <button class="btn btn-sm btn-danger ml-10" *ngIf="action.CanDelete"
+                                            (click)="removeProduct(i1,t1)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </td>
+                                    <td> {{t1.Product.ProductName}}</td>
+                                    <td> {{t1.Product.ManufacturerName}}</td>
+                                    <td> {{t1.Product.HSNCode}}</td>
+                                    <td>{{t1.Product.MRP|money}} </td>
+                                    <td>{{t1.Product.ExpiredDate|date:'dd-MM-yyyy'}}</td>
+                                    <td class="max_width_70">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_Quantity'"
+                                                [(ngModel)]="t1.Quantity" required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="max_width_70">
+                                        <mat-form-field appearance="outline">
+                                            <mat-select [name]="i1+'_UnitId'" [(ngModel)]="t1.UnitId" required>
+                                                <mat-option [value]="m1.UnitId"
+                                                    *ngFor="let m1 of UnitList">{{m1.UnitName}}</mat-option>
+                                            </mat-select>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <!-- <td>{{t1.Quantity + " " + t1.UnitName}}</td> -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer text-center">
+                <button mat-raised-button color="primary" (click)="saveIssue()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

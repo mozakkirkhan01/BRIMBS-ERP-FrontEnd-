@@ -1,0 +1,314 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body mt-3">
+                <div class="container">
+                    <form #FeePaymentForm="ngForm">
+                        <div class="row mt-2">
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Payment By</mat-label>
+                                <mat-select name="PaymentBy" [(ngModel)]="FeePayment.PaymentBy" required>
+                                    <mat-option [value]="1">Staff</mat-option>
+                                    <mat-option [value]="2">Pupil</mat-option>
+                                </mat-select>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+
+
+                            <mat-form-field appearance="outline" class="col-sm-6" *ngIf="FeePayment.PaymentBy == 2">
+                                <mat-label>Select Pupil</mat-label>
+                                <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                    placeholder="Enter Admission No / Pupil Name / Father's Name / Class Name / Section Name"
+                                    (ngModelChange)="filterPupilList($event)" [(ngModel)]="FeePayment.SearchPupil"
+                                    [matAutocomplete]="autoSearchPupil" required>
+                                <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                    (optionSelected)="afterPupilSeleted($event)">
+                                    <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                        [value]="option.SearchPupil">
+                                        {{option.SearchPupil}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <button mat-icon-button matSuffix *ngIf="FeePayment.SearchPupil" color="primary"
+                                    (click)="clearPupil()">
+                                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                </button>
+                                <mat-error>Required Field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-6" *ngIf="FeePayment.PaymentBy == 1">
+                                <mat-label>Select Staff</mat-label>
+                                <input matInput #SearchStaff="ngModel" name="SearchStaff"
+                                    placeholder="Enter Staff Code / Staff Name / Designation"
+                                    (ngModelChange)="filterStaffList($event)" [(ngModel)]="FeePayment.SearchStaff"
+                                    [matAutocomplete]="autoSearchStaff" required>
+                                <mat-autocomplete #autoSearchStaff="matAutocomplete"
+                                    (optionSelected)="afterStaffSeleted($event)">
+                                    <mat-option *ngFor="let option of StaffList" [id]="option.StaffId"
+                                        [value]="option.SearchStaff">
+                                        {{option.SearchStaff}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <button mat-icon-button matSuffix *ngIf="FeePayment.SearchStaff" color="primary"
+                                    (click)="clearStaff()">
+                                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                </button>
+                                <mat-error>Required Field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </form>
+                    <div class="row" *ngIf="(FeePayment.StaffId || FeePayment.PupilId)">
+                        <div class="col-sm-12 mt-2">
+                            <h3 class="header-text">Add Payment</h3>
+                            <form #formFeePaymentDetail="ngForm">
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-sm-5">
+                                        <mat-label>Select Head</mat-label>
+                                        <input matInput #HeadName="ngModel" name="HeadName"
+                                            placeholder="Enter Head Code / Head Name / Designation"
+                                            (ngModelChange)="filterHeadList($event)"
+                                            [(ngModel)]="FeePaymentDetail.HeadName" [matAutocomplete]="autoHeadName"
+                                            required>
+                                        <mat-autocomplete #autoHeadName="matAutocomplete"
+                                            (optionSelected)="afterHeadSeleted($event)">
+                                            <mat-option *ngFor="let option of HeadList" [id]="option.HeadId"
+                                                [value]="option.HeadName">
+                                                {{option.HeadName}}
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                        <button mat-icon-button matSuffix *ngIf="FeePaymentDetail.HeadName"
+                                            color="primary" (click)="clearHead()">
+                                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                        </button>
+                                        <mat-error>Required Field !!</mat-error>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Amount</mat-label>
+                                        <input type="number" placeholder="Amount" matInput name="FeeAmount"
+                                            [(ngModel)]="FeePaymentDetail.FeeAmount" required="">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Remarks</mat-label>
+                                        <input type="text" placeholder="Remarks" matInput name="FeeRemarks"
+                                            [(ngModel)]="FeePaymentDetail.Remarks">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <div class="col-sm-2">
+                                        <button mat-flat-button color="primary"
+                                            (click)="addFeePaymentDetail()">Add</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm-12" *ngIf="FeePaymentDetailList.length>0">
+                            <h3 class="header-text">Fee Details</h3>
+                            <div class="table-reponsive">
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Remove</th>
+                                            <th>Head</th>
+                                            <th class="text-right">Amount</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let fee of FeePaymentDetailList;let i1 = index">
+                                            <td>{{i1+1}} </td>
+                                            <td>
+                                                <a ngbTooltip="Delete Record" class="icon-delete"
+                                                    (click)="removeRecord(i1)">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </a>
+                                            </td>
+                                            <td>{{fee.HeadName}}</td>
+                                            <!-- <td><input type="number" class="form-control form-control-sm width_money"
+                                                    (change)="changeAmount(fee,1)" [(ngModel)]="fee.FeeAmount" required>
+                                            </td>
+                                            <td><input type="text" class="form-control form-control-sm"
+                                                    placeholder="Enter Remarks...." [(ngModel)]="fee.Remarks" required>
+                                            </td> -->
+
+                                            <th class="text-right">{{fee.FeeAmount}}</th>
+                                            <td>{{fee.Remarks}}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="text-right"></th>
+                                            <th class="text-right"></th>
+                                            <th class="text-right">Total</th>
+                                            <th class="text-right">{{FeePayment.TotalAmount | number:'1.2-2'}}</th>
+                                            <th class="text-right"></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 mt-3" *ngIf="FeePaymentDetailList.length>0 && action.CanCreate">
+                            <form #formFeePayment="ngForm">
+                                <div class="row">
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Paid Amount</mat-label>
+                                        <input type="number" class="text-bold text-success" [readonly]="true" matInput
+                                            name="PaidAmount" [(ngModel)]="FeePayment.PaidAmount">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Due Amount</mat-label>
+                                        <input type="number" class="text-bold text-danger" [readonly]="true" matInput
+                                            name="DueAmount" [(ngModel)]="FeePayment.DueAmount">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field> -->
+
+                                    <mat-form-field appearance="outline" class="col-sm-3" *ngIf="isAccount">
+                                        <mat-label>Account</mat-label>
+                                        <mat-select name="AccountId" [(ngModel)]="FeePayment.AccountId" required>
+                                            <mat-option [value]="option.AccountId" *ngFor="let option of AccountList;">
+                                                {{option.AccountNo}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Payment Date</mat-label>
+                                        <input matInput name="PaymentDate" [(ngModel)]="FeePayment.PaymentDate" required
+                                            [matDatepicker]="PaymentDatePicker">
+                                        <mat-datepicker-toggle matIconSuffix
+                                            [for]="PaymentDatePicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #PaymentDatePicker></mat-datepicker>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-2">
+                                        <mat-label>Mode</mat-label>
+                                        <mat-select name="PaymentMode" [(ngModel)]="FeePayment.PaymentMode" required>
+                                            <mat-option [value]="option.Key" *ngFor="let option of PaymentModeList;">
+                                                {{option.Value}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3"
+                                        *ngIf="FeePayment.PaymentMode > 2">
+                                        <mat-label>Transaction No</mat-label>
+                                        <input type="test" placeholder="Transaction No" matInput name="TransactionNo"
+                                            [(ngModel)]="FeePayment.TransactionNo">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3"
+                                        *ngIf="FeePayment.PaymentMode == 2">
+                                        <mat-label>Cheque No</mat-label>
+                                        <input type="test" placeholder="Cheque No" matInput name="ChequeNo"
+                                            [(ngModel)]="FeePayment.ChequeNo">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3"
+                                        *ngIf="FeePayment.PaymentMode == 2">
+                                        <mat-label>Cheque Date</mat-label>
+                                        <input matInput name="ChequeDate" [(ngModel)]="FeePayment.ChequeDate"
+                                            [matDatepicker]="ChequeDatePicker">
+                                        <mat-datepicker-toggle matIconSuffix
+                                            [for]="ChequeDatePicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #ChequeDatePicker></mat-datepicker>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3"
+                                        *ngIf="FeePayment.PaymentMode == 2">
+                                        <mat-label>Cheque Bank</mat-label>
+                                        <input type="test" placeholder="Cheque Bank" matInput name="ChequeBank"
+                                            [(ngModel)]="FeePayment.ChequeBank">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3"
+                                        *ngIf="FeePayment.PaymentMode == 2">
+                                        <mat-label>Bank Branch</mat-label>
+                                        <input type="test" placeholder="Bank Branch" matInput name="ChequeBankBranch"
+                                            [(ngModel)]="FeePayment.ChequeBankBranch">
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Remarks</mat-label>
+                                        <textarea matInput name="Remarks" [(ngModel)]="FeePayment.Remarks"></textarea>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3"
+                                        *ngIf="FeePayment.WaiveOffAmount>0">
+                                        <mat-label>Remarks On Waive Off</mat-label>
+                                        <textarea matInput name="RemarksOnWaiveOff"
+                                            [(ngModel)]="FeePayment.RemarksOnWaiveOff"></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="FeePaymentDetailList.length>0 && action.CanCreate">
+                <button mat-flat-button color="primary" (click)="saveFeePayment()">Submit</button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-12" *ngIf="FeePaymentList.length>0">
+                        <h3 class="header-text">Recent Payments</h3>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" #table_1>
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Receipt</th>
+                                        <th>Payment Date</th>
+                                        <th>Receipt No</th>
+                                        <th>Remarks</th>
+                                        <th>Mode</th>
+                                        <th class="text-right">Paid Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of FeePaymentList; let i = index;">
+                                        <td>{{i+ 1}}</td>
+                                        <td class="no-wrap">
+                                            <a ngbTooltip="Print Receipt" class="icon-print"
+                                                (click)="printFeeePaymentReceipt(1,true,item.FeePaymentId)"> <i
+                                                    class="bi bi-printer-fill"></i>
+                                            </a>
+                                        </td>
+                                        <td class="no-wrap">{{item.PaymentDate|date:'dd-MM-yyyy HH:mm a' }}</td>
+                                        <td>{{item.ReceiptNo }}</td>
+                                        <td>{{item.Remarks }}</td>
+                                        <td>{{AllPaymentMode[item.PaymentMode]}}</td>
+                                        <td class="text-right">{{item.PaidAmount|number:'1.2-2' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

@@ -1,0 +1,155 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body ">
+                <form #fromFilter="ngForm" autocomplete="false">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group" *ngIf="filterModel.ReportNo==2||filterModel.ReportNo==1">
+                            <mat-label>Select Session</mat-label>
+                            <mat-select #SessionId="ngModel" name="SessionId" [(ngModel)]="filterModel.SessionId"
+                                required [autofocus]="true">
+                                <mat-option [value]="option.SessionId"
+                                    *ngFor="let option of SessionList">{{option.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>Session is required !!</mat-error>
+                        </mat-form-field>
+                        <!-- <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Select Class</mat-label>
+                            <mat-select #ClassId="ngModel" name="ClassId" [(ngModel)]="filterModel.ClassId"
+                                (selectionChange)="changeClass()" required>
+                                <mat-option [value]="option.ClassId"
+                                    *ngFor="let option of ClassList">{{option.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>Class is required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Select Section</mat-label>
+                            <mat-select #SectionId="ngModel" name="SectionId" [(ngModel)]="filterModel.SectionId"
+                                required>
+                                <mat-option [value]="0">--All Sections--</mat-option>
+                                <mat-option [value]="option.SectionId"
+                                    *ngFor="let option of SectionList">{{option.SectionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>Section is required !!</mat-error>
+                        </mat-form-field> -->
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group" *ngIf="filterModel.ReportNo==2">
+                            <mat-label>Month</mat-label>
+                            <mat-select name="MonthId" [(ngModel)]="filterModel.MonthId" required
+                                [autofocus]="true">
+                                <mat-option [value]="option.MonthId"
+                                    *ngFor="let option of MonthList">{{option.MonthName}}</mat-option>
+                            </mat-select>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+                        
+                        <mat-form-field appearance="outline" class="col-sm-2" *ngIf="filterModel.ReportNo==3">
+                            <mat-label>From Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="filterModel.FromDateString"
+                                [matDatepicker]="FromDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2" *ngIf="filterModel.ReportNo==3">
+                            <mat-label>To Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="filterModel.ToDateString"
+                                [matDatepicker]="ToDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Account</mat-label>
+                            <mat-select name="AccountId" [(ngModel)]="filterModel.AccountId">
+                                <mat-option [value]="0">--All--</mat-option>
+                                <mat-option [value]="option.AccountId" *ngFor="let option of AccountList;">
+                                    {{option.AccountNo}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+                        
+                        <div class="col-sm-4">
+                            <button mat-flat-button color="primary" (click)="getYearlyCollectionList(false)"><i class="bi bi-search"></i> Search</button>
+                            <button style="margin-left: 10px;" color="primary" mat-flat-button (click)="printReport(1,true)"><i class="bi bi-printer"></i> Print</button>
+                        </div>
+                    </div>
+
+                </form>
+                <hr class="mt-3">
+                <div class="table-container" *ngIf="YearlyCollectionList.length > 0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm"
+                        (click)="printReport(1,false)">Export To PDF</a>
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm"
+                        (click)="printReport(2,false)">Export To Word</a>
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm"
+                        (click)="printReport(1,true)">Print Report</a>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th (click)="sort('HeadName')">Head</th>
+                                    <th class="text-right" (click)="sort('Fine')">Fee Amount</th>
+                                    <th class="text-right" (click)="sort('WaiveOffAmount')">Waive Off</th>
+                                    <th class="text-right" (click)="sort('TotalAmount')">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of YearlyCollectionList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td>{{item.HeadName }}</td>
+                                    <td class="text-right">{{item.FeeAmount|number:'1.2-2' }}</td>
+                                    <td class="text-right">{{item.WaiveOffAmount|number:'1.2-2' }}</td>
+                                    <td class="text-right">{{item.TotalAmount|number:'1.2-2' }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2">Total</th>
+                                    <th class="text-right">{{FooterObj.FeeAmount|number:'1.2-2' }}</th>
+                                    <th class="text-right">{{FooterObj.WaiveOffAmount|number:'1.2-2' }}</th>
+                                    <th class="text-right">{{FooterObj.TotalAmount|number:'1.2-2' }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

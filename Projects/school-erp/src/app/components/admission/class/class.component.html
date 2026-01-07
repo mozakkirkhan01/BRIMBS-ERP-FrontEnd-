@@ -1,0 +1,164 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Class</button>
+        </div>
+    </div>
+
+
+    <section class="section">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th style="cursor:pointer;" (click)="sort('ClassName')">Class</th>
+                                <th style="cursor:pointer;" (click)="sort('ClassNo')">Class Title</th>
+                                <th style="cursor:pointer;" (click)="sort('ShortName')">Short Name</th>
+                                <!-- <th style="cursor:pointer;" (click)="sort('Streams')">Streams</th> -->
+                                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                                <th *ngIf="action.CanEdit">Edit</th>
+                                <th *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of ClassList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>{{item.ClassName}}</td>
+                                <td>{{item.ClassTitle}}</td>
+                                <td>{{item.ShortName}}</td>
+                                <!-- <td>
+                                    <ul>
+                                        <li *ngFor="let s1 of item.Streams">{{s1}}</li>
+                                    </ul>
+                                </td> -->
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatus[item.Status]}}
+                                    </span>
+                                </td>
+                                <td *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editClass(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteClass(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Class.ClassId > 0 ?
+                        'Update':'New'}}
+                        Class
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formClass="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Class Name</mat-label>
+                                    <input matInput name="ClassName" [(ngModel)]="Class.ClassName" required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Short Name</mat-label>
+                                    <input matInput name="ShortName" [(ngModel)]="Class.ShortName">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+
+                                <!-- <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Sub-Class Name</mat-label>
+                                    <input matInput #SubClassName="ngModel" name="SubClassName"
+                                        [(ngModel)]="Class.SubClassName" required autofocus>
+                                    <mat-error
+                                        *ngIf="(SubClassName.dirty  || SubClassName.touched) || (SubClassName.invalid && isSubmitted)">
+                                        Class name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field> -->
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Class Title</mat-label>
+                                    <mat-select #ClassNumberId="ngModel" name="ClassNumberId"
+                                        [(ngModel)]="Class.ClassNumberId" required>
+                                        <mat-option [value]="p1.ClassNumberId"
+                                            *ngFor="let p1 of ClassNumberList">{{p1.ClassTitle}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="Class.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveClass()">{{Class.ClassId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

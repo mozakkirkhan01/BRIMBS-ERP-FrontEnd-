@@ -1,0 +1,283 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                        <mat-label>Select Session</mat-label>
+                        <mat-select #SessionId="ngModel" (selectionChange)="getClassSubjectList()" name="SessionId"
+                            [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                            <mat-option [value]="e1.SessionId"
+                                *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Session is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                        <mat-label>Select Class</mat-label>
+                        <mat-select #ClassId="ngModel" (selectionChange)="getClassSubjectList()" name="ClassId"
+                            [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                            <mat-option [value]="e1.ClassId" *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Class is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <div class="col-sm-8 mb-1" *ngIf="FilterModel.ClassId && FilterModel.SessionId">
+                        <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right mr-2"
+                            (click)="newClassSubject()">New Subject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3 class="header-text">Mark Subjects</h3>
+                        <!-- <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div> -->
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                        <th (click)="sort('SubjectName')">Subject</th>
+                                        <th (click)="sort('SubjectShortName')">Short Name</th>
+                                        <th (click)="sort('SubjectCode')">Code</th>
+                                        <th (click)="sort('IsTheory')">Theory</th>
+                                        <th (click)="sort('IsPractical')">Practical</th>
+                                        <!-- <th (click)="sort('Position')">Position</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of ClassSubjectList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                        <td *ngIf="action.CanEdit || action.CanDelete">
+                                            <a ngbTooltip="Edit ClassSubject" *ngIf="action.CanEdit" class="icon-edit"
+                                                (click)="editClassSubject(item)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <a ngbTooltip="Delete ClassSubject" *ngIf="action.CanDelete"
+                                                class="icon-delete" (click)="deleteClassSubject(item)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
+                                        </td>
+                                        <td>{{item.SubjectName}}</td>
+                                        <td>{{item.SubjectShortName}}</td>
+                                        <td>{{item.SubjectCode}}</td>
+                                        <td>{{item.IsTheory?'Yes':'No'}}</td>
+                                        <td>{{item.IsPractical?'Yes':'No'}}</td>
+                                        <!-- <td>{{item.Position}}</td> -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- <div class="dataTable-bottom">
+                <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                    class="my-pagination"></pagination-controls>
+            </div> -->
+                    </div>
+                    <div class="col-sm-6">
+                        <h3 class="header-text">Grade Subjects</h3>
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                        <th (click)="sort('SubjectName')">Subject</th>
+                                        <th (click)="sort('GradeGroupName')">Group</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of ClassSubjectGradeList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                        <td *ngIf="action.CanEdit || action.CanDelete">
+                                            <a ngbTooltip="Edit ClassSubject" *ngIf="action.CanEdit" class="icon-edit"
+                                                (click)="editClassSubject(item)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <a ngbTooltip="Delete ClassSubject" *ngIf="action.CanDelete"
+                                                class="icon-delete" (click)="deleteClassSubject(item)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
+                                        </td>
+                                        <td>{{item.SubjectName}}</td>
+                                        <td>{{item.GradeGroupName}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" [ngClass]="{'modal-xl':ClassSubject.ClassSubjectId == null }">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ClassSubject.ClassSubjectId > 0 ?
+                        'Update':'New'}} Subject
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row" *ngIf="ClassSubject.ClassSubjectId == null">
+                            <div class="col-sm-6 table-responsive">
+                                <h3 class="header-text">Subjects</h3>
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Subject</th>
+                                            <th>Subject Code</th>
+                                            <th>Theory</th>
+                                            <th>Practical</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngFor="let item of SubjectList">
+                                        <tr *ngIf="!item.IsGrade">
+                                            <td>
+                                                <mat-checkbox color="primary" (change)="item.IsTheory = item.IsSelected"
+                                                    [(ngModel)]="item.IsSelected"></mat-checkbox>
+                                            </td>
+                                            <td>{{item.SubjectName}}</td>
+                                            <td><input type="text" class="form-control" placeholder="Subject Code..."
+                                                    [(ngModel)]="item.SubjectCode" style="width: 100px;"> </td>
+                                            <td>
+                                                <mat-checkbox [(ngModel)]="item.IsTheory"></mat-checkbox>
+                                            </td>
+                                            <td>
+                                                <mat-checkbox [(ngModel)]="item.IsPractical"></mat-checkbox>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="col-sm-6 table-responsive">
+                                <h3 class="header-text">Grade Subjects</h3>
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Subject</th>
+                                            <th>Grade Group</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngFor="let item of SubjectList">
+                                        <tr *ngIf="item.IsGrade">
+                                            <td>
+                                                <mat-checkbox color="primary" (change)="item.IsTheory = item.IsSelected"
+                                                    [(ngModel)]="item.IsSelected"></mat-checkbox>
+                                            </td>
+                                            <td>{{item.SubjectName}}</td>
+                                            <td>
+                                                <select class="form-select-sm" [(ngModel)]="item.GradeGroupId">
+                                                    <option *ngFor="let p1 of GradeGroupList" [value]="p1.GradeGroupId">
+                                                        {{p1.GradeGroupName}}</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <form #formClassSubject="ngForm" *ngIf="ClassSubject.ClassSubjectId > 0">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6 mb-2">
+                                    <mat-label>Subject</mat-label>
+                                    <mat-select #SubjectId="ngModel" name="SubjectId"
+                                        [(ngModel)]="ClassSubject.SubjectId" (selectionChange)="changeSubject()"
+                                        required [autofocus]="true">
+                                        <mat-option [value]="e1.SubjectId"
+                                            *ngFor="let e1 of SubjectList">{{e1.SubjectName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Subject is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 mb-2" *ngIf="ClassSubject.IsGrade">
+                                    <mat-label>Grade Group</mat-label>
+                                    <mat-select #GradeGroupId="ngModel" name="GradeGroupId"
+                                        [(ngModel)]="ClassSubject.GradeGroupId">
+                                        <mat-option [value]="e1.GradeGroupId"
+                                            *ngFor="let e1 of GradeGroupList">{{e1.GradeGroupName}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 mb-2"
+                                    *ngIf="ClassSubject.IsGrade == false">
+                                    <mat-label>Subject Code</mat-label>
+                                    <input matInput #SubjectCode="ngModel" name="SubjectCode"
+                                        [(ngModel)]="ClassSubject.SubjectCode">
+                                    <mat-error>
+                                        Subject code is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-4 mb-2">
+                                    <mat-label>Position</mat-label>
+                                    <input matInput #Position="ngModel" name="Position"
+                                        [(ngModel)]="ClassSubject.Position" required autofocus>
+                                    <mat-error>
+                                        Position is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-checkbox name="IsTheory" *ngIf="ClassSubject.IsGrade == false" #IsTheory="ngModel"
+                                    [(ngModel)]="ClassSubject.IsTheory" class="col-sm-4 mb-2">Theory</mat-checkbox>
+                                <mat-checkbox name="IsPractical" *ngIf="ClassSubject.IsGrade == false"
+                                    #IsPractical="ngModel" [(ngModel)]="ClassSubject.IsPractical"
+                                    class="col-sm-4 mb-2">Practical</mat-checkbox>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button mat-raised-button color="primary" *ngIf="ClassSubject.ClassSubjectId == null"
+                        (click)="saveClassSubjectList()">Submit</button>
+                    <button mat-raised-button color="primary" *ngIf="ClassSubject.ClassSubjectId > 0"
+                        (click)="saveClassSubject()">{{ClassSubject.ClassSubjectId
+                        >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

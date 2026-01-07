@@ -1,0 +1,206 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body ">
+                <form #FilterObjForm="ngForm">
+                    <div class="row mt-2">
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Session</mat-label>
+                            <mat-select #SessionId="ngModel" name="SessionId" [(ngModel)]="FilterObj.SessionId" required
+                                autofocus>
+                                <mat-option [value]="0">--All Session--</mat-option>
+                                <mat-option [value]="session.SessionId"
+                                    *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Class</mat-label>
+                            <mat-select #ClassId="ngModel" name="ClassId" [(ngModel)]="FilterObj.ClassId">
+                                <mat-option [value]="0">--All Class--</mat-option>
+                                <mat-option [value]="class.ClassId"
+                                    *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>From Registration Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="FilterObj.FromDateString"
+                                [matDatepicker]="FromDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>To Registration Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="FilterObj.ToDateString"
+                                [matDatepicker]="ToDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Status</mat-label>
+                            <mat-select name="ClassId" [(ngModel)]="FilterObj.Status">
+                                <mat-option [value]="0">--All Status--</mat-option>
+                                <mat-option [value]="class.Key"
+                                    *ngFor="let class of RegistrationStatusList">{{class.Value}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <div class="col-sm-12 text-center mb-4">
+                            <button mat-flat-button color="primary" (click)="getRegistrationList()">Search</button>
+                            <!-- <button mat-flat-button (click)="exportToExcel()" color="primary" class="ml-10">Export To Excel</button>
+                              <button mat-flat-button color="primary" (click)="printRegistrationList(1,true)" class="ml-10">Print</button> -->
+                        </div>
+                    </div>
+                </form>
+                <div class="table-container" *ngIf="RegistrationList.length !=0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    <!-- &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="printRegistrationList(1,false)">Export To PDF</a>
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="printRegistrationList(2,false)">Export To Word</a>
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="printRegistrationList(1,true)">Print Report</a> -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">S.No</th>
+                                    <th rowspan="2" *ngIf="!isExporting">Action</th>
+                                    <th rowspan="2" (click)="sort('RegistrationNo')">Registration No.</th>
+                                    <th rowspan="2" (click)="sort('FormNo')">Form No.</th>
+                                    <th rowspan="2" (click)="sort('PupilName')">Pupil</th>
+                                    <th rowspan="2" (click)="sort('SessionName')">Session</th>
+                                    <th rowspan="2" (click)="sort('ClassName')">Class</th>
+                                    <th rowspan="2" (click)="sort('FatherName')">Father Name</th>
+                                    <th rowspan="2" (click)="sort('MotherName')">Mother Name</th>
+                                    <th rowspan="2" (click)="sort('DOB')">DOB</th>
+                                    <th rowspan="2" (click)="sort('Gender')">Gender</th>
+                                    <th rowspan="2" (click)="sort('Category')">Category</th>
+                                    <th rowspan="2" (click)="sort('BloodGroup')">Blood Group</th>
+                                    <th rowspan="2" (click)="sort('Religion')">Religion</th>
+                                    <th rowspan="2" (click)="sort('Nationality')">Nationality</th>
+                                    <th rowspan="2" (click)="sort('MobileNo')">Mobile No.</th>
+                                    <th rowspan="2" (click)="sort('AlternateNo')">Whatsapp No.</th>
+                                    <th rowspan="2" (click)="sort('Email')">Email</th>
+                                    <th rowspan="2" (click)="sort('AadhaarNo')">Aadhaar No.</th>
+                                    <th rowspan="2" (click)="sort('FatherOccupation')">Father's Occupation</th>
+                                    <th rowspan="2" (click)="sort('GuardianMobileNo')">Guardian Mobile No.</th>
+                                    <th (click)="sort('CorrespondenceAddress')">Address</th>
+                                    <th (click)="sort('CorrespondenceCityName')">City</th>
+                                    <th (click)="sort('CorrespondenceStateName')">State</th>
+                                    <th (click)="sort('CorrespondencePinCode')">Pincode</th>
+                                    <th rowspan="2" (click)="sort('RegistrationDate')">Registration Date</th>
+                                    <th rowspan="2" (click)="sort('AdmissionNo')">Admission No</th>
+                                    <th rowspan="2" (click)="sort('SectionName')">Section</th>
+                                    <th rowspan="2" (click)="sort('RollNo')">Roll No.</th>
+                                    <th rowspan="2" (click)="sort('RegistrationStatus')">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of RegistrationList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td *ngIf="!isExporting">
+                                        <!-- <a ngbTooltip="Print Registration Receipt" class="icon-print" *ngIf="item.FeePaymentId > 0"
+                                            (click)="printRegistrationReceipt(1,true,item)"> <i class="bi bi-printer-fill"></i>
+                                        </a> -->
+                                        <a ngbTooltip="Print Payment Receipt" class="icon-print" *ngIf="item.FeePaymentId > 0"
+                                            (click)="printFeeePaymentReceipt(1,true,item)"> <i class="bi bi-printer-fill"></i>
+                                        </a>
+                                        <a ngbTooltip="Download Receipt" class="icon-delete" *ngIf="item.FeePaymentId > 0"
+                                        (click)="printFeeePaymentReceipt(1,false,item)"> <i
+                                                class="bi bi-file-earmark-pdf-fill"></i>
+                                        </a>
+                                        <a ngbTooltip="Download Receipt" class="icon-edit" *ngIf="item.FeePaymentId > 0"
+                                        (click)="printFeeePaymentReceipt(1,false,item)"> <i
+                                                class="bi bi-file-earmark-word-fill"></i>
+                                        </a>
+                                        <!-- <a class="icon-detail" ngbTooltip="View Details"
+                                            (click)="getQuotationDetail(item)">
+                                            <i class="bi bi-file-text"></i>
+                                        </a> -->
+                                        <a *ngIf="item.StudentPhoto" [href]="imageUrl + item.StudentPhoto"  target="_blank" ngbTooltip="Pupil Photo" class="icon-detail">
+                                            <i class="bi bi-file-person"></i>
+                                        </a>
+                                        <a *ngIf="action.CanEdit" ngbTooltip="Edit Registration Details" class="icon-edit"
+                                            (click)="editRecord(item)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a *ngIf="action.CanDelete && item.AdmissionNo == null" ngbTooltip="Delete Registration" class="icon-delete"
+                                            (click)="deleteRegistration(item,i)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </td>
+                                    <td>{{item.RegistrationNo }}</td>
+                                    <td>{{item.FormNo}}</td>
+                                    <td>{{item.PupilName }}</td>
+                                    <td>{{item.SessionName }}</td>
+                                    <td>{{item.ClassName }}</td>
+                                    <td>{{item.FatherName }}</td>
+                                    <td>{{item.MotherName }}</td>
+                                    <td style="white-space: nowrap;">{{item.DOB | date : "dd-MM-yyyy"}}</td>
+                                    <td>{{AllGenderList[item.Gender]|enumCase }}</td>
+                                    <td>{{AllCategoryList[item.Category]|enumCase }}</td>
+                                    <td>{{AllBloodGroupList[item.BloodGroup]|enumCase }}</td>
+                                    <td>{{AllReligionList[item.Religion]|enumCase}}</td>
+                                    <td>{{AllNationalityList[item.Nationality]|enumCase }}</td>
+                                    <td>{{item.MobileNo }}</td>
+                                    <td>{{item.AlternateNo }}</td>
+                                    <td>{{item.Email }}</td>
+                                    <td>{{item.AadhaarNo }}</td>
+                                    <td>{{item.FatherOccupation }}</td>
+                                    <td>{{item.GuardianMobileNo }}</td>
+                                    <td>{{item.CorrespondenceAddress }}</td>
+                                    <td>{{item.CorrespondenceCityName }}</td>
+                                    <td>{{item.CorrespondenceStateName }}</td>
+                                    <td>{{item.CorrespondencePinCode }}</td>
+                                    <td style="white-space: nowrap;">{{item.RegistrationDate | date
+                                        :"dd-MM-yyyy"}}</td>
+                                    <td>{{item.AdmissionNo }}</td>
+                                    <td>{{item.SectionName }}</td>
+                                    <td>{{item.RollNo }}</td>
+                                    <td>{{AllRegistrationStatusList[item.RegistrationStatus]|enumCase }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+</main>

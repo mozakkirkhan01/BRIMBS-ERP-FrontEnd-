@@ -1,0 +1,235 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card" *ngIf="action.CanCreate || (action.CanEdit && Expense.ExpenseId > 0)">
+            <div class="card-body">
+                <form #formExpense="ngForm">
+                    <div class="container">
+                        <div class="row">
+                          
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Category</mat-label>
+                                <mat-select name="ExpenseCategoryId" (selectionChange)="changeExpenseCategory()"
+                                    [(ngModel)]="Expense.ExpenseCategoryId" required>
+                                    <mat-option [value]="ExpenseCategory.ExpenseCategoryId"
+                                        *ngFor="let ExpenseCategory of ExpenseCategoryList">{{ExpenseCategory.ExpenseCategoryName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+    
+                            <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Head</mat-label>
+                                <mat-select name="ExpenseHeadId" [(ngModel)]="Expense.ExpenseHeadId">
+                                    <mat-option [value]="ExpenseHead.ExpenseHeadId"
+                                        *ngFor="let ExpenseHead of ExpenseHeadList">{{ExpenseHead.ExpenseHeadName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field> -->
+                            <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Select Head</mat-label>
+                                <input matInput #SearchExpenseHead="ngModel" name="SearchExpenseHead"
+                                    placeholder="Enter Head/Category Name" (ngModelChange)="filterExpenseHeadList($event)"
+                                    [(ngModel)]="Expense.SearchExpenseHead" [matAutocomplete]="autoSearchExpenseHead"
+                                    required>
+                                <mat-autocomplete #autoSearchExpenseHead="matAutocomplete"
+                                    (optionSelected)="afterExpenseHeadSeleted($event)">
+                                    <mat-option *ngFor="let option of ExpenseHeadList" [id]="option.ExpenseHeadId"
+                                        [value]="option.SearchExpenseHead">
+                                        {{option.SearchExpenseHead}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <button mat-icon-button matSuffix *ngIf="Expense.SearchExpenseHead" color="primary"
+                                    (click)="clearExpenseHead()">
+                                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                </button>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Particulars</mat-label>
+                                <input type="text" matInput name="Particulars" [(ngModel)]="Expense.Particulars">
+                                <mat-error>
+                                    required !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Amount</mat-label>
+                                <input type="number" matInput name="Amount" [(ngModel)]="Expense.Amount" required>
+                                <mat-error>
+                                    required !!
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Expense Date</mat-label>
+                                <input matInput name="ExpenseDate" [(ngModel)]="Expense.ExpenseDateString" required
+                                    [matDatepicker]="ExpenseDatePicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="ExpenseDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #ExpenseDatePicker></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Account </mat-label>
+                                <mat-select name="AccountId"
+                                    [(ngModel)]="Expense.AccountId" required>
+                                    <mat-option [value]="p1.AccountId"
+                                        *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Payment Mode</mat-label>
+                                <mat-select #PaymentMode="ngModel" name="PaymentMode" [(ngModel)]="Expense.PaymentMode"
+                                    required>
+                                    <mat-option [value]="PaymentMode.Key"
+                                        *ngFor="let PaymentMode of PaymentModeList">{{PaymentMode.Value}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2" *ngIf="Expense.PaymentMode > 2">
+                                <mat-label>Transaction No</mat-label>
+                                <input matInput name="TransactionNo" [(ngModel)]="Expense.TransactionNo">
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2" *ngIf="Expense.PaymentMode == 2">
+                                <mat-label>Cheque No</mat-label>
+                                <input matInput name="ChequeNo" [(ngModel)]="Expense.ChequeNo">
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2" *ngIf="Expense.PaymentMode==2">
+                                <mat-label>Cheque Date</mat-label>
+                                <input matInput name="ChequeDate" [(ngModel)]="Expense.ChequeDate" required
+                                    [matDatepicker]="ChequeDatePicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="ChequeDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #ChequeDatePicker></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2" *ngIf="Expense.PaymentMode == 2">
+                                <mat-label>Cheque Bank</mat-label>
+                                <input matInput name="ChequeBank" [(ngModel)]="Expense.ChequeBank">
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2" *ngIf="Expense.PaymentMode == 2">
+                                <mat-label>Bank Branch</mat-label>
+                                <input matInput name="ChequeBankBranch" [(ngModel)]="Expense.ChequeBankBranch">
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Remarks</mat-label>
+                                <textarea matInput name="Remarks" [(ngModel)]="Expense.Remarks"></textarea>
+                                <mat-error>
+                                    required !!
+                                </mat-error>
+                            </mat-form-field>
+                            <div class="col-sm-2">
+                                <button mat-flat-button color="primary" (click)="saveExpense()">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body" *ngIf="ExpenseList.length > 0">
+                <h3 class="header-text">Previous Expense List</h3>
+                <!-- <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div> -->
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                <th (click)="sort('ExpenseDate')">Date</th>
+                                <th (click)="sort('ExpenseCategoryName')">Category</th>
+                                <th (click)="sort('ExpenseHeadName')">Head</th>
+                                <th (click)="sort('Amount')">Amount</th>
+                                <th (click)="sort('Particulars')">Particulars</th>
+                                <th (click)="sort('AccountNo')">Account</th>
+                                <th (click)="sort('PaymentMode')">Payment Mode</th>
+                                <th>Transaction Details</th>
+                                <th (click)="sort('Remarks')">Remarks</th>
+                                <!-- <th (click)="sort('Status')">Status</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of ExpenseList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td class="no-wrap" *ngIf="action.CanEdit || action.CanDelete">
+                                    <a ngbTooltip="Edit Expense" *ngIf="action.CanEdit" class="icon-edit"
+                                        data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        (click)="editExpense(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a ngbTooltip="Delete Expense" *ngIf="action.CanDelete" class="icon-delete"
+                                        (click)="deleteExpense(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <td class="no-wrap">{{item.ExpenseDate|date:'dd-MM-yyyy'}}</td>
+                                <td class="no-wrap">{{item.ExpenseCategoryName}}</td>
+                                <td>{{item.ExpenseHeadName}}</td>
+                                <td class="no-wrap">{{item.Amount|money}}</td>
+                                <td>{{item.Particulars}}</td>
+                                <td>{{item.AccountNo}}</td>
+                                <td>{{AllPaymentModeList[item.PaymentMode]}}</td>
+                                <td>
+                                    <label>{{item.TransactionNo }}</label>
+                                    <label>{{item.ChequeNo }}</label>
+                                    <label> - {{item.ChequeDate|date:'dd/MM/yyyy' }}</label>
+                                    <label> - {{item.ChequeBank }}</label>
+                                    <label> - {{item.ChequeBankBranch }}</label>
+                                </td>
+                                <td>{{item.Remarks}}</td>
+                                <!-- <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div> -->
+
+
+            </div>
+        </div>
+
+    </section>
+</main>

@@ -1,0 +1,375 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4 mb-3">
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body mt-0">
+                <form #formSupplier="ngForm">
+                
+                    <div class="row mt-4">
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Select Supplier or Enter Supplier Name</mat-label>
+                            <input matInput #SupplierId="ngModel" name="SupplierId"
+                                (ngModelChange)="filterSupplierList($event)"
+                                placeholder="Search By Supplier Name / Code / Mobile No"
+                                [(ngModel)]="Supplier.SupplierName" [matAutocomplete]="autoSupplier" required>
+                            <mat-autocomplete #autoSupplier="matAutocomplete"
+                                (optionSelected)="afterSupplierSelected($event)">
+                                <mat-option *ngFor="let option of SupplierList" id="{{option.SupplierId}}"
+                                    [value]="option.SupplierName">{{option.SearchSupplier}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="Supplier.SupplierName" color="primary"
+                                (click)="clearSupplier()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Mobile No</mat-label>
+                            <input type="number" matInput name="MobileNo" [(ngModel)]="Supplier.MobileNo">
+                            <mat-error>Required Field !! </mat-error>
+                        </mat-form-field> 
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>State Code</mat-label>
+                            <input type="number" matInput name="StateCode" [(ngModel)]="Supplier.StateCode"
+                                (change)="changeStateCode()">
+                            <mat-error>Required Field !! </mat-error>
+                        </mat-form-field>
+
+                        <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Alternate No</mat-label>
+                            <input type="number" matInput name="AlternateNo" [(ngModel)]="Supplier.AlternateNo">
+                            <mat-error>Required Field !! </mat-error>
+                        </mat-form-field> -->
+                        <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Full Address</mat-label>
+                            <input matInput name="FullAddress" [(ngModel)]="Supplier.FullAddress">
+                            <mat-error>Required Field !! </mat-error>
+                        </mat-form-field> -->
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Purchase Date</mat-label>
+                            <input matInput [(ngModel)]="Purchase.PurchaseDate" name="PurchaseDate"
+                                [matDatepicker]="PurchaseDatePicker" required>
+                            <mat-datepicker-toggle matSuffix [for]="PurchaseDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #PurchaseDatePicker [touchUi]="true" [color]="'primary'"
+                                [enableMeridian]="true"></mat-datepicker>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Invoice No</mat-label>
+                            <input matInput name="InvoiceNo" [(ngModel)]="Purchase.InvoiceNo" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                    </div>
+                </form>
+
+                <h3 class="header-text">Add Books</h3>
+                <form #formPurchaseBook="ngForm" class="row">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Book Details</mat-label>
+                            <input matInput name="BookId" (ngModelChange)="filterBookList($event)"
+                                placeholder="Search By Book Name / HSN / Manufacturer Name"
+                                [(ngModel)]="PurchaseBook.Book.SearchBook" [matAutocomplete]="autoBook" required>
+                            <mat-autocomplete #autoBook="matAutocomplete" (optionSelected)="afterBookSelected($event)">
+                                <mat-option *ngFor="let option of BookList" [id]="option.BookId.toString()"
+                                    [value]="option.SearchBook">{{option.SearchBook}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="PurchaseBook.Book.SearchBook" color="primary"
+                                (click)="clearBook()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Quantity</mat-label>
+                            <input type="number" matInput name="Quantity" (change)="changeData(PurchaseBook,0,false)"
+                                [(ngModel)]="PurchaseBook.Quantity" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Free Qunatity</mat-label>
+                            <input type="number" matInput name="FreeQunatity" [(ngModel)]="PurchaseBook.FreeQunatity"
+                                required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>MRP</mat-label>
+                            <input type="number" matInput name="MRP" [(ngModel)]="PurchaseBook.MRP"
+                                (change)="changeData(PurchaseBook,1,false)" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Cost Price</mat-label>
+                            <input type="number" matInput name="CostPrice" (change)="changeData(PurchaseBook,0,false)"
+                                [(ngModel)]="PurchaseBook.CostPrice" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Discount (%)</mat-label>
+                            <input type="number" matInput name="DiscountPercentage"
+                                [(ngModel)]="PurchaseBook.DiscountPercentage"
+                                (change)="changeData(PurchaseBook,0,false)" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Discount (₹)</mat-label>
+                            <input type="number" matInput name="DiscountAmount"
+                                [(ngModel)]="PurchaseBook.DiscountAmount" (change)="changeData(PurchaseBook,2,false)"
+                                required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <!-- <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Taxable (₹)</mat-label>
+                            <input type="number" matInput name="TaxableAmount" [(ngModel)]="PurchaseBook.TaxableAmount"
+                                required [disabled]="true">
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field> -->
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>GST (%)</mat-label>
+                            <input type="number" matInput name="GSTValue" (change)="changeData(PurchaseBook,0,false)"
+                                [(ngModel)]="PurchaseBook.GSTValue" required>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>GST Amount</mat-label>
+                            <input type="number" matInput name="GSTAmount" [(ngModel)]="PurchaseBook.GSTAmount" required
+                                [disabled]="true">
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-2">
+                            <mat-label>Total Amount</mat-label>
+                            <input type="number" matInput name="TotalAmount" [(ngModel)]="PurchaseBook.TotalAmount"
+                                required [disabled]="true">
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-2">
+                            <button mat-flat-button color="primary" (click)="addPurchaseBook()">Add</button>
+                        </div>
+
+                    </div>
+                </form>
+                <form #formPurchase="ngForm">
+                    <h3 class="card-title mt-3" *ngIf="PurchaseBookList.length > 0">Book List</h3>
+                    <div class="col-sm-12 table-responsive" *ngIf="PurchaseBookList.length > 0">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th class="text-right" *ngIf="action.CanDelete">Remove</th>
+                                    <th>Book</th>
+                                    <th>Qty.</th>
+                                    <th>Free Qty.</th>
+                                    <th>MRP</th>
+                                    <th>Cost Price</th>
+                                    <th>Discount (%)</th>
+                                    <th>Discount Amount</th>
+                                    <th>Bill Discount</th>
+                                    <th class="text-right">Taxable Amount</th>
+                                    <th>GST (%)</th>
+                                    <th class="text-right" *ngIf="Purchase.CGSTAmount>0">CGST Amount</th>
+                                    <th class="text-right" *ngIf="Purchase.SGSTAmount>0">SGST Amount</th>
+                                    <th class="text-right" *ngIf="Purchase.IGSTAmount>0">IGST Amount</th>
+                                    <th class="text-right">Total Amount</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let t1 of PurchaseBookList;let i1 = index">
+                                    <td>{{i1+1}}</td>
+                                    <td class="text-right" *ngIf="action.CanDelete">
+                                        <button class="btn btn-sm btn-danger ml-10" *ngIf="action.CanDelete"
+                                            (click)="removeBook(i1)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </td>
+                                    <td> {{t1.Book.SearchBook}}</td>
+
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_Quantity'"
+                                                (change)="changeData(t1,0,true)" [(ngModel)]="t1.Quantity" required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_FreeQunatity'"
+                                                [(ngModel)]="t1.FreeQunatity" required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_MRP'" [(ngModel)]="t1.MRP"
+                                                (change)="changeData(t1,1,true)" required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_CostPrice'"
+                                                (change)="changeData(t1,0,true)" [(ngModel)]="t1.CostPrice" required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_DiscountPercentage'"
+                                                [(ngModel)]="t1.DiscountPercentage" (change)="changeData(t1,0,true)"
+                                                required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_DiscountAmount'"
+                                                [(ngModel)]="t1.DiscountAmount" (change)="changeData(t1,2,true)"
+                                                required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="text-right no-wrap">{{t1.BillDiscountAmount|money}}</td>
+                                    <td class="text-right no-wrap">{{t1.TaxableAmount|money}}</td>
+                                    <td class="max_width_100">
+                                        <mat-form-field appearance="outline">
+                                            <input type="number" matInput [name]="i1+'_GSTValue'"
+                                                (change)="changeData(t1,0,true)" [(ngModel)]="t1.GSTValue" required>
+                                            <mat-error>Required field !!</mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                    <td class="text-right no-wrap" *ngIf="Purchase.CGSTAmount>0">{{t1.CGSTAmount|money}}
+                                    </td>
+                                    <td class="text-right no-wrap" *ngIf="Purchase.SGSTAmount>0">{{t1.SGSTAmount|money}}
+                                    </td>
+                                    <td class="text-right no-wrap" *ngIf="Purchase.IGSTAmount>0">{{t1.IGSTAmount|money}}
+                                    </td>
+                                    <td class="text-right no-wrap">{{t1.TotalAmount|money}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3">Total</th>
+                                    <th class="no-wrap">{{Purchase.Quantity}}</th>
+                                    <th class="no-wrap">{{Purchase.FreeQunatity}}</th>
+                                    <th colspan="3"></th>
+                                    <th class="no-wrap">{{Purchase.ItemDiscountAmount|money}}</th>
+                                    <th class="text-right no-wrap">{{Purchase.BillDiscountAmount|money}}</th>
+                                    <th class="text-right no-wrap">{{Purchase.TaxableAmount|money}}</th>
+                                    <th></th>
+                                    <th class="text-right no-wrap" *ngIf="Purchase.CGSTAmount>0">
+                                        {{(Purchase.CGSTAmount)|money}}
+                                    </th>
+                                    <th class="text-right no-wrap" *ngIf="Purchase.SGSTAmount>0">
+                                        {{(Purchase.SGSTAmount)|money}}
+                                    </th>
+                                    <th class="text-right no-wrap" *ngIf="Purchase.IGSTAmount>0">
+                                        {{(Purchase.IGSTAmount)|money}}
+                                    </th>
+                                    <th class="text-right no-wrap">{{Purchase.TotalAmount|money}}</th>
+                                    <th colspan="3"></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="header-text mt-3">Purchase Details</h3>
+                            <div class="row">
+
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Bill Amount</mat-label>
+                                    <input type="number" matInput name="BillAmount"
+                                        [value]="Purchase.TotalAmount +Purchase.BillDiscountAmount" disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Bill Discount (%)</mat-label>
+                                    <input type="number" matInput (change)="calculateTotal(1)"
+                                        name="BillDiscountPercentage" [(ngModel)]="Purchase.BillDiscountPercentage"
+                                        required>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Bill Discount (₹)</mat-label>
+                                    <input type="number" matInput (change)="calculateTotal(0)" name="BillDiscountAmount"
+                                        [(ngModel)]="Purchase.BillDiscountAmount" required>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Total Amount</mat-label>
+                                    <input type="number" matInput name="TotalAmount" [(ngModel)]="Purchase.TotalAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Final Amount</mat-label>
+                                    <input type="number" matInput name="FinalAmount" [(ngModel)]="Purchase.FinalAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Paid Amount</mat-label>
+                                    <input type="number" matInput name="PaidAmount" [(ngModel)]="Purchase.PaidAmount"
+                                        (change)="Purchase.DuesAmount = Purchase.FinalAmount - Purchase.PaidAmount"
+                                        required>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                                    <mat-label>Due Amount</mat-label>
+                                    <input type="number" matInput name="DuesAmount" [(ngModel)]="Purchase.DuesAmount"
+                                        disabled>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field> -->
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer text-center">
+                <button mat-flat-button color="primary" (click)="savePurchaseBook()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

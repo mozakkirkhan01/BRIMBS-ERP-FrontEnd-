@@ -1,0 +1,154 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #formMarksheet="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Session</mat-label>
+                            <mat-select #SessionId="ngModel"
+                                (selectionChange)="MarksheetList = [];"
+                                name="SessionId" [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                                <mat-option [value]="e1.SessionId"
+                                    *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Term</mat-label>
+                            <mat-select #Term="ngModel" name="Term"
+                                [(ngModel)]="FilterModel.Term" required [autofocus]="true">
+                                <mat-option [value]="0">All Term</mat-option>
+                                <mat-option [value]="e1.Key" *ngFor="let e1 of TermList">{{e1.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Term is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Class</mat-label>
+                            <mat-select #ClassId="ngModel" (selectionChange)="MarksheetList = [];changeClass()"
+                                name="ClassId" [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                                <mat-option [value]="e1.ClassId"
+                                    *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Class is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Section</mat-label>
+                            <mat-select #SectionId="ngModel" (selectionChange)="MarksheetList = [];"
+                                name="SectionId" [(ngModel)]="FilterModel.SectionId" required [autofocus]="true">
+                                <!-- <mat-option [value]="0">All Section</mat-option> -->
+                                <mat-option [value]="e1.SectionId"
+                                    *ngFor="let e1 of SectionList">{{e1.SectionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Section is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+
+                        <div class="col-sm-4 mb-1">
+                            <button mat-flat-button color="accent" class="mr-10"
+                                (click)="getEntryPupilAttendanceList()">Search</button>
+                            <button mat-flat-button color="primary" *ngIf="MarksheetList.length > 0"
+                                (click)="savePupilAttendance()">Submit</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 mb-1 text-right">
+                            <label class="text-link text-blue text-bold">Settings :-</label>
+                            <br>
+                            <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                            <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                        </div>
+                    </div>
+
+                </form>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dataTable-top">
+                            <div class="dataTable-dropdown d-flex">
+                                <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                    <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                                </select>
+                                <span class="ms-2">Entries per page</span>
+                            </div>
+                            <div class="dataTable-search">
+                                <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                    placeholder="Search..." type="text">
+                            </div>
+                        </div>
+
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">#</th>
+                                        <th (click)="sort('AdmissionNo')">Admission No.</th>
+                                        <th style="min-width: 160px;" (click)="sort('PupilName')">Pupil Name</th>
+                                        <th *ngIf="FilterModel.SectionId == 0" (click)="sort('SectionName')">Section</th>
+                                        <th (click)="sort('RollNo')">Roll No</th>
+                                        <th *ngIf="FilterModel.Term == 0 || FilterModel.Term == 1" (click)="sort('HyPresentDays')">Term-1
+                                            <br>
+                                            Working Days : {{WorkingDay.HyWorkingDays}}
+                                        </th>
+                                        <th *ngIf="FilterModel.Term == 0 || FilterModel.Term == 2" (click)="sort('AnPresentDays')">Term-2
+                                            <br>
+                                            Working Days : {{WorkingDay.AnWorkingDays}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of MarksheetList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                        <td>{{item.AdmissionNo}}</td>
+                                        <td>{{item.PupilName}}</td>
+                                        <td *ngIf="FilterModel.SectionId == 0">{{item.SectionName}}</td>
+                                        <td>{{item.RollNo}}</td>
+                                        <td *ngIf="FilterModel.Term == 0 || FilterModel.Term == 1">
+                                            <input  type="number" (change)="changeHyPresentDays(i, item)" class="form-control" style="width: 80px;" [(ngModel)]="item.HyPresentDays">
+                                        </td>
+                                        <td *ngIf="FilterModel.Term == 0 || FilterModel.Term == 2">
+                                            <input  type="number" (change)="changeAnPresentDays(i, item)" class="form-control" style="width: 80px;" [(ngModel)]="item.AnPresentDays">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dataTable-bottom">
+                            <pagination-controls (pageChange)="p=$event" style="float:right;"
+                                class="my-pagination"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="MarksheetList.length > 0">
+                <button type="button" mat-raised-button (click)="MarksheetList =[]" color="warn"
+                    class="me-2">Cancel</button>
+                <button mat-raised-button color="primary" (click)="savePupilAttendance()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

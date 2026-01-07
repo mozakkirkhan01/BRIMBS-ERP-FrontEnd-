@@ -1,0 +1,203 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{RegistrationForm.RegistrationFormId > 0?"Update":"New"}} Registration Form</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{RegistrationForm.RegistrationFormId > 0?"Update":"New"}}
+                    Registration Form</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formRegistrationForm="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>Session</mat-label>
+                            <mat-select #Session="ngModel" name="Session" [(ngModel)]="RegistrationForm.SessionId"
+                                required>
+                                <mat-option *ngFor="let option of SessionList" [value]="option.SessionId">
+                                    {{option.SessionName}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(Session.dirty  || Session.touched) || (Session.invalid && isSubmitted)">
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>Class</mat-label>
+                            <mat-select #Class="ngModel" name="Class" [(ngModel)]="RegistrationForm.ClassId" required>
+                                <mat-option *ngFor="let option of ClassList" [value]="option.ClassId">
+                                    {{option.ClassName}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(Class.dirty  || Class.touched) || (Class.invalid && isSubmitted)">
+                                Class name is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>Start Date</mat-label>
+                            <input matInput #StartDateString="ngModel" name="StartDateString"
+                                [(ngModel)]="RegistrationForm.StartDateString" required
+                                [matDatepicker]="StartDateStringPicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="StartDateStringPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #StartDateStringPicker></mat-datepicker>
+                            <mat-error
+                                *ngIf="(StartDateString.dirty  || StartDateString.touched) || (StartDateString.invalid && isSubmitted)">
+                                Start Date is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>End Date</mat-label>
+                            <input matInput #EndDateString="ngModel" name="EndDateString"
+                                [(ngModel)]="RegistrationForm.EndDateString" [matDatepicker]="EndDateStringPicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="EndDateStringPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #EndDateStringPicker></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>From DOB</mat-label>
+                            <input matInput #FromDOBString="ngModel" name="FromDOBString"
+                                [(ngModel)]="RegistrationForm.FromDOBString" [matDatepicker]="FromDOBStringPicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDOBStringPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDOBStringPicker></mat-datepicker>
+                            <mat-error
+                                *ngIf="(FromDOBString.dirty  || FromDOBString.touched) || (FromDOBString.invalid && isSubmitted)">
+                                From DOB is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>To DOB</mat-label>
+                            <input matInput #ToDOBString="ngModel" name="ToDOBString"
+                                [(ngModel)]="RegistrationForm.ToDOBString" [matDatepicker]="ToDOBStringPicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDOBStringPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDOBStringPicker></mat-datepicker>
+                            <mat-error
+                                *ngIf="(ToDOBString.dirty  || ToDOBString.touched) || (ToDOBString.invalid && isSubmitted)">
+                                To DOB is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="col-lg-2 form-group">
+                            <mat-checkbox #StudentSingnatureRequired="ngModel" name="StudentSingnatureRequired"
+                                [(ngModel)]="RegistrationForm.StudentSingnatureRequired" color="primary">Student
+                                Signature</mat-checkbox>
+                        </div>
+
+                        <div class="col-lg-2 form-group">
+                            <mat-checkbox #StudentPhotoRequired="ngModel" name="StudentPhotoRequired"
+                                [(ngModel)]="RegistrationForm.StudentPhotoRequired" color="primary">Student
+                                Photo</mat-checkbox>
+                        </div>
+
+                        <div class="col-lg-2 form-group">
+                            <mat-checkbox #FatherPhotoRequired="ngModel" name="FatherPhotoRequired"
+                                [(ngModel)]="RegistrationForm.FatherPhotoRequired" color="primary">Father's
+                                Photo</mat-checkbox>
+                        </div>
+
+                        <div class="col-lg-2 form-group">
+                            <mat-checkbox #MotherPhotoRequired="ngModel" name="MotherPhotoRequired"
+                                [(ngModel)]="RegistrationForm.MotherPhotoRequired" color="primary">Mother's
+                                Photo</mat-checkbox>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>Form For</mat-label>
+                            <mat-select #FormFor="ngModel" name="FormFor" [(ngModel)]="RegistrationForm.FormFor"
+                                required>
+                                <mat-option [value]="FormFor.Key"
+                                    *ngFor="let FormFor of FormForList">{{FormFor.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(FormFor.dirty  || FormFor.touched) || (FormFor.invalid && isSubmitted)">
+                                Form For is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-lg-2 form-group">
+                            <mat-label>Status</mat-label>
+                            <mat-select #Status="ngModel" name="Status" [(ngModel)]="RegistrationForm.Status" required>
+                                <mat-option [value]="status.Key"
+                                    *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                Status is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-lg-8 form-group">
+                            <mat-label>Title</mat-label>
+                            <input matInput #Title="ngModel" name="Title" [(ngModel)]="RegistrationForm.Title" required>
+                            <mat-error *ngIf="(Title.dirty  || Title.touched) || (Title.invalid && isSubmitted)">
+                                Title is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <input accept="image/png, image/jpg, image/jpeg" hidden #fileThumbnailPhoto
+                            #ThumbnailPhotoFile="ngModel" [(ngModel)]="RegistrationForm.ThumbnailPhotoFile"
+                            name="fileThumbnailPhoto" (change)="setThumbnailPhotoFile($event)" type="file" id="file">
+                        <mat-form-field appearance="outline" class="col-sm-4 form-group file_input"
+                            (click)="fileThumbnailPhoto.click()">
+                            <mat-label>Thumbnail</mat-label>
+                            <input matInput #ThumbnailPhotoName="ngModel" readonly="true" name="ThumbnailPhoto"
+                                [(ngModel)]="RegistrationForm.ThumbnailPhotoName">
+                            <button mat-icon-button matSuffix>
+                                <mat-icon>attach_file</mat-icon>
+                            </button>
+                            <mat-error
+                                *ngIf="(ThumbnailPhotoName.dirty  || ThumbnailPhotoName.touched) || (ThumbnailPhotoName.invalid && isSubmitted)">
+                                Thumbnail is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="row mb-3">
+                        <editor class="col-lg-12 form-group" #Description="ngModel" name="Description"
+                            [(ngModel)]="RegistrationForm.Description" [init]="editorConfig"></editor>
+                    </div>
+                </form>
+
+                <div class="row">
+                    <h3 class="text-link">Registration Fee</h3>
+                    <div class="col-sm-12 form-group">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Head</th>
+                                    <th>Fee (Other School)</th>
+                                    <th>Fee (Same School)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let m1 of FeeRegistrationList;let i = index">
+                                    <td>{{i+1}}</td>
+                                    <td>{{m1.HeadName}}</td>
+                                    <td><input type="number" placeholder="Amount" [(ngModel)]="m1.FeeAmount"></td>
+                                    <td><input type="number" placeholder="Amount" [(ngModel)]="m1.SameSchoolFeeAmount">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer" style="text-align: center;" *ngIf="action.CanEdit || action.CanCreate">
+                <button class="btn btn-primary" (click)="saveRegistrationForm()">{{RegistrationForm.RegistrationFormId >
+                    0?"Update":"Submit"}}</button>
+            </div>
+        </div>
+
+    </section>
+
+</main>

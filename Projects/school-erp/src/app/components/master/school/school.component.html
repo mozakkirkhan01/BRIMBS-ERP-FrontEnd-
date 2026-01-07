@@ -1,0 +1,614 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <!-- <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                School</button>
+        </div> -->
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formSchool="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-4 form-group">
+                            <mat-label>{{recordSchool}} Name</mat-label>
+                            <input matInput name="SchoolName" [(ngModel)]="School.SchoolName" required>
+                            <mat-error>Required Field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Short Name</mat-label>
+                            <input matInput #ShortName="ngModel" name="ShortName" [(ngModel)]="School.ShortName"
+                                required>
+                            <mat-error>Required Field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Location</mat-label>
+                            <input matInput #Location="ngModel" name="Location" [(ngModel)]="School.Location" required>
+                            <mat-error>Required Field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>School Code</mat-label>
+                            <input matInput #SchoolCode="ngModel" name="SchoolCode" [(ngModel)]="School.SchoolCode">
+                            <mat-error>Required Field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Full Address</mat-label>
+                            <textarea matInput #FullAddress="ngModel" class="textarea_height" name="FullAddress" [(ngModel)]="School.FullAddress"
+                                required></textarea>
+                                <mat-error>Required Field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Slogan</mat-label>
+                            <textarea matInput #SchoolSlogan="ngModel" class="textarea_height" name="SchoolSlogan"
+                                [(ngModel)]="School.SchoolSlogan"></textarea>
+                                <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Affiliation Detail</mat-label>
+                            <textarea matInput #AffiliationDetail="ngModel" class="textarea_height" name="AffiliationDetail"
+                                [(ngModel)]="School.AffiliationDetail"></textarea>
+                                <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Affiliation No</mat-label>
+                            <input matInput #AffiliationNo="ngModel" name="AffiliationNo"
+                                [(ngModel)]="School.AffiliationNo">
+                                <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Website URL</mat-label>
+                            <input matInput #WebsiteUrl="ngModel" name="WebsiteUrl" [(ngModel)]="School.WebsiteUrl">
+                            <mat-icon matSuffix>link</mat-icon>
+                            <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                            <mat-label>Email</mat-label>
+                            <input matInput #Email="ngModel" name="Email" email="true" [(ngModel)]="School.Email">
+                            <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Mobile No</mat-label>
+                            <input type="number" matInput #MobileNo="ngModel" name="MobileNo"
+                                [(ngModel)]="School.MobileNo" required>
+                            <mat-icon matSuffix>phone</mat-icon>
+                            <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Alternate No</mat-label>
+                            <input type="number" matInput #AlternateNo="ngModel" name="AlternateNo"
+                                [(ngModel)]="School.AlternateNo">
+                            <mat-icon matSuffix>phone</mat-icon>
+                            <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Status</mat-label>
+                            <mat-select #Status="ngModel" name="Status" [(ngModel)]="School.Status" required>
+                                <mat-option [value]="status.Key"
+                                    *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error>Required Field !!</mat-error>
+
+                        </mat-form-field>
+                        <div class="col-sm-3 text-center">
+                            <img [src]="LogoPngPhoto ? LogoPngPhoto:'assets/img/no-image.png'" alt="Profile"
+                                class="img-120 mb-4">
+
+                            <input accept="image/png" hidden #fileLogoPng #LogoPngFile="ngModel"
+                                [(ngModel)]="School.LogoPngFile" name="fileLogoPng" (change)="setLogoPngFile($event)"
+                                type="file" id="file">
+                            <mat-form-field appearance="outline" class="form-group file_input"
+                                (click)="fileLogoPng.click()">
+                                <mat-label>Logo (transparent)</mat-label>
+                                <input matInput #LogoPngName="ngModel" readonly="true" name="LogoPng"
+                                    [(ngModel)]="School.LogoPngName">
+                                <button mat-icon-button matSuffix>
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <mat-error>Required Field !!</mat-error>
+
+                            </mat-form-field>
+                        </div>
+                        <div class="col-sm-3 text-center">
+                            <img [src]="LogoJpgPhoto ? LogoJpgPhoto:'assets/img/no-image.png'" alt="Profile"
+                                class="img-120 mb-4">
+                            <input accept="image/jpg,image/jpeg" hidden #fileLogoJpg #LogoJpgFile="ngModel"
+                                [(ngModel)]="School.LogoJpgFile" name="fileLogoJpg" (change)="setLogoJpgFile($event)"
+                                type="file" id="file">
+                            <mat-form-field appearance="outline" class="form-group file_input">
+                                <mat-label>Logo JPEG</mat-label>
+                                <input matInput #LogoJpgName="ngModel" readonly name="LogoJpgName"
+                                    (click)="fileLogoJpg.click()" [(ngModel)]="School.LogoJpgName">
+                                <button mat-icon-button matSuffix>
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-sm-3 text-center">
+                            <img [src]="AffiliationLogoPhoto ? AffiliationLogoPhoto:'assets/img/no-image.png'" alt="Profile"
+                                class="img-120 mb-4">
+                            <input accept="image/jpg,image/jpeg,image/png" hidden #fileAffiliationLogo
+                                #AffiliationLogoFile="ngModel" [(ngModel)]="School.AffiliationLogoFile"
+                                name="fileAffiliationLogo" (change)="setAffiliationLogoFile($event)" type="file"
+                                id="file">
+                            <mat-form-field appearance="outline" class="form-group file_input">
+                                <mat-label>Affiliation Logo</mat-label>
+                                <input matInput #AffiliationLogoName="ngModel" readonly name="AffiliationLogoName"
+                                    (click)="fileAffiliationLogo.click()" [(ngModel)]="School.AffiliationLogoName">
+                                <button mat-icon-button matSuffix>
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-sm-3 text-center">
+                            <img [src]="ReportBackgroudPhoto ? ReportBackgroudPhoto:'assets/img/no-image.png'"
+                                alt="Profile" class="img-120 mb-4">
+                            <input accept="image/jpg,image/jpeg,image/png" hidden #fileReportBackgroud
+                                #ReportBackgroudFile="ngModel" [(ngModel)]="School.ReportBackgroudFile"
+                                name="fileReportBackgroud" (change)="setReportBackgroudFile($event)" type="file"
+                                id="file">
+                            <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                <mat-label>Report Backgroud</mat-label>
+                                <input matInput #ReportBackgroudName="ngModel" readonly name="ReportBackgroudName"
+                                    (click)="fileReportBackgroud.click()" [(ngModel)]="School.ReportBackgroudName">
+                                <button mat-icon-button matSuffix>
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-sm-12 text-center">
+                            <img [src]="HeaderPhotoUrl ? HeaderPhotoUrl:'assets/img/no-image.png'" alt="Profile"
+                                class="img-120 mb-4">
+                            <input accept="image/jpg,image/jpeg,image/png" hidden #fileHeaderPhoto
+                                #HeaderPhotoFile="ngModel" [(ngModel)]="School.HeaderPhotoFile" name="fileHeaderPhoto"
+                                (change)="setHeaderPhotoFile($event)" type="file" id="file">
+                            <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                <mat-label>Report Header</mat-label>
+                                <input matInput #HeaderPhotoName="ngModel" readonly name="HeaderPhotoName"
+                                    (click)="fileHeaderPhoto.click()" [(ngModel)]="School.HeaderPhotoName">
+                                <button mat-icon-button matSuffix>
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-sm-12 text-center">
+                            <img [src]="FooterPhotoUrl ? FooterPhotoUrl:'assets/img/no-image.png'" alt="Profile"
+                                class="img-120 mb-4" >
+                            <input accept="image/jpg,image/jpeg,image/png" hidden #fileFooterPhoto
+                                #FooterPhotoFile="ngModel" [(ngModel)]="School.FooterPhotoFile" name="fileFooterPhoto"
+                                (change)="setFooterPhotoFile($event)" type="file" id="file">
+                            <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                <mat-label>Report Footer</mat-label>
+                                <input matInput #FooterPhotoName="ngModel" readonly name="FooterPhotoName"
+                                    (click)="fileFooterPhoto.click()" [(ngModel)]="School.FooterPhotoName">
+                                <button mat-icon-button matSuffix>
+                                    <mat-icon>attach_file</mat-icon>
+                                </button>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                        </div>
+                       
+                       
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <button mat-raised-button color="primary" (click)="saveSchool()">{{School.SchoolId >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+            <!-- <div class="card-body ">
+
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th (click)="sort('SchoolName')">School</th>
+                                <th (click)="sort('ShortName')">Short Name</th>
+                                <th (click)="sort('Location')">Location</th>
+                                <th (click)="sort('FullAddress')">Full Address</th>
+                                <th (click)="sort('Slogan')">Slogan</th>
+                                <th (click)="sort('AffiliationDetail')">Affiliation Detail</th>
+                                <th (click)="sort('AffiliationNo')">Affiliation No</th>
+                                <th (click)="sort('SchoolCode')">School Code</th>
+                                <th (click)="sort('Website')">Website</th>
+                                <th (click)="sort('Email')">Email</th>
+                                <th (click)="sort('MobileNumber')">Mobile Number</th>
+                                <th (click)="sort('AlternateNumber')">Alternate Number</th>
+                                <th (click)="sort('Status')">Status</th>
+                                <th>Transparent Logo </th>
+                                <th>Logo</th>
+                                <th>Report Backgroud</th>
+                                <th>Affiliation Logo</th>
+                                <th>Report Header</th>
+                                <th>Report Footer</th>
+                                <th *ngIf="action.CanEdit">Edit</th>
+                                <th *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of SchoolList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>{{item.SchoolName}}</td>
+                                <td>{{item.ShortName}}</td>
+                                <td>{{item.Location}}</td>
+                                <td>{{item.FullAddress}}</td>
+                                <td>{{item.SchoolSlogan}}</td>
+                                <td>{{item.AffiliationDetail}}</td>
+                                <td>{{item.AffiliationNo}}</td>
+                                <td>{{item.SchoolCode}}</td>
+                                <td>{{item.WebsiteUrl}}</td>
+                                <td>{{item.Email}}</td>
+                                <td>{{item.MobileNo}}</td>
+                                <td>{{item.AlternateNo}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                                <td>
+                                    <label class="text-danger" *ngIf="item.LogoPng == null">N/A</label>
+                                    <a [href]="imageUrl + item.LogoPng" target="_blank" *ngIf="item.LogoPng != null">
+                                        <img height="80" [src]="imageUrl + item.LogoPng">
+                                    </a>
+                                </td>
+                                <td>
+                                    <label class="text-danger" *ngIf="item.LogoJpg == null">N/A</label>
+                                    <a [href]="imageUrl + item.LogoJpg" target="_blank" *ngIf="item.LogoJpg != null">
+                                        <img height="80" [src]="imageUrl + item.LogoJpg">
+                                    </a>
+                                </td>
+                                <td>
+                                    <label class="text-danger" *ngIf="item.ReportBackgroud == null">N/A</label>
+                                    <a [href]="imageUrl + item.ReportBackgroud" target="_blank"
+                                        *ngIf="item.ReportBackgroud != null">
+                                        <img height="80" [src]="imageUrl + item.ReportBackgroud">
+                                    </a>
+                                </td>
+                                <td>
+                                    <label class="text-danger" *ngIf="item.AffiliationLogo == null">N/A</label>
+                                    <a [href]="imageUrl + item.AffiliationLogo" target="_blank"
+                                        *ngIf="item.AffiliationLogo != null">
+                                        <img height="80" [src]="imageUrl + item.AffiliationLogo">
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <label class="text-danger" *ngIf="item.HeaderPhoto == null">N/A</label>
+                                    <a [href]="imageUrl + item.HeaderPhoto" target="_blank"
+                                        *ngIf="item.HeaderPhoto != null">
+                                        <img height="80" [src]="imageUrl + item.HeaderPhoto">
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <label class="text-danger" *ngIf="item.FooterPhoto == null">N/A</label>
+                                    <a [href]="imageUrl + item.FooterPhoto" target="_blank"
+                                        *ngIf="item.FooterPhoto != null">
+                                        <img height="80" [src]="imageUrl + item.FooterPhoto">
+                                    </a>
+                                </td>
+                                <td *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop" (click)="editSchool(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteSchool(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+
+
+            </div> -->
+        </div>
+
+    </section>
+
+    <!-- <div *ngIf="action.CanEdit || action.CanCreate" class="modal modal-lg fade" id="staticBackdrop"
+        data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{School.SchoolId > 0
+                        ?'Update':'New'}}
+                        School
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formSchool="ngForm">
+                        <div class="contianer">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>School Name</mat-label>
+                                    <input matInput #SchoolName="ngModel" name="SchoolName"
+                                        [(ngModel)]="School.SchoolName" required>
+                                    <mat-error
+                                        *ngIf="(SchoolName.dirty  || SchoolName.touched) || (SchoolName.invalid && isSubmitted)">
+                                        School name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Short Name</mat-label>
+                                    <input matInput #ShortName="ngModel" name="ShortName" [(ngModel)]="School.ShortName"
+                                        required>
+                                    <mat-error
+                                        *ngIf="(ShortName.dirty  || ShortName.touched) || (ShortName.invalid && isSubmitted)">
+                                        Short Name is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Location</mat-label>
+                                    <input matInput #Location="ngModel" name="Location" [(ngModel)]="School.Location"
+                                        required>
+                                    <mat-error
+                                        *ngIf="(Location.dirty  || Location.touched) || (Location.invalid && isSubmitted)">
+                                        Location is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Full Address</mat-label>
+                                    <input matInput #FullAddress="ngModel" name="FullAddress"
+                                        [(ngModel)]="School.FullAddress" required>
+                                    <mat-error
+                                        *ngIf="(FullAddress.dirty  || FullAddress.touched) || (FullAddress.invalid && isSubmitted)">
+                                        Full Address is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Slogan</mat-label>
+                                    <input matInput #SchoolSlogan="ngModel" name="SchoolSlogan"
+                                        [(ngModel)]="School.SchoolSlogan">
+                                    <mat-error
+                                        *ngIf="(SchoolSlogan.dirty  || SchoolSlogan.touched) || (SchoolSlogan.invalid && isSubmitted)">
+                                        Slogan is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Affiliation Detail</mat-label>
+                                    <input matInput #AffiliationDetail="ngModel" name="AffiliationDetail"
+                                        [(ngModel)]="School.AffiliationDetail">
+                                    <mat-error
+                                        *ngIf="(AffiliationDetail.dirty  || AffiliationDetail.touched) || (AffiliationDetail.invalid && isSubmitted)">
+                                        Affiliation Details is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Affiliation No</mat-label>
+                                    <input matInput #AffiliationNo="ngModel" name="AffiliationNo"
+                                        [(ngModel)]="School.AffiliationNo">
+                                    <mat-error
+                                        *ngIf="(AffiliationNo.dirty  || AffiliationNo.touched) || (AffiliationNo.invalid && isSubmitted)">
+                                        Affiliation No is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>School Code</mat-label>
+                                    <input matInput #SchoolCode="ngModel" name="SchoolCode"
+                                        [(ngModel)]="School.SchoolCode">
+                                    <mat-error
+                                        *ngIf="(SchoolCode.dirty  || SchoolCode.touched) || (SchoolCode.invalid && isSubmitted)">
+                                        School Code is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Website URL</mat-label>
+                                    <input matInput #WebsiteUrl="ngModel" name="WebsiteUrl"
+                                        [(ngModel)]="School.WebsiteUrl">
+                                    <mat-icon matSuffix>link</mat-icon>
+                                    <mat-error
+                                        *ngIf="(WebsiteUrl.dirty  || WebsiteUrl.touched) || (WebsiteUrl.invalid && isSubmitted)">
+                                        Website URL is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Email</mat-label>
+                                    <input matInput #Email="ngModel" name="Email" email="true"
+                                        [(ngModel)]="School.Email">
+                                    <mat-error
+                                        *ngIf="(Email.dirty  || Email.touched) || (Email.invalid && isSubmitted)">
+                                        Email is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Mobile No</mat-label>
+                                    <input type="number" matInput #MobileNo="ngModel" name="MobileNo"
+                                        [(ngModel)]="School.MobileNo" required>
+                                    <mat-icon matSuffix>phone</mat-icon>
+                                    <mat-error
+                                        *ngIf="(MobileNo.dirty  || MobileNo.touched) || (MobileNo.invalid && isSubmitted)">
+                                        Mobile No is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Alternate No</mat-label>
+                                    <input type="number" matInput #AlternateNo="ngModel" name="AlternateNo"
+                                        [(ngModel)]="School.AlternateNo">
+                                    <mat-icon matSuffix>phone</mat-icon>
+                                    <mat-error
+                                        *ngIf="(AlternateNo.dirty  || AlternateNo.touched) || (AlternateNo.invalid && isSubmitted)">
+                                        Alternate No is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <input accept="image/png" hidden #fileLogoPng #LogoPngFile="ngModel"
+                                    [(ngModel)]="School.LogoPngFile" name="fileLogoPng"
+                                    (change)="setLogoPngFile($event)" type="file" id="file">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group file_input"
+                                    (click)="fileLogoPng.click()">
+                                    <mat-label>Logo (transparent)</mat-label>
+                                    <input matInput #LogoPngName="ngModel" readonly="true" name="LogoPng"
+                                        [(ngModel)]="School.LogoPngName">
+                                    <button mat-icon-button matSuffix>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </button>
+                                    <mat-error
+                                        *ngIf="(LogoPngName.dirty  || LogoPngName.touched) || (LogoPngName.invalid && isSubmitted)">
+                                        Logo is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <input accept="image/jpg,image/jpeg" hidden #fileLogoJpg #LogoJpgFile="ngModel"
+                                    [(ngModel)]="School.LogoJpgFile" name="fileLogoJpg"
+                                    (change)="setLogoJpgFile($event)" type="file" id="file">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                    <mat-label>Logo JPEG</mat-label>
+                                    <input matInput #LogoJpgName="ngModel" readonly name="LogoJpgName"
+                                        (click)="fileLogoJpg.click()" [(ngModel)]="School.LogoJpgName">
+                                    <button mat-icon-button matSuffix>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <input accept="image/jpg,image/jpeg,image/png" hidden #fileReportBackgroud
+                                    #ReportBackgroudFile="ngModel" [(ngModel)]="School.ReportBackgroudFile"
+                                    name="fileReportBackgroud" (change)="setReportBackgroudFile($event)" type="file"
+                                    id="file">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                    <mat-label>Report Backgroud</mat-label>
+                                    <input matInput #ReportBackgroudName="ngModel" readonly name="ReportBackgroudName"
+                                        (click)="fileReportBackgroud.click()" [(ngModel)]="School.ReportBackgroudName">
+                                    <button mat-icon-button matSuffix>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <input accept="image/jpg,image/jpeg,image/png" hidden #fileHeaderPhoto
+                                    #HeaderPhotoFile="ngModel" [(ngModel)]="School.HeaderPhotoFile"
+                                    name="fileHeaderPhoto" (change)="setHeaderPhotoFile($event)" type="file" id="file">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                    <mat-label>Report Header</mat-label>
+                                    <input matInput #HeaderPhotoName="ngModel" readonly name="HeaderPhotoName"
+                                        (click)="fileHeaderPhoto.click()" [(ngModel)]="School.HeaderPhotoName">
+                                    <button mat-icon-button matSuffix>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <input accept="image/jpg,image/jpeg,image/png" hidden #fileFooterPhoto
+                                    #FooterPhotoFile="ngModel" [(ngModel)]="School.FooterPhotoFile"
+                                    name="fileFooterPhoto" (change)="setFooterPhotoFile($event)" type="file" id="file">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                    <mat-label>Report Footer</mat-label>
+                                    <input matInput #FooterPhotoName="ngModel" readonly name="FooterPhotoName"
+                                        (click)="fileFooterPhoto.click()" [(ngModel)]="School.FooterPhotoName">
+                                    <button mat-icon-button matSuffix>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <input accept="image/jpg,image/jpeg,image/png" hidden #fileAffiliationLogo
+                                    #AffiliationLogoFile="ngModel" [(ngModel)]="School.AffiliationLogoFile"
+                                    name="fileAffiliationLogo" (change)="setAffiliationLogoFile($event)" type="file"
+                                    id="file">
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group file_input">
+                                    <mat-label>Affiliation Logo</mat-label>
+                                    <input matInput #AffiliationLogoName="ngModel" readonly name="AffiliationLogoName"
+                                        (click)="fileAffiliationLogo.click()" [(ngModel)]="School.AffiliationLogoName">
+                                    <button mat-icon-button matSuffix>
+                                        <mat-icon>attach_file</mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select #Status="ngModel" name="Status" [(ngModel)]="School.Status" required>
+                                        <mat-option [value]="status.Key"
+                                            *ngFor="let status of StatusList">{{status.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="(Status.dirty  || Status.touched) || (Status.invalid && isSubmitted)">
+                                        Status is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveSchool()">{{School.SchoolId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+</main>

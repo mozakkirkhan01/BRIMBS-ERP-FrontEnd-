@@ -1,0 +1,34 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="container">
+                    <div class="row">
+                        <span class="col-sm-4" *ngFor="let head of FeeTransportHeadList">
+                            <input id="id{{head.HeadId}}" [(ngModel)]="head.IsSelected" class="form-check-input me-2"
+                                type="checkbox">
+                            <label for="id{{head.HeadId}}" class="form-check-label text-link">{{head.HeadName}}</label>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="FeeTransportHeadList.length > 0 && (action.CanEdit || action.CanCreate)" class="card-footer" style="text-align: center;">
+                <button class="btn btn-primary" (click)="saveFeeTransportHead()">Update</button>
+            </div>
+        </div>
+    </section>
+</main>
+

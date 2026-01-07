@@ -1,0 +1,149 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body">
+                <form #formCharacterCertificate="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Select Pupil</mat-label>
+                            <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                (ngModelChange)="filterPupilList($event)"
+                                placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                                [(ngModel)]="CharacterCertificate.SearchPupil" [matAutocomplete]="autoSearchPupil"
+                                required>
+                            <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSeleted($event)">
+                                <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                    [value]="option.SearchPupil">
+                                    {{option.SearchPupil}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="CharacterCertificate.SearchPupil" color="primary"
+                                (click)="clearPupil()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div *ngIf="CharacterCertificate.PupilAdmissionId">
+                        <h5 class="header-text">Pupil Details</h5>
+                        <div class="row">
+                            <div *ngIf="Pupil.PupilName" class="col-lg-2 col-md-3 label text-bold">Full Name :</div>
+                            <div *ngIf="Pupil.PupilName" class="col-lg-4 col-md-3">{{Pupil.PupilName}}</div>
+                            <div *ngIf="Pupil.FatherName" class="col-lg-2 col-md-3 label text-bold">Father's Name :
+                            </div>
+                            <div *ngIf="Pupil.FatherName" class="col-lg-4 col-md-3">{{Pupil.FatherName}}</div>
+                            <div *ngIf="Pupil.MotherName" class="col-lg-2 col-md-3 label text-bold">Mother's Name :
+                            </div>
+                            <div *ngIf="Pupil.MotherName" class="col-lg-4 col-md-3">{{Pupil.MotherName}}</div>
+                            <div *ngIf="Pupil.DOB" class="col-lg-2 col-md-3 label text-bold">Date of Birth :</div>
+                            <div *ngIf="Pupil.DOB" class="col-lg-4 col-md-3">{{Pupil.DOB|date:'dd-MM-yyyy'}}</div>
+                            <div *ngIf="Pupil.AdmissionNo" class="col-lg-2 col-md-3 label text-bold">Admission No :
+                            </div>
+                            <div *ngIf="Pupil.AdmissionNo" class="col-lg-4 col-md-3">{{Pupil.AdmissionNo}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Class :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.ClassName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Section :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.SectionName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Roll No :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.RollNo}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Join Date :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.JoinDate|date:'dd-MM-yyyy'}}</div>
+                        </div>
+                        <h5 class="header-text mt-4">Certificate Details</h5>
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Pupil Name </mat-label>
+                                <input matInput name="PupilName" [readonly]="true" [(ngModel)]="CharacterCertificate.PupilName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Admission No</mat-label>
+                                <input matInput name="AdmissionNo"
+                                    [(ngModel)]="CharacterCertificate.AdmissionNo" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Father's Name</mat-label>
+                                <input matInput name="FatherName"
+                                    [(ngModel)]="CharacterCertificate.FatherName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Mother's Name</mat-label>
+                                <input matInput name="MotherName"
+                                    [(ngModel)]="CharacterCertificate.MotherName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Gender</mat-label>
+                                <mat-select #Gender="ngModel" name="Gender" [(ngModel)]="CharacterCertificate.Gender" required>
+                                    <mat-option [value]="gender.Key"
+                                        *ngFor="let gender of GenderList">{{gender.Value}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Class</mat-label>
+                                <input matInput name="ClassName"
+                                    [(ngModel)]="CharacterCertificate.ClassName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>From Date</mat-label>
+                                <input matInput name="FromDate" [(ngModel)]="CharacterCertificate.FromDateDT"
+                                    required [matDatepicker]="FromDatePicker">
+                                <mat-datepicker-toggle matIconSuffix
+                                    [for]="FromDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #FromDatePicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>To Date</mat-label>
+                                <input matInput name="ToDate" [(ngModel)]="CharacterCertificate.ToDateDT"
+                                    required [matDatepicker]="ToDatePicker">
+                                <mat-datepicker-toggle matIconSuffix
+                                    [for]="ToDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #ToDatePicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Issue Date</mat-label>
+                                <input matInput name="IssueDate" [(ngModel)]="CharacterCertificate.IssueDateDT" required
+                                    [matDatepicker]="IssueDatePicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="IssueDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #IssueDatePicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center" *ngIf="CharacterCertificate.PupilAdmissionId">
+                <button mat-raised-button color="primary"
+                    (click)="saveCharacterCertificate()">{{CharacterCertificate.CharacterCertificateId >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+        </div>
+    </section>
+</main>

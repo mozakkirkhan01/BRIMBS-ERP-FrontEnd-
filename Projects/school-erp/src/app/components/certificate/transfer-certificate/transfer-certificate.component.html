@@ -1,0 +1,395 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body">
+                <form #formTransferCertificate="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Select Pupil</mat-label>
+                            <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                (ngModelChange)="filterPupilList($event)"
+                                placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                                [(ngModel)]="TransferCertificate.SearchPupil" [matAutocomplete]="autoSearchPupil"
+                                required>
+                            <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                (optionSelected)="afterPupilSeleted($event)">
+                                <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                    [value]="option.SearchPupil">
+                                    {{option.SearchPupil}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="TransferCertificate.SearchPupil" color="primary"
+                                (click)="clearPupil()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div *ngIf="TransferCertificate.PupilAdmissionId">
+                        <h5 class="header-text">Pupil Details</h5>
+                        <div class="row">
+                            <div *ngIf="Pupil.PupilName" class="col-lg-2 col-md-3 label text-bold">Full Name :</div>
+                            <div *ngIf="Pupil.PupilName" class="col-lg-4 col-md-3">{{Pupil.PupilName}}</div>
+                            <div *ngIf="Pupil.FatherName" class="col-lg-2 col-md-3 label text-bold">Father's Name :
+                            </div>
+                            <div *ngIf="Pupil.FatherName" class="col-lg-4 col-md-3">{{Pupil.FatherName}}</div>
+                            <div *ngIf="Pupil.MotherName" class="col-lg-2 col-md-3 label text-bold">Mother's Name :
+                            </div>
+                            <div *ngIf="Pupil.MotherName" class="col-lg-4 col-md-3">{{Pupil.MotherName}}</div>
+                            <div *ngIf="Pupil.DOB" class="col-lg-2 col-md-3 label text-bold">Date of Birth :</div>
+                            <div *ngIf="Pupil.DOB" class="col-lg-4 col-md-3">{{Pupil.DOB|date:'dd-MM-yyyy'}}</div>
+                            <div *ngIf="Pupil.AdmissionNo" class="col-lg-2 col-md-3 label text-bold">Admission No :
+                            </div>
+                            <div *ngIf="Pupil.AdmissionNo" class="col-lg-4 col-md-3">{{Pupil.AdmissionNo}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Class :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.ClassName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Section :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.SectionName}}</div>
+                            <div class="col-lg-2 col-md-3 label text-bold">Roll No :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.RollNo}}</div>
+                            <!-- <div class="col-lg-2 col-md-3 label text-bold">Pupil Type :</div>
+                        <div class="col-lg-4 col-md-3">{{Pupil.PupilTypeName}}</div>
+                        <div class="col-lg-2 col-md-3 label text-bold">Admission Type :</div>
+                        <div class="col-lg-4 col-md-3">{{AllAdmissionTypeList[Pupil.AdmissionType]}}</div> -->
+                            <div class="col-lg-2 col-md-3 label text-bold">Join Date :</div>
+                            <div class="col-lg-4 col-md-3">{{Pupil.JoinDate|date:'dd-MM-yyyy'}}</div>
+                            <!-- <div class="col-lg-2 col-md-3 label text-bold">Due Amount :</div>
+                        <div class="col-lg-4 col-md-3" style="color: red;font-weight: bold;">
+                            {{TransferCertificate.DueAmount |money}}</div>
+                        <div class="col-lg-2 col-md-3 label text-bold">Due Months :</div>
+                        <div class="col-lg-4 col-md-3">{{TransferCertificate.DueMonths}}</div> -->
+                        </div>
+                        <h5 class="header-text mt-4">Certificate Details</h5>
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Pupil Name </mat-label>
+                                <input matInput name="PupilName" [readonly]="true"
+                                    [(ngModel)]="TransferCertificate.PupilName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Father Name</mat-label>
+                                <input matInput name="FatherGuardianName"
+                                    [(ngModel)]="TransferCertificate.FatherGuardianName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Mother Name</mat-label>
+                                <input matInput name="MotherGuardianName"
+                                    [(ngModel)]="TransferCertificate.MotherGuardianName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Session</mat-label>
+                                <input matInput name="SessionName"
+                                    [(ngModel)]="TransferCertificate.SessionName" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Nationality</mat-label>
+                                <mat-select #Nationality="ngModel" name="Nationality"
+                                    [(ngModel)]="TransferCertificate.Nationality" required>
+                                    <mat-option [value]="nationality.Key"
+                                        *ngFor="let nationality of NationalityList">{{nationality.Value}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Category</mat-label>
+                                <mat-select #Category="ngModel" name="Category"
+                                    [(ngModel)]="TransferCertificate.Category" required>
+                                    <mat-option [value]="category.Key"
+                                        *ngFor="let category of CategoryList">{{category.Value}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>DOB</mat-label>
+                                <input matInput name="DOB" [(ngModel)]="TransferCertificate.DOBDT" required
+                                    [matDatepicker]="DOBPicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="DOBPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #DOBPicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>First Admission Date</mat-label>
+                                <input matInput name="FirstAdmissionDate"
+                                    [(ngModel)]="TransferCertificate.FirstAdmissionDateDT" required
+                                    [matDatepicker]="FirstAdmissionDatePicker">
+                                <mat-datepicker-toggle matIconSuffix
+                                    [for]="FirstAdmissionDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #FirstAdmissionDatePicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>First Admission Class </mat-label>
+                                <input matInput name="FirstAdmissionClass"
+                                    [(ngModel)]="TransferCertificate.FirstAdmissionClass" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Last Studied Class </mat-label>
+                                <input matInput name="LastClassName" [(ngModel)]="TransferCertificate.LastClassName"
+                                    required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Class Roll No. </mat-label>
+                                <input matInput name="RollNo" [(ngModel)]="TransferCertificate.RollNo" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>JAC Roll No. </mat-label>
+                                <input matInput name="JacRollNo" [(ngModel)]="TransferCertificate.JacRollNo" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Registration No. </mat-label>
+                                <input matInput name="JacRegistrationNo" [(ngModel)]="TransferCertificate.JacRegistrationNo"
+                                    required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Last Annual Exam with Result </mat-label>
+                                <input matInput name="LastExamResult" [(ngModel)]="TransferCertificate.LastExamResult" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>Last Annual Exam with Result</mat-label>
+                                <mat-select name="LastExamResult" [(ngModel)]="TransferCertificate.LastExamResult"
+                                    required>
+                                    <mat-option [value]="''">Select</mat-option>
+                                    <mat-option [value]="'Mid Session'">Mid Session</mat-option>
+                                    <mat-option [value]="'Pass'">Pass</mat-option>
+                                    <mat-option [value]="'Fail'">Fail</mat-option>
+                                </mat-select>
+                                <mat-error>
+                                    Required field !!
+                                </mat-error>
+                            </mat-form-field>
+
+
+                            <!-- <div class="col-sm-6">
+                                <input id="IsFailAnyTime" [(ngModel)]="TransferCertificate.IsFailAnyTime"
+                                    name="IsFailAnyTime" class="form-check-input me-2" type="checkbox">
+                                <label for="IsFailAnyTime" class="form-check-label text-link">Whether failed, if so
+                                    once/twice in the same class</label>
+                            </div> -->
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Subject 1 </mat-label>
+                                <mat-select name="SubjectOne" [(ngModel)]="TransferCertificate.SubjectOne" required>
+                                    <mat-option [value]="o1.SubjectName"
+                                        *ngFor="let o1 of SubjectList">{{o1.SubjectName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Subject 2 </mat-label>
+                                <mat-select name="SubjectTwo" [(ngModel)]="TransferCertificate.SubjectTwo" required>
+                                    <mat-option [value]="o1.SubjectName"
+                                        *ngFor="let o1 of SubjectList">{{o1.SubjectName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Subject 3 </mat-label>
+                                <mat-select name="SubjectThree" [(ngModel)]="TransferCertificate.SubjectThree" required>
+                                    <mat-option [value]="o1.SubjectName"
+                                        *ngFor="let o1 of SubjectList">{{o1.SubjectName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Subject 4 </mat-label>
+                                <mat-select name="SubjectFour" [(ngModel)]="TransferCertificate.SubjectFour">
+                                    <mat-option [value]="o1.SubjectName"
+                                        *ngFor="let o1 of SubjectList">{{o1.SubjectName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Subject 5 </mat-label>
+                                <mat-select name="SubjectFive" [(ngModel)]="TransferCertificate.SubjectFive">
+                                    <mat-option [value]="o1.SubjectName"
+                                        *ngFor="let o1 of SubjectList">{{o1.SubjectName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Subject 6 </mat-label>
+                                <mat-select name="SubjectSix" [(ngModel)]="TransferCertificate.SubjectSix">
+                                    <mat-option [value]="o1.SubjectName"
+                                        *ngFor="let o1 of SubjectList">{{o1.SubjectName}}</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <!-- <div class="col-sm-6">
+                                <input id="IsPromotedToHigherClass"
+                                    [(ngModel)]="TransferCertificate.IsPromotedToHigherClass"
+                                    name="IsPromotedToHigherClass" class="form-check-input me-2" type="checkbox">
+                                <label for="IsPromotedToHigherClass" class="form-check-label text-link">Whether
+                                    qualified
+                                    for promotion to Higher Class</label>
+                            </div>
+
+                            <mat-form-field appearance="outline" class="col-sm-2"
+                                *ngIf="TransferCertificate.IsPromotedToHigherClass">
+                                <mat-label>if so, to which class </mat-label>
+                                <input matInput name="PromotedClass" [(ngModel)]="TransferCertificate.PromotedClass"
+                                    required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Month upto which the (pupil has paid) school dues </mat-label>
+                                <input matInput name="SchoolDues" [(ngModel)]="TransferCertificate.SchoolDues" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <!-- <div class="col-sm-6">
+                                <input id="IsConcessionAvailed" [(ngModel)]="TransferCertificate.IsConcessionAvailed"
+                                    name="IsConcessionAvailed" class="form-check-input me-2" type="checkbox">
+                                <label for="IsConcessionAvailed" class="form-check-label text-link">Any fee concession
+                                    availed of : if so, the nature of such concession
+                                </label>
+                            </div> -->
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Total Working Days </mat-label>
+                                <input type="number" matInput name="TotalWorkingDays"
+                                    [(ngModel)]="TransferCertificate.TotalWorkingDays" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Total Present Days </mat-label>
+                                <input type="number" matInput name="TotalPresentDays"
+                                    [(ngModel)]="TransferCertificate.TotalPresentDays" required>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <!-- <div class="col-sm-6">
+                                <input id="IsNCC" [(ngModel)]="TransferCertificate.IsNCC" name="IsNCC"
+                                    class="form-check-input me-2" type="checkbox">
+                                <label for="IsNCC" class="form-check-label text-link">Whether NCC cadet/Boy Scout/Girl
+                                    Guide (details may be given)
+                                </label>
+                            </div> -->
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Extra Activities </mat-label>
+                                <input matInput name="ExtraActivities"
+                                    [(ngModel)]="TransferCertificate.ExtraActivities">
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field> -->
+
+                            <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Extra Activities </mat-label>
+                                <mat-select name="ExtraActivities" [(ngModel)]="TransferCertificate.ExtraActivities"
+                                    required>
+                                    <mat-option [value]="">Select</mat-option>
+                                    <mat-option [value]="'College Society , Sports and Games'">College Society , Sports and Games</mat-option>
+                                    <!-- <mat-option [value]="'Sports and Games'">Sports and Games</mat-option> -->
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-3">
+                                <mat-label>General Conduct </mat-label>
+                                <!-- <input matInput name="GeneralConduct" [(ngModel)]="TransferCertificate.GeneralConduct" required> -->
+                                <mat-select name="GeneralConduct" [(ngModel)]="TransferCertificate.GeneralConduct" required>
+                                    <mat-option [value]="">Select</mat-option>
+                                    <mat-option [value]="'Good'">Good</mat-option>
+                                    <mat-option [value]="'Excellent'">Excellent</mat-option>
+                                    <mat-option [value]="'Bad'">Bad</mat-option>
+                                </mat-select>
+                                <mat-error>required field !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Issue Date</mat-label>
+                                <input matInput name="IssueDate" [(ngModel)]="TransferCertificate.IssueDateDT" required
+                                    [matDatepicker]="IssueDatePicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="IssueDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #IssueDatePicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Application Date</mat-label>
+                                <input matInput name="ApplicationDate"
+                                    [(ngModel)]="TransferCertificate.ApplicationDateDT" required
+                                    [matDatepicker]="ApplicationDatePicker">
+                                <mat-datepicker-toggle matIconSuffix
+                                    [for]="ApplicationDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #ApplicationDatePicker touchUi="true"></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-5">
+                                <mat-label>Leaving Reason</mat-label>
+                                <textarea matInput name="LeavingReason" [(ngModel)]="TransferCertificate.LeavingReason"
+                                    required></textarea>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="col-sm-5">
+                                <mat-label>Other Remarks</mat-label>
+                                <textarea matInput name="OtherRemarks"
+                                    [(ngModel)]="TransferCertificate.OtherRemarks"></textarea>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                                <mat-label>Other Remarks </mat-label>
+                                <mat-select name="OtherRemarks" [(ngModel)]="TransferCertificate.OtherRemarks" required>
+                                    <mat-option [value]="">Select</mat-option>
+                                    <mat-option [value]="'Good'">Good</mat-option>
+                                    <mat-option [value]="'Excellent'">Excellent</mat-option>
+                                    <mat-option [value]="'Bad'">Bad</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center" *ngIf="TransferCertificate.PupilAdmissionId">
+                <button mat-raised-button color="primary"
+                    (click)="saveTransferCertificate()">{{TransferCertificate.TransferCertificateId >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+        </div>
+    </section>
+</main>

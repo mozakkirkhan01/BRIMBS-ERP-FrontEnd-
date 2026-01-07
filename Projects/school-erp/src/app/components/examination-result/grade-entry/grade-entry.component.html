@@ -1,0 +1,195 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #formPupilGrade="ngForm">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-3 mb-1">
+                                    <mat-label>Select Session</mat-label>
+                                    <mat-select #SessionId="ngModel" (selectionChange)="PupilGradeList = [];getSubjectGradingScaleList()"
+                                        name="SessionId" [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                                        <mat-option [value]="e1.SessionId"
+                                            *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Session is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-3 mb-1">
+                                    <mat-label>Select Term</mat-label>
+                                    <mat-select #Term="ngModel" (selectionChange)="PupilGradeList = [];getSubjectGradingScaleList()"
+                                        name="Term" [(ngModel)]="FilterModel.Term" required [autofocus]="true">
+                                        <mat-option [value]="e1.Key" *ngFor="let e1 of TermList">{{e1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Term is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+        
+                                <mat-form-field appearance="outline" class="col-sm-3 mb-1">
+                                    <mat-label>Select Class</mat-label>
+                                    <mat-select #ClassId="ngModel" (selectionChange)="PupilGradeList = [];changeClass()"
+                                        name="ClassId" [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                                        <mat-option [value]="e1.ClassId"
+                                            *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Class is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+        
+                                <mat-form-field appearance="outline" class="col-sm-3 mb-1">
+                                    <mat-label>Select Section</mat-label>
+                                    <mat-select #SectionId="ngModel" (selectionChange)="PupilGradeList = [];" name="SectionId"
+                                        [(ngModel)]="FilterModel.SectionId" required [autofocus]="true">
+                                        <!-- <mat-option [value]="0">All Section</mat-option> -->
+                                        <mat-option [value]="e1.SectionId"
+                                            *ngFor="let e1 of SectionList">{{e1.SectionName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Section is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+        
+                                <mat-form-field appearance="outline" class="col-sm-4 mb-1">
+                                    <mat-label>Select Subject</mat-label>
+                                    <mat-select #SubjectGradingScaleId="ngModel" (selectionChange)="PupilGradeList = [];"
+                                        name="SubjectGradingScaleId" [(ngModel)]="FilterModel.SubjectGradingScaleId" required [autofocus]="true">
+                                        <mat-option [value]="e1.SubjectGradingScaleId"
+                                            *ngFor="let e1 of SubjectGradingScaleList">{{e1.SubjectName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Subject is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+        
+        
+                                <div class="col-sm-4 mb-1">
+                                    <button mat-flat-button color="accent" class="mr-10"
+                                        (click)="getPupilGradeList()">Search</button>
+                                    <button mat-flat-button color="primary" *ngIf="PupilGradeList.length > 0"  (click)="savePupilGrade()">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-1 text-right border-left">
+                                <label class="text-link text-blue text-bold">Settings :-</label>
+                                <br>
+                                <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                    [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                                <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                                <br>
+                                <input class="form-check-input me-1" name="AllowAttendance" type="checkbox"
+                                    [(ngModel)]="FilterModel.AllowAttendance" id="AllowAttendance">
+                                <label for="AllowAttendance" class="text-link text-blue">Allow Attendance </label>
+                        </div>
+                    </div>
+                    
+                </form>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dataTable-top">
+                            <div class="dataTable-dropdown d-flex">
+                                <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                    <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                                </select>
+                                <span class="ms-2">Entries per page</span>
+                            </div>
+                            <div class="dataTable-search">
+                                <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                    placeholder="Search..." type="text">
+                            </div>
+                        </div>
+
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">#</th>
+                                        <th (click)="sort('AdmissionNo')">Admission No.</th>
+                                        <th style="min-width: 160px;" (click)="sort('PupilName')">Pupil Name</th>
+                                        <th *ngIf="FilterModel.SectionId == 0" (click)="sort('SectionName')">Section</th>
+                                        <th (click)="sort('RollNo')">Roll No</th>
+
+                                        <th *ngIf="FilterModel.AllowAttendance && FilterModel.Term==1" (click)="sort('HyAttendance')">Attendance</th>
+                                        <th *ngIf="FilterModel.Term==1" (click)="sort('HyGradeId')">Grade [{{SubjectGradingScale.GradingScaleName}}]</th>
+
+                                        <th *ngIf="FilterModel.AllowAttendance && FilterModel.Term==2" (click)="sort('AnAttendance')">Attendance</th>
+                                        <th *ngIf="FilterModel.Term==2" (click)="sort('AnGradeId')">Grade [{{SubjectGradingScale.GradingScaleName}}]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of PupilGradeList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                        <td>{{item.AdmissionNo}}</td>
+                                        <td>{{item.PupilName}}</td>
+                                        <td *ngIf="FilterModel.SectionId == 0">{{item.SectionName}}</td>
+                                        <td>{{item.RollNo}}</td>
+                                        <td
+                                            *ngIf="FilterModel.AllowAttendance && FilterModel.Term==1">
+                                            <select (change)="changeHyAttendance(i,item)"
+                                                style="width: 130px;" class="form-select"
+                                                [(ngModel)]="item.HyAttendance">
+                                                <option [value]="p1.Key" *ngFor="let p1 of ExamAttendanceList">
+                                                    {{p1.Value}}</option>
+                                            </select>
+                                        </td>
+                                        <td *ngIf="FilterModel.Term==1">
+                                            <select (change)="changeHyGrade(i,item)"
+                                                style="width: 130px;" class="form-select"
+                                                [(ngModel)]="item.HyGradeId">
+                                                <option [value]="p1.GradeId" *ngFor="let p1 of GradeList">
+                                                    {{p1.GradeName}}</option>
+                                            </select>
+                                        </td>
+                                        <td
+                                            *ngIf="FilterModel.AllowAttendance && FilterModel.Term==2">
+                                            <select (change)="changeAnAttendance(i,item)"
+                                                style="width: 130px;" class="form-select"
+                                                [(ngModel)]="item.AnAttendance">
+                                                <option [value]="p1.Key" *ngFor="let p1 of ExamAttendanceList">
+                                                    {{p1.Value}}</option>
+                                            </select>
+                                        </td>
+                                        <td *ngIf="FilterModel.Term==2">
+                                            <select (change)="changeAnGrade(i,item)"
+                                                style="width: 130px;" class="form-select"
+                                                [(ngModel)]="item.AnGradeId">
+                                                <option [value]="p1.GradeId" *ngFor="let p1 of GradeList">
+                                                    {{p1.GradeName}}</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dataTable-bottom">
+                            <pagination-controls (pageChange)="p=$event" style="float:right;"
+                                class="my-pagination"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="PupilGradeList.length > 0">
+                <button type="button" mat-raised-button (click)="PupilGradeList =[]" color="warn"
+                    class="me-2">Cancel</button>
+                <button mat-raised-button color="primary" (click)="savePupilGrade()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

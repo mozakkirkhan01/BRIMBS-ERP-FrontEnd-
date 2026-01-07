@@ -1,0 +1,103 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #PupilWaiveOffForm="ngForm">
+                    <div class="container">
+                        <div class="row mt-2">
+                            <mat-form-field appearance="outline" class="col-sm-6">
+                                <mat-label>Select Pupil</mat-label>
+                                <input matInput #SearchPupil="ngModel" name="SearchPupil"
+                                    (ngModelChange)="filterPupilList($event)"
+                                    placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+                                    [(ngModel)]="PupilWaiveOff.SearchPupil" [matAutocomplete]="autoSearchPupil" required
+                                    autofocus>
+                                <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                                    (optionSelected)="afterPupilSeleted($event)">
+                                    <mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+                                        [value]="option.SearchPupil">
+                                        {{option.SearchPupil}}
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <button mat-icon-button matSuffix *ngIf="PupilWaiveOff.SearchPupil" color="primary"
+                                    (click)="clearPupil()">
+                                    <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                </button>
+                                <mat-error
+                                    *ngIf="(SearchPupil.dirty  || SearchPupil.touched) || (SearchPupil.invalid && isSubmitted)">
+                                    Pupil is <strong>required</strong>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+                <div *ngFor="let month of MonthList" style="margin-bottom: 0;">
+                    <div>
+                        <h3 class="header-text">{{month.MonthName}}</h3>
+                        <!-- <span>
+                            <label for="id-month_{{month.MonthId}}" class="form-check-label text-link mb-2"
+                                style="font-weight: 600;color: blue;">{{month.MonthName
+                                }}</label>
+                        </span> -->
+                        <div class="row">
+                            <div class="col-lg-12 table-responsive">
+                                <h4 *ngIf="month.PupilWaiveOffList.length == 0">No Head is Available for this month.
+                                    <a class="text-link" [routerLink]="['/admin/fee-class-head']">Click here to add
+                                        head</a>
+                                </h4>
+                                <table class="table table-sm table-bordered table-hover"
+                                    *ngIf="month.PupilWaiveOffList.length > 0">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th (click)="sort('HeadName')">Head</th>
+                                            <th (click)="sort('FeeAmount')">Fee Amount</th>
+                                            <th (click)="sort('WaiveOffAmount')">Waive Off Amount</th>
+                                            <th (click)="sort('Remarks')">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngIf="action.CanEdit || action.CanCreate">
+                                        <tr *ngFor="let item of month.PupilWaiveOffList; let i=index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{item.HeadName}}</td>
+                                            <td>{{item.FeeAmount}}</td>
+                                            <td><input [(ngModel)]="item.WaiveOffAmount" type="text"></td>
+                                            <td><input [(ngModel)]="item.Remarks" type="text" class="form-control"></td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody *ngIf="!action.CanEdit && !action.CanCreate">
+                                        <tr *ngFor="let item of month.PupilWaiveOffList; let i=index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{item.HeadName}}</td>
+                                            <td>{{item.FeeAmount|money}}</td>
+                                            <td>{{item.WaiveOffAmount|money}}</td>
+                                            <td>{{item.Remarks}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer" style="text-align: center;"
+                *ngIf="MonthList.length > 0 && (action.CanEdit || action.CanCreate)">
+                <button class="btn btn-primary" (click)="savePupilWaiveOff(PupilWaiveOffForm)">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

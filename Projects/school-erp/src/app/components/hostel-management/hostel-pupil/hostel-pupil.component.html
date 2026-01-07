@@ -1,0 +1,175 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-6">
+                        <mat-label>Select Pupil</mat-label>
+                        <input matInput #SearchPupil="ngModel" name="SearchPupil" (ngModelChange)="filterPupilList($event)"
+                            [(ngModel)]="HostelPupilobj.SearchPupil" [matAutocomplete]="autoSearchPupil" required>
+                        <mat-autocomplete #autoSearchPupil="matAutocomplete"
+                            (optionSelected)="afterPupilSeleted($event)">
+                            <mat-option *ngFor="let option of PupilList" [id]="option.PupilId"
+                                [value]="option.SearchPupil">
+                                {{option.SearchPupil}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix *ngIf="HostelPupilobj.SearchPupil" color="primary"
+                            (click)="clearPupil()">
+                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                        </button>
+                        <mat-error
+                            *ngIf="(SearchPupil.dirty  || SearchPupil.touched) || (SearchPupil.invalid && isSubmitted)">
+                            Pupil is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+
+                    <span *ngIf="SearchPupil.value != null && action.CanCreate" class="col-sm-6">
+                        <button mat-raised-button color="primary" class="float-right" (click)="newHostelPupil()">Assign
+                            New Hostel</button>
+                    </span>
+                </div>
+
+                <div *ngIf="HostelPupilList.length  > 0">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th (click)="sort('PupilName')">Pupil Name</th>
+                                <th (click)="sort('HostelName')">Hostel Name</th>
+                                <th (click)="sort('RoomName')">Room</th>
+                                <th (click)="sort('StartDate')">Start Date</th>
+                                <th (click)="sort('EndDate')">End Date</th>
+                                <th *ngIf="action.CanEdit">Edit</th>
+                                <th *ngIf="action.CanDelete">Delete</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let item of HostelPupilList">
+                                <td>{{item.PupilName}}</td>
+                                <td>{{item.HostelName}}</td>
+                                <td>{{item.RoomName}}</td>
+                                <td>{{item.StartDate | date : "dd-MM-yyyy"}}</td>
+                                <td>{{item.EndDate | date : "dd-MM-yyyy"}}</td>
+                                <td *ngIf="action.CanEdit">
+                                    <button class="btn btn-sm btn-warning" (click)="editHostelPupil(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                </td>
+                                <td *ngIf="action.CanDelete">
+                                    <button class="btn btn-sm btn-danger" (click)="deleteHostelPupil(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{HostelPupil.HostelPupilId > 0 ?
+                        'Update':'New'}}
+                        Hostel
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form #formHostelPupil="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                        <div class="container">
+                            <div class="row">
+
+                                <!--<mat-form-field appearance="outline" class="col-sm-6">
+                <mat-label>Pupil</mat-label>
+                <mat-select #Pupil="ngModel" name="Pupil" [(ngModel)]="HostelPupil.PupilId" required >
+                  <mat-option [value]="option.PupilId" *ngFor="let option of PupilList;">
+                    {{option.PupilName}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="(Pupil.dirty  || Pupil.touched) || (Pupil.invalid && isSubmitted)">
+                  Pupil Name is <strong>required</strong>
+                </mat-error>
+              </mat-form-field> -->
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Hostel</mat-label>
+                                    <mat-select #Hostel="ngModel" name="Hostel" (selectionChange)="changeHostel()"
+                                        [(ngModel)]="HostelPupil.HostelId" required>
+                                        <mat-option [value]="option.HostelId" *ngFor="let option of HostelList;">
+                                            {{option.HostelName}}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Hostel is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Select Room</mat-label>
+                                    <mat-select #HostelRoom="ngModel" name="HostelRoom"
+                                        [(ngModel)]="HostelPupil.HostelRoomId" required>
+                                        <mat-option [value]="option.HostelRoomId"
+                                            *ngFor="let option of HostelRoomList;">
+                                            {{option.RoomName}}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Room is <strong>required</strong>
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Start Date</mat-label>
+                                    <input matInput #StartDate="ngModel" name="StartDate"
+                                        [(ngModel)]="HostelPupil.StartDate" required [matDatepicker]="StartDatePicker">
+                                    <mat-datepicker-toggle matIconSuffix
+                                        [for]="StartDatePicker"></mat-datepicker-toggle>
+                                    <mat-datepicker touchUi #StartDatePicker></mat-datepicker>
+                                    <mat-error>Start date is required !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>End Date</mat-label>
+                                    <input matInput #EndDate="ngModel" name="EndDate" [(ngModel)]="HostelPupil.EndDate"
+                                        [matDatepicker]="EndDatePicker">
+                                    <mat-datepicker-toggle matIconSuffix [for]="EndDatePicker"></mat-datepicker-toggle>
+                                    <mat-datepicker touchUi #EndDatePicker></mat-datepicker>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveHostelPupil()">{{HostelPupil.HostelPupilId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

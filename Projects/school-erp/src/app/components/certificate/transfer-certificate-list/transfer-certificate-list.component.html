@@ -1,0 +1,187 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formTransferCertificate="ngForm">
+                    <div class="row mt-2">
+                        <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Session</mat-label>
+                            <mat-select #SessionId="ngModel" name="SessionId" [(ngModel)]="FilterObj.SessionId">
+                                <mat-option value="0">--All Session--</mat-option>
+                                <mat-option [value]="session.SessionId"
+                                    *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Class</mat-label>
+                            <mat-select #ClassId="ngModel" name="ClassId" [(ngModel)]="FilterObj.ClassId"
+                                (selectionChange)="changeClass()">
+                                <mat-option value="0">--All Class--</mat-option>
+                                <mat-option [value]="class.ClassId"
+                                    *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Section</mat-label>
+                            <mat-select #SectionId="ngModel" name="SectionId" [(ngModel)]="FilterObj.SectionId">
+                                <mat-option value="0">--All Section--</mat-option>
+                                <mat-option [value]="s1.SectionId"
+                                    *ngFor="let s1 of SectionList">{{s1.SectionName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field> -->
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>From Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="FilterObj.FromDateString"
+                                [matDatepicker]="FromDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>To Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="FilterObj.ToDateString"
+                                [matDatepicker]="ToDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <div class="col-sm-2">
+                            <button mat-flat-button color="primary"
+                                (click)="getTransferCertificateList()">Search</button>
+                        </div>
+                    </div>
+                </form>
+                <div *ngIf="TransferCertificateList.length > 0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    <div class="table-container overflow-auto">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                    <th (click)="sort('AdmissionNo')">Admission No.</th>
+                                    <th (click)="sort('PupilName')">Pupil Name</th>
+                                    <th (click)="sort('TCNo')">TC No</th>
+                                    <th (click)="sort('ApplicationDate')">Application Date</th>
+                                    <th (click)="sort('IssueDate')">Issue Date</th>
+                                    <th (click)="sort('FatherGuardianName')">Father/Guardian Name</th>
+                                    <th (click)="sort('DOB')">DOB</th>
+                                    <th (click)="sort('AadhaarNo')">Aadhaar No.</th>
+                                    <th (click)="sort('Nationality')">Nationality</th>
+                                    <th (click)="sort('Category')">Category</th>
+                                    <th (click)="sort('FirstAdmissionDate')">First Admission Date</th>
+                                    <th (click)="sort('FirstAdmissionClass')">First Admission Class</th>
+                                    <th (click)="sort('LastClassName')">Last Class Name</th>
+                                    <th (click)="sort('LastExamResult')">Last Exam Result</th>
+                                    <th (click)="sort('IsFailAnyTime')">Failed Once or Twice</th>
+                                    <!-- <th (click)="sort('SubjectOne')">Subject 1</th>
+                                    <th (click)="sort('SubjectTwo')">Subject 2</th>
+                                    <th (click)="sort('SubjectThree')">Subject 3</th>
+                                    <th (click)="sort('SubjectFour')">Subject 4</th>
+                                    <th (click)="sort('SubjectFive')">Subject 5</th>
+                                    <th (click)="sort('SubjectSix')">Subject 6</th> -->
+                                    <!-- <th (click)="sort('IsPromotedToHigherClass')">Promoted To Higher Class</th>
+                                    <th (click)="sort('PromotedClass')">Promoted Class</th>
+                                    <th (click)="sort('SchoolDues')">School Dues</th>
+                                    <th (click)="sort('IsConcessionAvailed')">Concession Availed</th>
+                                    <th (click)="sort('TotalWorkingDays')">Total Working Days</th>
+                                    <th (click)="sort('TotalPresentDays')">Total Present Days</th>
+                                    <th (click)="sort('IsNCC')">NCC</th> -->
+                                    <th (click)="sort('ExtraActivities')">Extra Activities</th>
+                                    <th (click)="sort('GeneralConduct')">General Conduct</th>
+                                    <th (click)="sort('LeavingReason')">Leaving Reason</th>
+                                    <th (click)="sort('OtherRemarks')">Other Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of TransferCertificateList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td class="no-wrap">
+                                        <a ngbTooltip="Print Marksheet"
+                                            (click)="printTransferCertificate(1,true,item.TransferCertificateId)" class="icon-print">
+                                            <i class="bi bi-printer-fill"></i>
+                                        </a>
+                                        <a ngbTooltip="Edit Record" *ngIf="action.CanEdit" class="icon-edit"
+                                            data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                            (click)="editTransferCertificate(item)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a ngbTooltip="Delete Record" *ngIf="action.CanDelete" class="icon-delete"
+                                            (click)="deleteTransferCertificate(item)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </td>
+                                    <td>{{item.AdmissionNo }}</td>
+                                    <td>{{item.PupilName }}</td>
+                                    <td>{{item.TCNo }}</td>
+                                    <td class="no-wrap">{{item.ApplicationDate|date:'dd-MM-yyyy'}}</td>
+                                    <td class="no-wrap">{{item.IssueDate|date:'dd-MM-yyyy'}}</td>
+                                    <td>{{item.FatherGuardianName }}</td>
+                                    <td class="no-wrap">{{item.DOB|date:'dd-MM-yyyy'}}</td>
+                                    <td>{{item.AadhaarNo }}</td>
+                                    <td>{{AllNationalityList[item.Nationality]}}</td>
+                                    <td>{{AllCategoryList[item.Category]}}</td>
+                                    <td class="no-wrap">{{item.FirstAdmissionDate|date:'dd-MM-yyyy'}}</td>
+                                    <td>{{item.FirstAdmissionClass }}</td>
+                                    <td>{{item.LastClassName }}</td>
+                                    <td>{{item.LastExamResult }}</td>
+                                    <td>{{item.IsFailAnyTime?'Yes':'No'}}</td>
+                                    <!-- <td>{{item.SubjectOne}}</td>
+                                    <td>{{item.SubjectTwo}}</td>
+                                    <td>{{item.SubjectThree}}</td>
+                                    <td>{{item.SubjectFour}}</td>
+                                    <td>{{item.SubjectFive}}</td>
+                                    <td>{{item.SubjectSix}}</td>
+                                    <td>{{item.IsPromotedToHigherClass?'Yes':'No'}}</td>
+                                    <td>{{item.PromotedClass}}</td>
+                                    <td>{{item.SchoolDues}}</td>
+                                    <td>{{item.IsConcessionAvailed?'Yes':'No'}}</td>
+                                    <td>{{item.TotalWorkingDays}}</td>
+                                    <td>{{item.TotalPresentDays}}</td>
+                                    <td>{{item.IsNCC?'Yes':'No'}}</td> -->
+                                    <td>{{item.ExtraActivities}}</td>
+                                    <td>{{item.GeneralConduct}}</td>
+                                    <td>{{item.LeavingReason}}</td>
+                                    <td>{{item.OtherRemarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

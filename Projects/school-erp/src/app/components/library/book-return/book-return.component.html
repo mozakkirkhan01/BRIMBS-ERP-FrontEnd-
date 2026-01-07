@@ -1,0 +1,163 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4 mb-3">
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formIssueBook="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-6">
+                            <mat-label>Select Book</mat-label>
+                            <input matInput name="BookStockId" (ngModelChange)="filterBookStockList($event)"
+                                placeholder="Search By Accession No / Book Name / Publisher / Author"
+                                [(ngModel)]="SearchBook" [matAutocomplete]="autoBook" required>
+                            <mat-autocomplete #autoBook="matAutocomplete" (optionSelected)="afterBookSelected($event)">
+                                <mat-option *ngFor="let option of BookStockList" id="{{option.BookStockId}}"
+                                    [value]="option.SearchBook">{{option.SearchBook}}</mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="SearchBook" color="primary" (click)="clearBook()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>Required field !!</mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="row" *ngIf="IssueBook.IssueBookId>0">
+                        <div class="col-sm-6">
+                            <h3 class="header-text">Book Detail</h3>
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-12">
+                                    <mat-label>Book Name</mat-label>
+                                    <input matInput name="BookName" [(ngModel)]="IssueBook.BookStock.Book.BookName"
+                                        disabled>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Publisher</mat-label>
+                                    <input matInput name="Publisher" [(ngModel)]="IssueBook.BookStock.Book.Publisher"
+                                        disabled>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Author</mat-label>
+                                    <input matInput name="Author" [(ngModel)]="IssueBook.BookStock.Book.Author"
+                                        disabled>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Edition</mat-label>
+                                    <input matInput name="Edition" [(ngModel)]="IssueBook.BookStock.Book.Edition"
+                                        disabled>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Racks</mat-label>
+                                    <input matInput name="RackIds" [(ngModel)]="IssueBook.BookStock.Book.RackIds"
+                                        disabled>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <h3 class="header-text">Book Issue Detail</h3>
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Issue Date</mat-label>
+                                    <input matInput name="IssueDate"
+                                        value="{{IssueBook.IssueDate|date:'dd-MM-yyy HH:mm a'}}" disabled>
+                                </mat-form-field>
+                                <ng-container *ngIf="Staff.StaffName">
+                                    <mat-form-field appearance="outline" class="col-sm-6">
+                                        <mat-label>Staff Name</mat-label>
+                                        <input matInput name="StaffName" [(ngModel)]="Staff.StaffName" disabled>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-4">
+                                        <mat-label>Staff Code</mat-label>
+                                        <input matInput name="StaffCode" [(ngModel)]="Staff.StaffCode" disabled>
+                                    </mat-form-field>
+
+                                    <!-- <mat-form-field appearance="outline" class="col-sm-4">
+                                        <mat-label>Mobile No</mat-label>
+                                        <input type="number" matInput name="MobileNo" [(ngModel)]="Staff.MobileNo"
+                                            disabled>
+                                    </mat-form-field> -->
+
+                                    <mat-form-field appearance="outline" class="col-sm-8">
+                                        <mat-label>Full Address</mat-label>
+                                        <input matInput name="FullAddress" [(ngModel)]="Staff.FullAddress" disabled>
+                                    </mat-form-field>
+                                </ng-container>
+                                <ng-container *ngIf="Pupil.PupilName">
+                                    <mat-form-field appearance="outline" class="col-sm-6">
+                                        <mat-label>{{recordPupil}} Name</mat-label>
+                                        <input matInput name="PupilName" [(ngModel)]="Pupil.PupilName" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-4">
+                                        <mat-label>Admission No.</mat-label>
+                                        <input matInput name="AdmissionNo" [(ngModel)]="Pupil.AdmissionNo" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-4">
+                                        <mat-label>Mobile No.</mat-label>
+                                        <input matInput name="PupilMobileNo" [(ngModel)]="Pupil.MobileNo" disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-4">
+                                        <mat-label>Alternate No.</mat-label>
+                                        <input matInput name="PupilAlternateNo" [(ngModel)]="Pupil.AlternateNo"
+                                            disabled>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="col-sm-12">
+                                        <mat-label>Address</mat-label>
+                                        <input matInput name="PupilCorrespondenceAddress"
+                                            [(ngModel)]="Pupil.CorrespondenceAddress" disabled>
+                                    </mat-form-field>
+                                </ng-container>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Return Date</mat-label>
+                                    <input matInput name="ReturnDate" [(ngModel)]="IssueBook.ReturnDate"
+                                        (ngModelChange)="changeReturnDate()" [matDatepicker]="ReturnDatePicker"
+                                        required>
+                                    <mat-datepicker-toggle matIconSuffix
+                                        [for]="ReturnDatePicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #ReturnDatePicker></mat-datepicker>
+                                    <mat-error>required !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>No of Days</mat-label>
+                                    <input matInput name="NoOfDays" value="{{IssueBook.NoOfDays}}" disabled>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Fine Amount</mat-label>
+                                    <input type="number" placeholder="Fine Amount" matInput name="FineAmount"
+                                        [(ngModel)]="IssueBook.FineAmount">
+                                    <mat-error>required !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Action</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="IssueBook.IssueBookStatus" required>
+                                        <ng-container *ngFor="let m1 of IssueBookStatusList">
+                                            <mat-option [value]="m1.Key" *ngIf="m1.Key !=1">{{m1.Value}}</mat-option>
+                                        </ng-container>
+                                    </mat-select>
+                                    <mat-error>required !!</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center" *ngIf="IssueBook.IssueBookId > 0">
+                <button mat-raised-button color="primary" (click)="returnBook()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

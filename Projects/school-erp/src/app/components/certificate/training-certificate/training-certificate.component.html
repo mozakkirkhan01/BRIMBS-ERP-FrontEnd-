@@ -1,0 +1,71 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body">
+                <form #formTrainingCertificate="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-5">
+                            <mat-label>Select Teacher</mat-label>
+                            <input matInput #StaffName="ngModel" name="StaffName"
+                                (ngModelChange)="filterStaffList($event)" placeholder="Enter Teacher Name"
+                                [(ngModel)]="TrainingCertificate.StaffName" [matAutocomplete]="autoStaffName" required>
+                            <mat-autocomplete #autoStaffName="matAutocomplete"
+                                (optionSelected)="afterStaffSeleted($event)">
+                                <mat-option *ngFor="let option of StaffList" [id]="option.StaffId"
+                                    [value]="option.StaffName">
+                                    {{option.StaffName}}
+                                </mat-option>
+                            </mat-autocomplete>
+                            <button mat-icon-button matSuffix *ngIf="TrainingCertificate.StaffName" color="primary"
+                                (click)="clearStaff()">
+                                <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                            </button>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>Training Date</mat-label>
+                            <input matInput name="TrainingDate" [(ngModel)]="TrainingCertificate.TrainingDateDT"
+                                required [matDatepicker]="TrainingDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="TrainingDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #TrainingDatePicker touchUi="true"></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-4">
+                            <mat-label>Conducted By</mat-label>
+                            <input matInput name="ConductedBy" [(ngModel)]="TrainingCertificate.ConductedBy" required>
+                            <mat-error>required field !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-12">
+                            <mat-label>Topic</mat-label>
+                            <input matInput name="Topic" [(ngModel)]="TrainingCertificate.Topic" required>
+                            <mat-error>required field !!</mat-error>
+                        </mat-form-field>
+
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <button mat-raised-button color="primary"
+                    (click)="saveTrainingCertificate()">{{TrainingCertificate.TrainingCertificateId >
+                    0 ? 'Update':'Submit'}}</button>
+            </div>
+        </div>
+    </section>
+</main>

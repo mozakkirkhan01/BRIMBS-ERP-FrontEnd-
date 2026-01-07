@@ -1,0 +1,186 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4 mb-3">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                (click)="newProduct()">New Product</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-container overflow-auto">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                <th style="cursor:pointer;" (click)="sort('ProductName')">Product Name</th>
+                                <th style="cursor:pointer;" (click)="sort('ManufacturerName')">Manufacturer</th>
+                                <th style="cursor:pointer;" (click)="sort('HSNCode')">HSN</th>
+                                <th style="cursor:pointer;" (click)="sort('UnitName')">Unit</th>
+                                <th style="cursor:pointer;" (click)="sort('MRP')">MRP</th>
+                                <th style="cursor:pointer;" (click)="sort('GSTValue')">GST (%)</th>
+                                <th style="cursor:pointer;" (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of ProductList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td *ngIf="action.CanEdit || action.CanDelete">
+                                    <button *ngIf="action.CanEdit" class="btn btn-sm btn-warning"
+                                        (click)="editProduct(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button *ngIf="action.CanDelete" class="btn btn-sm btn-danger ml-10"
+                                        (click)="deleteProduct(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
+                                <td>{{item.ProductName}}</td>
+                                <td>{{item.ManufacturerName}}</td>
+                                <td>{{item.HSNCode}}</td>
+                                <td>{{item.UnitName}}</td>
+                                <td>{{item.MRP|money}}</td>
+                                <td>{{item.GSTValue}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="modal fade" *ngIf="action.CanEdit || action.CanCreate" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Product.ProductId > 0
+                        ?'Update':'New'}} Product
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form #formProduct="ngForm" class="d-flex justify-content-evenly flex-wrap">
+                        <div class="container">
+                            <div class="row">
+
+                                <mat-form-field appearance="outline" class="col-sm-8">
+                                    <mat-label>Product Name</mat-label>
+                                    <input matInput name="ProductName" [(ngModel)]="Product.ProductName" required>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>Unit</mat-label>
+                                    <mat-select name="UnitId" [(ngModel)]="Product.UnitId" required>
+                                        <mat-option [value]="m1.UnitId"
+                                            *ngFor="let m1 of UnitList">{{m1.UnitName}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Manufacturer</mat-label>
+                                    <input matInput name="ManufacturerId"
+                                        (ngModelChange)="filterManufacturerList($event)"
+                                        placeholder="Enter Manufacturer Name" [(ngModel)]="Product.ManufacturerName"
+                                        [matAutocomplete]="autoManufacturer">
+                                    <mat-autocomplete #autoManufacturer="matAutocomplete"
+                                        (optionSelected)="afterManufacturerSelected($event)">
+                                        <mat-option *ngFor="let option of ManufacturerList" [id]="option.ManufacturerId"
+                                            [value]="option.ManufacturerName">{{option.ManufacturerName}}</mat-option>
+                                    </mat-autocomplete>
+                                    <button mat-icon-button matSuffix *ngIf="Product.ManufacturerName" color="primary"
+                                        (click)="clearManufacturer()">
+                                        <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                                    </button>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>HSN Code</mat-label>
+                                    <input matInput name="HSNCode" [(ngModel)]="Product.HSNCode">
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>MRP</mat-label>
+                                    <input matInput name="MRP" [(ngModel)]="Product.MRP" required>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>GST (%)</mat-label>
+                                    <input matInput name="GSTValue" [(ngModel)]="Product.GSTValue" required>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-4">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="Product.Status" required>
+                                        <mat-option [value]="m1.Key"
+                                            *ngFor="let m1 of StatusList">{{m1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required field !!</mat-error>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveProduct()">{{Product.ProductId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

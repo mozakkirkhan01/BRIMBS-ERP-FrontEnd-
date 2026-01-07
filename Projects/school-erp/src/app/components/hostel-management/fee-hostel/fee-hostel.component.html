@@ -1,0 +1,108 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                        <mat-label>Class</mat-label>
+                        <mat-select #ClassId="ngModel" name="ClassId" [(ngModel)]="FeeHostel.ClassId" (selectionChange)="getFeeHostelList()">
+                            <mat-option [value]="class.ClassId"
+                                *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Class is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-sm-4">
+                        <mat-label [ariaSetSize]="8">Hostel Duration</mat-label>
+                        <mat-select #HostelDurationId="ngModel" name="HostelDurationIdId"
+                            [(ngModel)]="FeeHostel.HostelDurationId" (selectionChange)="getFeeHostelList()">
+                            <mat-option [value]="option.HostelDurationId"
+                                *ngFor="let option of HostelDurationList;">{{option.FromDate | date : "dd MMM yyyy"}}
+                                to {{option.ToDate | date : "dd MMM yyyy"}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Hostel Duration is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="table-container ">
+                    <div class="row" *ngFor="let Hostel of FeeHostelList;let i1 = index">
+                        <span *ngIf="Hostel.FeeHostelList.length > 0">
+                            <h3 class="header-text">{{(i1+1) +". " + Hostel.HostelName}}</h3>
+                            <!-- <strong style="white-space: nowrap;" #HostelId="ngModel"
+                                [(ngModel)]="Hostel.HostelHostelId">{{(i1+1) +". " + Hostel.HostelName}}</strong> -->
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Fee Head</th>
+                                        <th>Amount</th>
+                                        <th>Compulsory</th>
+                                        <th>Active</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody *ngIf="action.CanEdit || action.CanCreate">
+                                    <tr *ngFor="let FeeHostel of Hostel.FeeHostelList;let i = index ">
+                                        <td>{{i+1}}</td>
+                                        <td>{{FeeHostel.HeadName}}</td>
+                                        <td><input class="form-control" type="number" #FeeAmount="ngModel"
+                                                [(ngModel)]="FeeHostel.FeeAmount" style="max-width: 120px;" /></td>
+                                        <td>
+                                            <mat-checkbox [(ngModel)]="FeeHostel.IsCompulsory"
+                                                color="primary"></mat-checkbox>
+                                        </td>
+                                        <td>
+                                            <mat-checkbox [(ngModel)]="FeeHostel.IsActive"
+                                                color="primary"></mat-checkbox>
+                                        </td>
+                                        <td><input class="form-control" #Remarks="ngModel"
+                                                [(ngModel)]="FeeHostel.Remarks" /></td>
+                                    </tr>
+                                </tbody>
+
+                                <tbody *ngIf="!action.CanEdit && !action.CanCreate">
+                                    <tr *ngFor="let FeeHostel of Hostel.FeeHostelList;let i = index ">
+                                        <td>{{i+1}}</td>
+                                        <td>{{FeeHostel.HeadName}}</td>
+                                        <td>{{FeeHostel.FeeAmount|money}}</td>
+                                        <td>{{FeeHostel.IsCompulsory?'Yes':'No'}}</td>
+                                        <td>{{FeeHostel.IsActive?'Yes':'No'}}</td>
+                                        <td>{{FeeHostel.Remarks}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </span>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div *ngIf="FeeHostelList.length > 0 && (action.CanEdit || action.CanCreate)" class="card-footer">
+                <div style="text-align:center;">
+                    <button class="btn btn-primary" (click)="saveFeeHostel(HostelDurationId)">Submit</button>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>

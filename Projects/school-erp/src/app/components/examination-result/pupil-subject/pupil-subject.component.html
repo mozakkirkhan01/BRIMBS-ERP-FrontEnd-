@@ -1,0 +1,136 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #formPupilSubject="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Session</mat-label>
+                            <mat-select #SessionId="ngModel" (selectionChange)="PupilSubjectList = []" name="SessionId"
+                                [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                                <mat-option [value]="e1.SessionId"
+                                    *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Class</mat-label>
+                            <mat-select #ClassId="ngModel" (selectionChange)="PupilSubjectList = [];changeClass()"
+                                name="ClassId" [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                                <mat-option [value]="e1.ClassId"
+                                    *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Class is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Section</mat-label>
+                            <mat-select #SectionId="ngModel" (selectionChange)="PupilSubjectList = [];" name="SectionId"
+                                [(ngModel)]="FilterModel.SectionId">
+                                <mat-option [value]="e1.SectionId"
+                                    *ngFor="let e1 of SectionList">{{e1.SectionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Section is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-2 mb-1">
+                            <button mat-flat-button color="primary" (click)="getPupilSubjectList()">Search</button>
+                        </div>
+                        <div class="col-sm-4 mb-1 text-right">
+                            <input class="form-check-input me-1" name="isChangeAll" type="checkbox" [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                            <label for="isChangeAll" class="text-link text-blue">Allow to changes all row while changing first row </label>
+                        </div>
+
+                    </div>
+                </form>
+                <div class="row">
+                    <div class="col-sm-12">
+                        
+
+                        <div class="dataTable-top">
+                            <div class="dataTable-dropdown d-flex">
+                                <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                    <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                                </select>
+                                <span class="ms-2">Entries per page</span>
+                            </div>
+                            <div class="dataTable-search">
+                                <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                    placeholder="Search..." type="text">
+                            </div>
+                        </div>
+                       
+                        <div class="table-container overflow-auto">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">#</th>
+                                        <th rowspan="2" (click)="sort('AdmissionNo')">Admission No.</th>
+                                        <th rowspan="2" style="min-width: 160px;" (click)="sort('PupilName')">Pupil Name
+                                        </th>
+                                        <th rowspan="2" *ngIf="FilterModel.SectionId == null"
+                                            (click)="sort('SectionName')">Section</th>
+                                        <th rowspan="2" (click)="sort('RollNo')">Roll No</th>
+                                        <th *ngFor="let s1 of SubjectNoList" class="text-center"
+                                            style="min-width: 160px;"> Subject {{s1.No}}</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-center" *ngFor="let s1 of SubjectNoList">
+                                            <input class="form-check-input me-1" [(ngModel)]="s1.IsOptional" type="checkbox" [id]="'sub_'+s1.No">
+                                            <label for="sub_{{s1.No}}">Optional</label>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of PupilSubjectList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i2 = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i2+ 1}}</td>
+                                        <td>{{item.AdmissionNo}}</td>
+                                        <td>{{item.PupilName}}</td>
+                                        <td *ngIf="FilterModel.SectionId == null">{{item.SectionName}}</td>
+                                        <td>{{item.RollNo}}</td>
+                                        <td *ngFor="let c1 of item.ClassSubjectList">
+                                            <select class="form-select" (change)="changeSubject(i2,c1)"
+                                                [(ngModel)]="c1.ClassSubjectId">
+                                                <option value="0">--Select--</option>
+                                                <option [value]="s1.ClassSubjectId" *ngFor="let s1 of ClassSubjectList">
+                                                    {{s1.SubjectName}}</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dataTable-bottom">
+                            <pagination-controls (pageChange)="p=$event" style="float:right;"
+                                class="my-pagination"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="PupilSubjectList.length > 0">
+                <button type="button" mat-raised-button (click)="PupilSubjectList =[]" color="warn"
+                    class="me-2">Cancel</button>
+                <button mat-raised-button color="primary" (click)="savePupilSubject()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

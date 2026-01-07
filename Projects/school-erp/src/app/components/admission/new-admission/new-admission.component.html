@@ -1,0 +1,736 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+	<div class="pagetitle">
+		<h1>{{action.MenuTitle}}</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+				<li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+				<li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+			</ol>
+		</nav>
+	</div>
+	<section class="section dashboard">
+		<div class="card">
+			<div class="card-body ">
+				<form #formPupil="ngForm" autocomplete="off">
+					<div class="container">
+						<div class="row mt-2" *ngIf="actionType==1">
+							<mat-form-field appearance="outline" class="col-sm-6">
+								<mat-label>Select Pupil</mat-label>
+								<input matInput #SearchPupil="ngModel" name="SearchPupil"
+									placeholder="Enter Admission No / Pupil Name / Class Name / Section Name"
+									(ngModelChange)="filterPupilList($event)" [(ngModel)]="Pupil.SearchPupil"
+									[matAutocomplete]="autoSearchPupil" required>
+								<mat-autocomplete #autoSearchPupil="matAutocomplete"
+									(optionSelected)="afterPupilSeleted($event)">
+									<mat-option *ngFor="let option of PupilList" [id]="option.PupilAdmissionId"
+										[value]="option.SearchPupil">
+										{{option.SearchPupil}}
+									</mat-option>
+								</mat-autocomplete>
+								<button mat-icon-button matSuffix *ngIf="Pupil.SearchPupil" color="primary"
+									(click)="clearPupil()">
+									<mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+								</button>
+								<mat-error>Required Field !!</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="row mt-2" *ngIf="actionType==2">
+							<mat-form-field appearance="outline" class="col-sm-6">
+								<mat-label>Select Registration</mat-label>
+								<input matInput #SearchRegistration="ngModel" name="SearchRegistration"
+									placeholder="Enter Registraion No / Registration Name / Father Name"
+									(ngModelChange)="filterRegistrationList($event)"
+									[(ngModel)]="Pupil.SearchRegistration" [matAutocomplete]="autoSearchRegistration"
+									required>
+								<mat-autocomplete #autoSearchRegistration="matAutocomplete"
+									(optionSelected)="afterRegistrationSeleted($event)">
+									<mat-option *ngFor="let option of RegistrationList" [id]="option.RegistrationId"
+										[value]="option.SearchRegistration">
+										{{option.SearchRegistration}}
+									</mat-option>
+								</mat-autocomplete>
+								<button mat-icon-button matSuffix *ngIf="Pupil.SearchRegistration" color="primary"
+									(click)="clearRegistration()">
+									<mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+								</button>
+								<mat-error>Required Field !!</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div
+							*ngIf="(actionType!=1 || Pupil.PupilId != null) &&(actionType != 2 ||Pupil.RegistrationId != null)">
+							<h3 class="header-text">Personal Information</h3>
+							<div class="row">
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Pupil Name</mat-label>
+									<input matInput #PupilName="ngModel" name="PupilName" [(ngModel)]="Pupil.PupilName"
+										required>
+									<mat-error>required field !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2" *ngIf="Pupil.PupilId == null">
+									<mat-label>Pupil Type</mat-label>
+									<mat-select name="PupilTypeId" (selectionChange)="getFeeAdmissionList()"
+										[(ngModel)]="Pupil.PupilTypeId" required>
+										<mat-option [value]="option.PupilTypeId" *ngFor="let option of PupilTypeList;">
+											{{option.PupilTypeName}}
+										</mat-option>
+									</mat-select>
+									<mat-error>
+										Required field !!
+									</mat-error>
+								</mat-form-field>
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>DOB</mat-label>
+									<input matInput #DOB="ngModel" name="DOB" [(ngModel)]="Pupil.DOB" required
+										[matDatepicker]="DOBPicker">
+									<mat-datepicker-toggle matIconSuffix [for]="DOBPicker"></mat-datepicker-toggle>
+									<mat-datepicker touchUi #DOBPicker></mat-datepicker>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Mobile No.</mat-label>
+									<input pattern="[- +()0-9]{10,10}" matInput type="number" #MobileNo="ngModel"
+										name="MobileNo" [(ngModel)]="Pupil.MobileNo">
+									<mat-error>Invalid mobile number !!</mat-error>
+								</mat-form-field>
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Alternate No</mat-label>
+									<input pattern="[- +()0-9]{10,10}" matInput type="number" #AlternateNo="ngModel"
+										name="AlternateNo" [(ngModel)]="Pupil.AlternateNo">
+									<mat-error>Invalid alternate number !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Email</mat-label>
+									<input type="email" pattern="^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$" matInput
+										#Email="ngModel" name="Email" email="true" [(ngModel)]="Pupil.Email">
+									<mat-error>Invalid Email !!</mat-error>
+								</mat-form-field>
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Aadhaar No.</mat-label>
+									<input pattern="[0-9]{12,12}" matInput type="number" #AadhaarNo="ngModel"
+										name="AadhaarNo" [(ngModel)]="Pupil.AadhaarNo">
+									<mat-error>Invalid field !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>PEN</mat-label>
+									<input matInput type="number" #Pen="ngModel" name="Pen"
+										[(ngModel)]="Pupil.Pen">
+									<mat-error>Invalid field !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Gender</mat-label>
+									<mat-select #Gender="ngModel" name="Gender" [(ngModel)]="Pupil.Gender" required>
+										<mat-option [value]="gender.Key"
+											*ngFor="let gender of GenderList">{{gender.Value}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Category</mat-label>
+									<mat-select #Category="ngModel" name="Category" [(ngModel)]="Pupil.Category">
+										<mat-option [value]="category.Key"
+											*ngFor="let category of CategoryList">{{category.Value}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Blood Group</mat-label>
+									<mat-select #BloodGroup="ngModel" name="BloodGroup" [(ngModel)]="Pupil.BloodGroup">
+										<mat-option [value]="Blood.Key"
+											*ngFor="let Blood of BloodGroupList">{{Blood.Value}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Religion</mat-label>
+									<mat-select #Religion="ngModel" name="Religion" [(ngModel)]="Pupil.Religion">
+										<mat-option [value]="religion.Key"
+											*ngFor="let religion of ReligionList">{{religion.Value}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Nationality</mat-label>
+									<mat-select #Nationality="ngModel" name="Nationality"
+										[(ngModel)]="Pupil.Nationality">
+										<mat-option [value]="nationality.Key"
+											*ngFor="let nationality of NationalityList">{{nationality.Value}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+							</div>
+
+							<h3 class="header-text">Guardian Information</h3>
+							<div class="row">
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Father's Name</mat-label>
+									<input matInput #FatherName="ngModel" name="FatherName"
+										[(ngModel)]="Pupil.FatherName">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Father's Occupation</mat-label>
+									<input matInput #FatherOccupation="ngModel" name="FatherOccupation"
+										[(ngModel)]="Pupil.FatherOccupation">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Mother's Name</mat-label>
+									<input matInput #MotherName="ngModel" name="MotherName"
+										[(ngModel)]="Pupil.MotherName">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Mother's Occupation</mat-label>
+									<input matInput #MotherOccupation="ngModel" name="MotherOccupation"
+										[(ngModel)]="Pupil.MotherOccupation">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Family Annual Income</mat-label>
+									<input type="number" matInput #FamilyAnnualIncome="ngModel"
+										name="FamilyAnnualIncome" [(ngModel)]="Pupil.FamilyAnnualIncome">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Guardian Mobile No.</mat-label>
+									<input matInput type="number" pattern="[- +()0-9]{10,10}"
+										#GuardianMobileNo="ngModel" name="GuardianMobileNo"
+										[(ngModel)]="Pupil.GuardianMobileNo">
+									<mat-error>Invalid field !!</mat-error>
+								</mat-form-field>
+							</div>
+
+							<h3 class="header-text">Address</h3>
+							<div class="row">
+
+								<h4 class="text-sub-header">Correspondence Address</h4>
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Correspondence Address</mat-label>
+									<textarea matInput #CorrespondenceAddress="ngModel" name="CorrespondenceAddress"
+										[(ngModel)]="Pupil.CorrespondenceAddress"></textarea>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>State</mat-label>
+									<mat-select name="CorrespondenceState" (selectionChange)="onStateChange(1,true)"
+										[(ngModel)]="Pupil.CorrespondenceStateId">
+										<mat-option [value]="null">--Select--</mat-option>
+										<mat-option [value]="option.StateId" *ngFor="let option of StateList;">
+											{{option.StateName}}
+										</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>City</mat-label>
+									<mat-select #CorrespondenceCityId="ngModel" name="CorrespondenceCityId"
+										[(ngModel)]="Pupil.CorrespondenceCityId">
+										<mat-option [value]="option.CityId"
+											*ngFor="let option of CrosspondanceCityList;">
+											{{option.CityName}}
+										</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Pincode</mat-label>
+									<input type="number" matInput #CorrespondencePinCode="ngModel"
+										name="CorrespondencePinCode" [(ngModel)]="Pupil.CorrespondencePinCode">
+								</mat-form-field>
+
+							</div>
+							<div class="row">
+								<h4 class="text-sub-header">Permanent Address
+									<label class="float-right"><input id="sameAsCorrespondence" type="checkbox"
+											class="form-check-input me-2" (click)="sameAsCorrespondence($event)">
+										<span class="form-check-label text-link text-blue-sm"
+											for="sameAsCorrespondences">Same as Correspondence Address</span></label>
+								</h4>
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Permanent Address</mat-label>
+									<textarea matInput #PermanentAddress="ngModel" name="PermanentAddress"
+										[(ngModel)]="Pupil.PermanentAddress"></textarea>
+								</mat-form-field>
+
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>State</mat-label>
+									<mat-select name="PermanentState" (selectionChange)="onStateChange(2,true)"
+										[(ngModel)]="Pupil.PermanentStateId">
+										<mat-option [value]="null">--Select--</mat-option>
+										<mat-option [value]="option.StateId" *ngFor="let option of StateList;">
+											{{option.StateName}}
+										</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>City</mat-label>
+									<mat-select #PermanentCityId="ngModel" name="PermanentCityId"
+										[(ngModel)]="Pupil.PermanentCityId">
+										<mat-option [value]="option.CityId" *ngFor="let option of PermanentCityList;">
+											{{option.CityName}}
+										</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Pincode</mat-label>
+									<input type="number" matInput name="PermanentPinCode"
+										[(ngModel)]="Pupil.PermanentPinCode">
+								</mat-form-field>
+
+							</div>
+							<h3 class="header-text">Previous School Information (If Any)</h3>
+							<div class="row">
+
+								<mat-form-field appearance="outline" class="col-sm-3">
+									<mat-label>Previous School</mat-label>
+									<input matInput #PreviousSchoolName="ngModel" name="PreviousSchoolName"
+										[(ngModel)]="Pupil.PreviousSchoolName">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Board</mat-label>
+									<mat-select name="PreviousBoard" (selectionChange)="changePreviousBoard()"
+										[(ngModel)]="Pupil.PreviousBoard">
+										<mat-option [value]="m1.Key"
+											*ngFor="let m1 of BoardList">{{m1.Value}}</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-3" *ngIf="Pupil.PreviousBoard == 20">
+									<mat-label>Board Name</mat-label>
+									<input matInput #PreviousSchoolBoard="ngModel" name="PreviousSchoolBoard"
+										[(ngModel)]="Pupil.PreviousSchoolBoard">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Previous Class</mat-label>
+									<input matInput #PreviousSchoolClass="ngModel" name="PreviousSchoolClass"
+										[(ngModel)]="Pupil.PreviousSchoolClass">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>TC No.</mat-label>
+									<input matInput #PreviousSchoolTCNo="ngModel" name="PreviousSchoolTCNo"
+										[(ngModel)]="Pupil.PreviousSchoolTCNo">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>TC Date</mat-label>
+									<input matInput #PreviousSchoolTCDate="ngModel" name="PreviousSchoolTCDate"
+										[(ngModel)]="Pupil.PreviousSchoolTCDate"
+										[matDatepicker]="PreviousSchoolTCDatePicker">
+									<mat-datepicker-toggle matIconSuffix
+										[for]="PreviousSchoolTCDatePicker"></mat-datepicker-toggle>
+									<mat-datepicker #PreviousSchoolTCDatePicker></mat-datepicker>
+								</mat-form-field>
+							</div>
+
+							<h3 class="header-text">Class Details</h3>
+							<div class="row">
+
+								<!-- <mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Admission Type</mat-label>
+								<mat-select #AdmissionType="ngModel" name="AdmissionType"
+									[(ngModel)]="PupilAdmission.AdmissionType" required>
+									<mat-option [value]="admissionType.Key"
+										*ngFor="let admissionType of AdmissionTypeList">{{admissionType.Value}}</mat-option>
+								</mat-select>
+								<mat-error
+									*ngIf="(AdmissionType.dirty  || AdmissionType.touched) || (AdmissionType.invalid && isSubmitted)">
+									Admission Type Name is required !!
+								</mat-error>
+							</mat-form-field> -->
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Admission Date</mat-label>
+									<input matInput #AdmissionDate="ngModel" name="AdmissionDate"
+										[(ngModel)]="PupilAdmission.AdmissionDate" required
+										[matDatepicker]="AdmissionDatePicker">
+									<mat-datepicker-toggle matIconSuffix
+										[for]="AdmissionDatePicker"></mat-datepicker-toggle>
+									<mat-datepicker touchUi #AdmissionDatePicker></mat-datepicker>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Session</mat-label>
+									<mat-select (selectionChange)="getAdmissionRollNo();getFeeAdmissionList()"
+										name="Session" [(ngModel)]="PupilAdmission.SessionId" required>
+										<mat-option [value]="option.SessionId" *ngFor="let option of SessionList;">
+											{{option.SessionName}}
+										</mat-option>
+									</mat-select>
+									<mat-error>Required field !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Class</mat-label>
+									<mat-select name="Class"
+										(selectionChange)="onClassChange(true);getAdmissionRollNo();getFeeAdmissionList()"
+										[(ngModel)]="PupilAdmission.ClassId" required>
+										<mat-option [value]="option.ClassId" *ngFor="let option of ClassList;">
+											{{option.ClassName}}
+										</mat-option>
+									</mat-select>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Section</mat-label>
+									<mat-select name="Section" [(ngModel)]="PupilAdmission.SectionId" required>
+										<mat-option [value]="option.SectionId" *ngFor="let option of SectionList;">
+											{{option.SectionName}}
+										</mat-option>
+									</mat-select>
+									<mat-error>Required field !!</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Admission No.</mat-label>
+									<input matInput #AdmissionNo="ngModel" name="AdmissionNo"
+										[(ngModel)]="Pupil.AdmissionNo" required>
+									<mat-error>
+										Required field !!
+									</mat-error>
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Roll No</mat-label>
+									<input matInput type="number" #RollNo="ngModel" name="RollNo"
+										[(ngModel)]="PupilAdmission.RollNo">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Student Height</mat-label>
+									<input matInput type="number" #Height="ngModel" name="Height"
+										[(ngModel)]="PupilAdmission.Height">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-2">
+									<mat-label>Student Weight</mat-label>
+									<input matInput type="number" #Weight="ngModel" name="Weight"
+										[(ngModel)]="PupilAdmission.Weight">
+								</mat-form-field>
+
+								<mat-form-field appearance="outline" class="col-sm-8">
+									<mat-label>Remarks</mat-label>
+									<textarea matInput #Remaks="ngModel" name="Remaks"
+										[(ngModel)]="Pupil.Remaks"></textarea>
+								</mat-form-field>
+
+							</div>
+							<div *ngIf="Pupil.PupilId == null">
+								<h3 class="header-text">
+									<input type="checkbox" id="IsTransport" [(ngModel)]="Pupil.IsTransport"
+										name="IsTransport">
+									<label for="IsTransport" class="ml-10 text-link"> Transport Detail (If Any)</label>
+								</h3>
+								<div class="row" *ngIf="Pupil.IsTransport">
+									<mat-form-field appearance="outline" class="col-sm-2">
+										<mat-label>Transport Batch</mat-label>
+										<mat-select #TransportBatch="ngModel" name="TransportBatch"
+											[(ngModel)]="TransportPupil.TransportBatchId" required autofocus>
+											<mat-option [value]="option.TransportBatchId"
+												*ngFor="let option of TransportBatchList;">
+												{{option.BatchName}}
+											</mat-option>
+										</mat-select>
+										<mat-error>Required filed !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-2">
+										<mat-label>Vehicle</mat-label>
+										<mat-select #Vehicle="ngModel" name="Vehicle"
+											[(ngModel)]="TransportPupil.VehicleId" required autofocus>
+											<mat-option [value]="option.VehicleId" *ngFor="let option of VehicleList;">
+												{{option.VehicleName}}
+											</mat-option>
+										</mat-select>
+										<mat-error>Required filed !!</mat-error>
+									</mat-form-field>
+									<mat-form-field appearance="outline" class="col-sm-2">
+										<mat-label>Pickup Address</mat-label>
+										<input matInput type="text" #PickupAddress="ngModel" name="PickupAddress"
+											[(ngModel)]="TransportPupil.PickupAddress" autofocus>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-2">
+										<mat-label>Pickup Time</mat-label>
+										<input matInput type="time" #PickupTime="ngModel" name="PickupTime"
+											[(ngModel)]="TransportPupil.PickupTime" autofocus>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-2">
+										<mat-label>Start Date</mat-label>
+										<input matInput #StartDate="ngModel" name="StartDate"
+											[(ngModel)]="TransportPupil.StartDate" required autofocus
+											[matDatepicker]="StartDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="StartDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker touchUi #StartDatePicker></mat-datepicker>
+										<mat-error>Required filed !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-2">
+										<mat-label>End Date</mat-label>
+										<input matInput #EndDate="ngModel" name="EndDate"
+											[(ngModel)]="TransportPupil.EndDate" [matDatepicker]="EndDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="EndDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker touchUi #EndDatePicker></mat-datepicker>
+									</mat-form-field>
+
+								</div>
+
+								<h3 class="header-text">
+									<input type="checkbox" id="IsHostel" [(ngModel)]="Pupil.IsHostel" name="IsHostel">
+									<label for="IsHostel" class="ml-10 text-link"> Hostel Detail (If Any)</label>
+								</h3>
+								<div class="row" *ngIf="Pupil.IsHostel">
+									<mat-form-field appearance="outline" class="col-sm-3">
+										<mat-label>Hostel</mat-label>
+										<mat-select #Hostel="ngModel" name="Hostel" (selectionChange)="changeHostel()"
+											[(ngModel)]="HostelPupil.HostelId" required>
+											<mat-option [value]="option.HostelId" *ngFor="let option of HostelList;">
+												{{option.HostelName}}
+											</mat-option>
+										</mat-select>
+										<mat-error>
+											Hostel is <strong>required</strong>
+										</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-3">
+										<mat-label>Select Room</mat-label>
+										<mat-select #HostelRoom="ngModel" name="HostelRoom"
+											[(ngModel)]="HostelPupil.HostelRoomId" required>
+											<mat-option [value]="option.HostelRoomId"
+												*ngFor="let option of HostelRoomList;">
+												{{option.RoomName}}
+											</mat-option>
+										</mat-select>
+										<mat-error>
+											Room is <strong>required</strong>
+										</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-3">
+										<mat-label>Start Date</mat-label>
+										<input matInput #StartDate="ngModel" name="StartDate"
+											[(ngModel)]="HostelPupil.StartDate" required
+											[matDatepicker]="StartDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="StartDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker touchUi #StartDatePicker></mat-datepicker>
+										<mat-error>Start date is required !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-3">
+										<mat-label>End Date</mat-label>
+										<input matInput #EndDate="ngModel" name="EndDate"
+											[(ngModel)]="HostelPupil.EndDate" [matDatepicker]="EndDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="EndDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker touchUi #EndDatePicker></mat-datepicker>
+									</mat-form-field>
+								</div>
+								<h3 class="header-text">
+									<input type="checkbox" id="IsFeePayment" [(ngModel)]="Pupil.IsFeePayment"
+										name="IsFeePayment">
+									<label for="IsFeePayment" class="ml-10 text-link">Take Payment</label>
+								</h3>
+								<div *ngIf="Pupil.IsFeePayment">
+									<div class="row mb-4" *ngIf="FeePaymentDetailList.length > 0">
+										<div class="col-sm-12 table-responsive">
+											<div class="table-reponsive">
+												<table class="table table-bordered table-sm">
+													<thead>
+														<tr>
+															<!-- <th>#</th> -->
+															<th>Head</th>
+															<th>Fee Amount</th>
+															<th *ngIf="action.CanCreate">Paid Amount</th>
+															<th>Waive Off Amount</th>
+															<th style="text-align: right;">Line Total</th>
+															<!-- <th>Remarks</th> -->
+														</tr>
+													</thead>
+													<tbody *ngIf="action.CanCreate">
+														<tr *ngFor="let fee of FeePaymentDetailList;let i1 = index">
+															<!-- <td>
+															<input type="checkbox" (change)="calculateTotal()"
+																[name]="'is_selected_'+i1" [(ngModel)]="fee.IsSelected"
+																[disabled]="fee.IsCompulsory">
+														</td> -->
+															<td>{{fee.HeadName}}</td>
+															<td *ngIf="action.CanCreate">{{fee.InitialAmount}}</td>
+															<td><input type="number"
+																	class="form-control form-control-sm width_money"
+																	[name]="'fee_amount_'+i1"
+																	(change)="changeAmount(fee,1)"
+																	[(ngModel)]="fee.FeeAmount"
+																	[disabled]="fee.IsCompulsory"></td>
+															<td><input type="number" [name]="'waive_off_amount_'+i1"
+																	class="form-control form-control-sm width_money"
+																	(change)="changeAmount(fee,2)"
+																	[(ngModel)]="fee.WaiveOffAmount">
+															</td>
+															<th style="text-align: right;">{{fee.TotalAmount | number
+																:'1.2-2'}}
+															</th>
+															<!-- <td><input type="text" class="form-control form-control-sm" placeholder="Enter Remarks...." [(ngModel)]="fee.Remarks"></td> -->
+														</tr>
+													</tbody>
+
+													<tfoot>
+														<tr>
+															<th colspan="2">Total</th>
+															<th *ngIf="action.CanCreate">{{FeePayment.InitialAmount |
+																number
+																:'1.2-2'}}</th>
+															<th>{{FeePayment.FeeAmount | number :'1.2-2'}}</th>
+															<th>{{FeePayment.WaiveOffAmount | number :'1.2-2'}}</th>
+															<th style="text-align: right;">{{FeePayment.TotalAmount |
+																number
+																:'1.2-2'}}</th>
+														</tr>
+													</tfoot>
+												</table>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<mat-form-field appearance="outline" class="col-sm-4" *ngIf="isRPS">
+											<mat-label>Account</mat-label>
+											<mat-select name="AccountId" [(ngModel)]="FeePayment.AccountId" required>
+												<mat-option [value]="option.AccountId"
+													*ngFor="let option of AccountList;">
+													{{option.AccountNo}}
+												</mat-option>
+											</mat-select>
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="Pupil.PupilId == null">
+											<mat-label>Paid Amount</mat-label>
+											<input type="number" placeholder="Paid Amount" [disabled]="true" matInput
+												name="PaidAmount" [(ngModel)]="FeePayment.PaidAmount">
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2">
+											<mat-label>Due Amount</mat-label>
+											<input type="number" class="text-bold text-danger" [disabled]="true"
+												matInput name="DueAmount" [(ngModel)]="FeePayment.DueAmount">
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="Pupil.PupilId == null">
+											<mat-label>Payment Date</mat-label>
+											<input matInput name="PaymentDate" [(ngModel)]="FeePayment.PaymentDate"
+												required [matDatepicker]="PaymentDatePicker">
+											<mat-datepicker-toggle matIconSuffix
+												[for]="PaymentDatePicker"></mat-datepicker-toggle>
+											<mat-datepicker #PaymentDatePicker></mat-datepicker>
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="Pupil.PupilId == null">
+											<mat-label>Payment Mode</mat-label>
+											<mat-select name="PaymentMode" [(ngModel)]="FeePayment.PaymentMode"
+												required>
+												<mat-option [value]="option.Key"
+													*ngFor="let option of PaymentModeList;">
+													{{option.Value}}
+												</mat-option>
+											</mat-select>
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="FeePayment.PaymentMode > 2">
+											<mat-label>Transaction No</mat-label>
+											<input type="test" placeholder="Transaction No" matInput
+												name="TransactionNo" [(ngModel)]="FeePayment.TransactionNo">
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="FeePayment.PaymentMode == 2">
+											<mat-label>Cheque No</mat-label>
+											<input type="test" placeholder="Cheque No" matInput name="ChequeNo"
+												[(ngModel)]="FeePayment.ChequeNo">
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="FeePayment.PaymentMode == 2">
+											<mat-label>Cheque Date</mat-label>
+											<input matInput name="ChequeDate" [(ngModel)]="FeePayment.ChequeDate"
+												[matDatepicker]="ChequeDatePicker">
+											<mat-datepicker-toggle matIconSuffix
+												[for]="ChequeDatePicker"></mat-datepicker-toggle>
+											<mat-datepicker #ChequeDatePicker></mat-datepicker>
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="FeePayment.PaymentMode == 2">
+											<mat-label>Cheque Bank</mat-label>
+											<input type="test" placeholder="Cheque Bank" matInput name="ChequeBank"
+												[(ngModel)]="FeePayment.ChequeBank">
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-2"
+											*ngIf="FeePayment.PaymentMode == 2">
+											<mat-label>Bank Branch</mat-label>
+											<input type="test" placeholder="Bank Branch" matInput
+												name="ChequeBankBranch" [(ngModel)]="FeePayment.ChequeBankBranch">
+											<mat-error>Required field !!</mat-error>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-4"
+											*ngIf="Pupil.PupilId == null">
+											<mat-label>Remarks</mat-label>
+											<textarea matInput name="Remarks"
+												[(ngModel)]="FeePayment.Remarks"></textarea>
+										</mat-form-field>
+
+										<mat-form-field appearance="outline" class="col-sm-3"
+											*ngIf="FeePayment.WaiveOffAmount>0">
+											<mat-label>Remarks On Waive Off</mat-label>
+											<textarea matInput name="RemarksOnWaiveOff"
+												[(ngModel)]="FeePayment.RemarksOnWaiveOff"></textarea>
+										</mat-form-field>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="card-footer text-center"
+				*ngIf="(action.CanEdit || action.CanCreate) && (actionType!=1 || Pupil.PupilId != null) &&(actionType != 2 ||Pupil.RegistrationId != null)">
+				<button mat-raised-button color="primary" (click)="savePupil()">{{Pupil.PupilId >
+					0 ? 'Update':'Submit'}}</button>
+			</div>
+		</div>
+
+	</section>
+
+</main>

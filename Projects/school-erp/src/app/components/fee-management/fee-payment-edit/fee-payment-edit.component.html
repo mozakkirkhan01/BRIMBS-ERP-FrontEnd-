@@ -1,0 +1,278 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body mt-3">
+                <div class="container">
+                    <form #FeePaymentForm="ngForm">
+                        <div class="row" *ngIf="!isBack">
+                            <mat-form-field appearance="outline" class="col-sm-3 form-group">
+                                <mat-label>Receipt No</mat-label>
+                                <input matInput name="ReceiptNo" placeholder="Enter Receipt No."
+                                    [(ngModel)]="FeePayment.ReceiptNo" required>
+                                <mat-error>Required field !!</mat-error>
+                            </mat-form-field>
+                            <div class="col-sm-2">
+                                <button mat-flat-button color="primary" (click)="getFeePaymentDetail()"><i
+                                        class="bi bi-search"></i> Search</button>
+                            </div>
+                        </div>
+                        <div *ngIf="FeePayment.FeePaymentId" class="mb-4">
+                            <h5 class="header-text">{{Pupil?'Pupil':(Registration?'Registration':'Staff')}} Details</h5>
+                            <div class="row">
+                                <div class="col-lg-2 col-md-3 label text-bold">Receipt No :</div>
+                                <div class="col-lg-4 col-md-3">{{FeePayment.ReceiptNo}}</div>
+
+                                <ng-container *ngIf="Pupil">
+                                    <div class="col-lg-2 col-md-3 label text-bold">Admission No :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.AdmissionNo}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Full Name :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.PupilName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Father's Name :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.FatherName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Class :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.ClassName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Section :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.SectionName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Roll No :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.RollNo}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Mobile No :</div>
+                                    <div class="col-lg-4 col-md-3">{{Pupil.MobileNo}}</div>
+                                </ng-container>
+                                <ng-container *ngIf="Registration">
+                                    <div class="col-lg-2 col-md-3 label text-bold">Registration No :</div>
+                                    <div class="col-lg-4 col-md-3">{{Registration.RegistrationNo}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Full Name :</div>
+                                    <div class="col-lg-4 col-md-3">{{Registration.PupilName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Father's Name :</div>
+                                    <div class="col-lg-4 col-md-3">{{Registration.FatherName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Class :</div>
+                                    <div class="col-lg-4 col-md-3">{{Registration.ClassName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Mobile No :</div>
+                                    <div class="col-lg-4 col-md-3">{{Registration.MobileNo}}</div>
+                                </ng-container>
+                                <ng-container *ngIf="Staff">
+                                    <div class="col-lg-2 col-md-3 label text-bold">Staff Code :</div>
+                                    <div class="col-lg-4 col-md-3">{{Staff.StaffCode}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Staff Name :</div>
+                                    <div class="col-lg-4 col-md-3">{{Staff.StaffName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Father's Name :</div>
+                                    <div class="col-lg-4 col-md-3">{{Staff.FatherName}}</div>
+
+                                    <div class="col-lg-2 col-md-3 label text-bold">Designation :</div>
+                                    <div class="col-lg-4 col-md-3">{{Staff.DesignationName}}</div>
+                                    
+                                    <div class="col-lg-2 col-md-3 label text-bold">Mobile No :</div>
+                                    <div class="col-lg-4 col-md-3">{{Staff.MobileNo}}</div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div [ngClass]="action.CanCreate ?'col-lg-6':'col-lg-12'" class="form-group"
+                            *ngIf="FeePaymentDetailList.length>0">
+                            <h5 class="header-text">Fee Details</h5>
+                            <div>
+                                <div class="table-reponsive">
+                                    <table class="table table-bordered table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Head</th>
+                                                <th>Fee Amount</th>
+                                                <th *ngIf="action.CanCreate">Paid Amount</th>
+                                                <th>Waive Off Amount</th>
+                                                <th style="text-align: right;">Line Total</th>
+                                                <!-- <th>Remarks</th> -->
+                                            </tr>
+                                        </thead>
+                                        <tbody *ngIf="action.CanCreate">
+                                            <tr *ngFor="let fee of FeePaymentDetailList;let i1 = index">
+                                                <th>{{fee.HeadName}}
+                                                    <label class="text-darkblue">{{" [" +
+                                                        (AllFeeForList[fee.FeeFor]|enumCase) + "]"}}</label>
+                                                </th>
+                                                <th *ngIf="action.CanCreate">{{fee.InitialAmount}}</th>
+                                                <td><input type="number" class="form-control form-control-sm"
+                                                        (change)="changeAmount(fee,1)" [(ngModel)]="fee.FeeAmount"
+                                                        [disabled]="fee.IsCompulsory"></td>
+                                                <td><input type="number" class="form-control form-control-sm"
+                                                        (change)="changeAmount(fee,2)" [(ngModel)]="fee.WaiveOffAmount">
+                                                </td>
+                                                <th style="text-align: right;">{{fee.TotalAmount | number
+                                                    :'1.2-2'}}
+                                                </th>
+                                                <!-- <td><input type="text" [(ngModel)]="fee.Remarks"></td> -->
+                                            </tr>
+                                        </tbody>
+
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="1">Total</th>
+                                                <th *ngIf="action.CanCreate">{{FeePayment.InitialAmount | number
+                                                    :'1.2-2'}}</th>
+                                                <th>{{FeePayment.FeeAmount | number :'1.2-2'}}</th>
+                                                <th>{{FeePayment.WaiveOffAmount | number :'1.2-2'}}</th>
+                                                <th style="text-align: right;">{{FeePayment.TotalAmount | number
+                                                    :'1.2-2'}}</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6 form-group" *ngIf="FeePaymentDetailList.length>0 && action.CanCreate">
+                            <h5 class="header-text">Transaction Details</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <form #formFeePayment="ngForm">
+                                        <div class="row">
+
+                                            <div class="col-sm-3 form-group">
+                                                <label class="form-label">Paid Amount <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="number" placeholder="Enter Paid Amount" disabled="disabled"
+                                                    #PaidAmount="ngModel" [(ngModel)]="FeePayment.PaidAmount"
+                                                    name="PaidAmount" class="form-control text-bold text-success"
+                                                    [ngClass]="{'is-invalid':isSubmitted && PaidAmount.invalid}"
+                                                    required>
+
+                                                <div *ngIf="PaidAmount.invalid && (PaidAmount.dirty || PaidAmount.touched || isSubmitted)"
+                                                    class="text-danger">
+                                                    <div *ngIf="PaidAmount.errors?.['required']">
+                                                        Paid amount is required.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 form-group">
+                                                <label class="form-label">Due Amount <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="number" placeholder="Enter Paid Amount" disabled="disabled"
+                                                    [value]="FeePayment.DueAmount" name="PaidAmount"
+                                                    class="form-control text-bold text-danger">
+
+                                            </div>
+                                            <div class="col-sm-6 form-group">
+                                                <label class="form-label">Payment Date <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="date" placeholder="Enter Paid Amount"
+                                                    #PaymentDate="ngModel" [(ngModel)]="FeePayment.PaymentDate"
+                                                    name="PaymentDate" class="form-control"
+                                                    [ngClass]="{'is-invalid':isSubmitted && PaymentDate.invalid}"
+                                                    required>
+
+                                                <div *ngIf="PaymentDate.invalid && (PaymentDate.dirty || PaymentDate.touched || isSubmitted)"
+                                                    class="text-danger">
+                                                    <div *ngIf="PaymentDate.errors?.['required']">required !!</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 form-group">
+                                                <label class="form-label">Payment Mode <span
+                                                        class="text-danger">*</span></label>
+                                                <select class="form-select" #PaymentMode="ngModel"
+                                                    [(ngModel)]="FeePayment.PaymentMode" name="PaymentMode"
+                                                    [ngClass]="{'is-invalid':isSubmitted && PaymentMode.invalid}"
+                                                    required>
+                                                    <option value="">--Select Payment Mode--</option>
+                                                    <option [value]="model.Key" *ngFor="let model of PaymentModeList">
+                                                        {{model.Value}}</option>
+                                                </select>
+                                                <div *ngIf="PaymentMode.invalid && (PaymentMode.dirty || PaymentMode.touched || isSubmitted)"
+                                                    class="text-danger">
+                                                    <div *ngIf="PaymentMode.errors?.['required']">
+                                                        Payment Mode is required.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 form-group" *ngIf="FeePayment.PaymentMode > 2">
+                                                <label class="form-label"> Transaction No </label>
+                                                <input type="text" placeholder="Enter Transaction No"
+                                                    #TransactionNo="ngModel" [(ngModel)]="FeePayment.TransactionNo"
+                                                    name="TransactionNo" class="form-control">
+                                            </div>
+                                            <div class="col-sm-6 form-group" *ngIf="FeePayment.PaymentMode==2">
+                                                <label class="form-label">Cheque No </label>
+                                                <input type="text" placeholder="Enter Cheque No" #ChequeNo="ngModel"
+                                                    [(ngModel)]="FeePayment.ChequeNo" name="ChequeNo"
+                                                    class="form-control">
+                                            </div>
+                                            <div class="col-sm-6 form-group" *ngIf="FeePayment.PaymentMode==2">
+                                                <label class="form-label">Cheque Date </label>
+                                                <input type="date" placeholder="Enter Cheque Date" #ChequeDate="ngModel"
+                                                    [(ngModel)]="FeePayment.ChequeDate" name="ChequeDate"
+                                                    class="form-control">
+                                                <!-- <div *ngIf="ChequeDate.invalid && (ChequeDate.dirty || ChequeDate.touched || isSubmitted)"
+                                                    class="text-danger">
+                                                    <div *ngIf="ChequeDate.errors?.['required']">
+                                                        Cheque Date is required.
+                                                    </div>
+                                                </div> -->
+                                            </div>
+                                            <div class="col-sm-6 form-group" *ngIf="FeePayment.PaymentMode==2">
+                                                <label class="form-label">Cheque Bank </label>
+                                                <input type="text" placeholder="Enter Cheque Bank" #ChequeBank="ngModel"
+                                                    [(ngModel)]="FeePayment.ChequeBank" name="ChequeBank"
+                                                    class="form-control">
+                                            </div>
+                                            <div class="col-sm-6 form-group" *ngIf="FeePayment.PaymentMode==2">
+                                                <label class="form-label">Bank Branch</label>
+                                                <input type="text" placeholder="Enter Cheque Bank Branch"
+                                                    #ChequeBankBranch="ngModel"
+                                                    [(ngModel)]="FeePayment.ChequeBankBranch" name="ChequeBankBranch"
+                                                    class="form-control">
+                                            </div>
+                                            <div class="col-sm-6 form-group">
+                                                <label class="form-label">Remarks</label>
+                                                <textarea placeholder="Enter Remarks" #Remarks="ngModel"
+                                                    [(ngModel)]="FeePayment.Remarks" name="Remarks"
+                                                    class="form-control"></textarea>
+                                            </div>
+                                            <div class="col-sm-6 form-group" *ngIf="FeePayment.WaiveOffAmount>0">
+                                                <label class="form-label">Remarks On Waive Off</label>
+                                                <textarea placeholder="Enter Remarks On Waive Off"
+                                                    #RemarksOnWaiveOff="ngModel"
+                                                    [(ngModel)]="FeePayment.RemarksOnWaiveOff" name="RemarksOnWaiveOff"
+                                                    class="form-control"></textarea>
+                                            </div>
+
+
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="card-footer" style="text-align: center;">
+                                    <button class="btn btn-primary"
+                                        (click)="updateFeePayment(formFeePayment)">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>

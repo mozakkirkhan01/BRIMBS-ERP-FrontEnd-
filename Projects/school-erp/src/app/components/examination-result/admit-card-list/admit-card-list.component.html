@@ -1,0 +1,116 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" class="float-right" [routerLink]="'/admin/admit-card'">New Admit Card</button>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card" >
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>Select Session</mat-label>
+                        <mat-select #SessionId="ngModel" name="SessionId"
+                            [(ngModel)]="FilterModel.SessionId">
+                            <mat-option value="0">All Session</mat-option>
+                            <mat-option [value]="e1.SessionId"
+                                *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Session is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>Select Class</mat-label>
+                        <mat-select #ClassId="ngModel" name="ClassId"
+                            [(ngModel)]="FilterModel.ClassId">
+                            <mat-option [value]="0">All Class</mat-option>
+                            <mat-option [value]="e1.ClassId" *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                        </mat-select>
+                        <mat-error>
+                            Class is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <div class="col-sm-2">
+                        <button mat-flat-button color="primary" (click)="getAdmitCardList()">Search</button>
+                    </div>
+                </div>
+            <div *ngIf="AdmitCardList.length > 0">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th >Action</th>
+                                <th (click)="sort('SessionName')">Session</th>
+                                <th (click)="sort('ClassName')">Class</th>
+                                <th (click)="sort('ExamName')">Exam</th>
+                                <th (click)="sort('PublishDate')">Publish Date</th>
+                                <th (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of AdmitCardList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td>
+                                    <a ngbTooltip="Print Admit Card" (click)="printAdmitCard(item.AdmitCardId)" class="icon-print">
+                                        <i class="bi bi-printer-fill"></i>
+                                    </a>
+                                    <a ngbTooltip="Edit Admit Card" *ngIf="action.CanEdit" class="icon-edit"
+                                        (click)="editAdmitCard(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a ngbTooltip="Delete Admit Card" *ngIf="action.CanDelete" class="icon-delete"
+                                        (click)="deleteAdmitCard(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <td>{{item.SessionName}}</td>
+                                <td>{{item.ClassName}}</td>
+                                <td>{{item.ExamName}}</td>
+                                <td>{{item.PublishDate|date:'dd-MM-yyyy'}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatusList[item.Status]}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="p=$event" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+
+
+            </div>
+        </div>
+    </section>
+</main>

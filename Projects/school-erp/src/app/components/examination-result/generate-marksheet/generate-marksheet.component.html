@@ -1,0 +1,260 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+              </ol>
+            </nav>
+          </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #formMarksheet="ngForm">
+                    <div class="row">
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Session</mat-label>
+                            <mat-select #SessionId="ngModel" (selectionChange)="MarksheetList = [];" name="SessionId"
+                                [(ngModel)]="FilterModel.SessionId" required [autofocus]="true">
+                                <mat-option [value]="e1.SessionId"
+                                    *ngFor="let e1 of SessionList">{{e1.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Term</mat-label>
+                            <mat-select #Term="ngModel" name="Term" [(ngModel)]="FilterModel.Term" required
+                                [autofocus]="true">
+                                <mat-option [value]="e1.Key" *ngFor="let e1 of TermList">{{e1.Value}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Term is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Class</mat-label>
+                            <mat-select #ClassId="ngModel" (selectionChange)="MarksheetList = [];changeClass()"
+                                name="ClassId" [(ngModel)]="FilterModel.ClassId" required [autofocus]="true">
+                                <mat-option [value]="e1.ClassId"
+                                    *ngFor="let e1 of ClassList">{{e1.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Class is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 mb-1">
+                            <mat-label>Select Section</mat-label>
+                            <mat-select #SectionId="ngModel" (selectionChange)="MarksheetList = [];" name="SectionId"
+                                [(ngModel)]="FilterModel.SectionId" required [autofocus]="true">
+                                <!-- <mat-option [value]="0">All Section</mat-option> -->
+                                <mat-option [value]="e1.SectionId"
+                                    *ngFor="let e1 of SectionList">{{e1.SectionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Section is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+
+                        <div class="col-sm-4 mb-1">
+                            <button mat-flat-button color="primary" class="mr-10"
+                                (click)="getMarksheetList()">Search</button>
+                            <button mat-flat-button color="accent" class="mr-10" *ngIf="!FilterModel.isList"
+                                (click)="generateMarksheet()">Generate</button>
+                            <button *ngIf="FilterModel.SectionId>0" mat-flat-button color="primary" (click)="printMarksheet(1,true)">Print</button>
+                        </div>
+                    </div>
+                    <!-- <div class="row">
+                        <div class="col-sm-12 mb-1 text-right">
+                            <label class="text-link text-blue text-bold">Settings :-</label>
+                            <br>
+                            <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                            <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                        </div>
+                    </div> -->
+
+                </form>
+                <div class="row" *ngIf="MarksheetList.length !=0">
+                    <div class="col-sm-12">
+                        <div class="dataTable-top">
+                            <div class="dataTable-dropdown d-flex">
+                                <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                    <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                                </select>
+                                <span class="ms-2">Entries per page</span>
+                            </div>
+                            <div class="dataTable-search">
+                                <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                    placeholder="Search..." type="text">
+                            </div>
+                        </div>
+                        <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                        &nbsp;|| &nbsp;
+                        <a class="text-link text-link-sm" (click)="printMarksheet(2,false)">Export Marksheet To Word</a>
+                        &nbsp;|| &nbsp;
+                        <a class="text-link text-link-sm" (click)="printMarksheet(1,false)">Export Marksheet To PDF</a>
+                        &nbsp;|| &nbsp;
+                        <a class="text-link text-link-sm" (click)="printMarksheet(1,true)">Print Marksheet</a>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" #table_1>
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">#</th>
+                                        <th rowspan="2" *ngIf="!isExporting">Action</th>
+                                        <th rowspan="2" (click)="sort('AdmissionNo')">Admission No.</th>
+                                        <th rowspan="2" style="min-width: 160px;" (click)="sort('PupilName')">Pupil Name
+                                        </th>
+                                        <th rowspan="2" *ngIf="FilterModel.SectionId == 0"
+                                            (click)="sort('SectionName')">Section</th>
+                                        <th rowspan="2" (click)="sort('RollNo')">Roll No</th>
+                                        <th colspan="6"
+                                            class="text-center">Term-1 (Half Yearly)</th>
+                                        <th *ngIf="FilterModel.Term==0||FilterModel.Term==2" colspan="5"
+                                            class="text-center">Term-2 (Annual)</th>
+                                        <th *ngIf="FilterModel.Term==2" colspan="6" class="text-center">Final</th>
+
+                                    </tr>
+                                    <tr>
+                                        <!-- <th (click)="sort('HyMarksObtained')">MO</th> -->
+                                        <th class="text-right no-wrap"
+                                        (click)="sort('HyRank')">Rank</th>
+                                        <th class="text-right no-wrap"
+                                            (click)="sort('HyAggregate')">Aggregate</th>
+                                        <th class="text-right no-wrap"
+                                            (click)="sort('HyPercentage')">%</th>
+                                        <th class="text-right"
+                                            (click)="sort('HyPass')">Result</th>
+                                        <th class="text-right no-wrap"
+                                            (click)="sort('HyPresentDays')">Attendance</th>
+                                        <th class="text-right"
+                                            (click)="sort('HyTeacherRemarks')">Remarks</th>
+
+                                        <!-- <th (click)="sort('AnMarksObtained')">MO</th> -->
+                                        <th *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap"
+                                            (click)="sort('AnRank')">Rank</th>
+                                        <th *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap"
+                                            (click)="sort('AnAggregate')">Aggregate</th>
+                                        <th *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap"
+                                            (click)="sort('AnPercentage')">%</th>
+                                        <th *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right"
+                                            (click)="sort('AnPass')">Result</th>
+                                        <th *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap"
+                                            (click)="sort('AnPresentDays')">Attendance</th>
+                                        
+
+                                        <!-- <th (click)="sort('FinalMarksObtained')">MO</th> -->
+                                        <th *ngIf="FilterModel.Term==2" class="text-right" (click)="sort('FinalRank')">
+                                            Rank</th>
+                                        <th *ngIf="FilterModel.Term==2" class="text-right no-wrap"
+                                            (click)="sort('FinalAggregate')">Aggregate</th>
+                                        <th *ngIf="FilterModel.Term==2" class="text-right no-wrap"
+                                            (click)="sort('FinalPercentage')">%</th>
+                                        <th *ngIf="FilterModel.Term==2" class="text-right" (click)="sort('FinalPass')">
+                                            Result</th>
+                                        <th *ngIf="FilterModel.Term==2" class="text-right">Attendance</th>
+                                        
+                                        <th *ngIf="FilterModel.Term==2" class="text-right"
+                                            (click)="sort('FinalTeacherRemarks')">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        *ngFor="let item of MarksheetList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index;">
+                                        <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                        <td *ngIf="!isExporting" class="no-wrap">
+                                            <a ngbTooltip="Print Marksheet"
+                                                (click)="printMarksheet(1,true,item.MarksheetId)" class="icon-print">
+                                                <i class="bi bi-printer-fill"></i>
+                                            </a>
+                                            <a ngbTooltip="Download Marksheet"
+                                                (click)="printMarksheet(1,false,item.MarksheetId)" class="icon-delete">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </a>
+                                            <a ngbTooltip="Download Marksheet"
+                                                (click)="printMarksheet(2,false,item.MarksheetId)" class="icon-edit">
+                                                <i class="bi bi-file-earmark-word-fill"></i>
+                                            </a>
+
+                                            <!-- <a ngbTooltip="View Marks Details" (click)="printMarksheet(item.MarksheetId)"
+                                                class="icon-detail">
+                                                <i class="bi bi-file-text"></i>
+                                            </a> -->
+
+
+                                            <!-- <a ngbTooltip="Edit Admit Card" *ngIf="action.CanEdit" class="icon-edit"
+                                                    (click)="editAdmitCard(item)">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <a ngbTooltip="Delete Admit Card" *ngIf="action.CanDelete" class="icon-delete"
+                                                    (click)="deleteAdmitCard(item)">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </a> -->
+                                        </td>
+                                        <td>{{item.AdmissionNo}}</td>
+                                        <td>{{item.PupilName}}</td>
+                                        <td *ngIf="FilterModel.SectionId == 0">{{item.SectionName}}</td>
+                                        <td>{{item.RollNo}}</td>
+                                        <!-- <td>{{item.HyMarksObtained}}</td> -->
+                                        <td class="text-right">
+                                            {{item.HyRank}}</td>
+                                        <td class="text-right no-wrap">
+                                            {{item.HyAggregate}}</td>
+                                        <td class="text-right no-wrap">
+                                            {{item.HyPercentage}}</td>
+                                        <td class="text-right">
+                                            {{item.HyPass?'Pass':'Fail'}}</td>
+                                        <td class="text-right no-wrap">
+                                            {{item.HyPresentDays}}/{{item.HyWorkingDays}}</td>
+                                        
+                                        <td class="text-right no-wrap">
+                                            {{item.HyTeacherRemarks}}</td>
+
+                                        <!-- <td>{{item.AnMarksObtained}}</td> -->
+                                        <td *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right">
+                                            {{item.AnRank}}</td>
+                                        <td *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap">
+                                            {{item.AnAggregate}}</td>
+                                        <td *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap">
+                                            {{item.AnPercentage}}</td>
+                                        <td *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right">
+                                            {{item.AnPass?'Pass':'Fail'}}</td>
+                                        <td *ngIf="FilterModel.Term==0||FilterModel.Term==2" class="text-right no-wrap">
+                                            {{item.AnPresentDays}}/{{item.AnWorkingDays}}</td>
+                                      
+
+                                        <!-- <td>{{item.FinalMarksObtained}}</td> -->
+                                        <td *ngIf="FilterModel.Term==2" class="text-right">{{item.FinalRank}}</td>
+                                        <td *ngIf="FilterModel.Term==2" class="text-right no-wrap">
+                                            {{item.FinalAggregate}}</td>
+                                        <td *ngIf="FilterModel.Term==2" class="text-right no-wrap">
+                                            {{item.FinalPercentage}}</td>
+                                        <td *ngIf="FilterModel.Term==2" class="text-right">
+                                            {{item.FinalPass?'Pass':'Fail'}}</td>
+                                        <td *ngIf="FilterModel.Term==2" class="text-right no-wrap">{{item.AnPresentDays
+                                            + item.HyPresentDays}}/{{item.AnWorkingDays+item.HyWorkingDays}}</td>
+                                        <td *ngIf="FilterModel.Term==2" class="text-right no-wrap">{{item.FinalTeacherRemarks}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dataTable-bottom">
+                            <pagination-controls (pageChange)="p=$event" style="float:right;"
+                                class="my-pagination"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

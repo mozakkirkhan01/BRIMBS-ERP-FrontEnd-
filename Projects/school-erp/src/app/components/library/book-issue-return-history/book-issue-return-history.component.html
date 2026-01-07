@@ -1,0 +1,157 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+    <div class="row">
+        <div class="pagetitle dashboard col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>From Date</mat-label>
+                        <input matInput name="FromDate" [(ngModel)]="FilterModel.FromDate"
+                            [matDatepicker]="FromDatePicker">
+                        <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #FromDatePicker></mat-datepicker>
+                        <mat-error>required !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>To Date</mat-label>
+                        <input matInput name="ToDate" [(ngModel)]="FilterModel.ToDate" [matDatepicker]="ToDatePicker">
+                        <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #ToDatePicker></mat-datepicker>
+                        <mat-error>required !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>Status</mat-label>
+                        <mat-select name="Status" [(ngModel)]="FilterModel.Status">
+                            <mat-option [value]="0">--All--</mat-option>
+                            <mat-option [value]="m1.Key"
+                                *ngFor="let m1 of IssueBookStatusList">{{m1.Value}}</mat-option>
+                        </mat-select>
+                        <mat-error>Required Field !! </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-2">
+                        <mat-label>Taken By</mat-label>
+                        <mat-select name="TakenBy" (selectionChange)="changeTakenBy()"
+                            [(ngModel)]="FilterModel.TakenBy">
+                            <mat-option [value]="0">--All--</mat-option>
+                            <mat-option [value]="m1.Key" *ngFor="let m1 of TakenByList">{{m1.Value}}</mat-option>
+                        </mat-select>
+                        <mat-error>Required field !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-4" *ngIf="FilterModel.TakenBy == 1">
+                        <mat-label>Select Staff</mat-label>
+                        <input matInput name="StaffId" (ngModelChange)="filterStaffList($event)"
+                            placeholder="Search By Staff Name / Mobile No" [(ngModel)]="FilterModel.SearchStaff"
+                            [matAutocomplete]="autoStaff">
+                        <mat-autocomplete #autoStaff="matAutocomplete" (optionSelected)="afterStaffSelected($event)">
+                            <mat-option *ngFor="let option of StaffList" id="{{option.StaffId}}"
+                                [value]="option.SearchStaff">{{option.SearchStaff}}</mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix *ngIf="FilterModel.SearchStaff" color="primary"
+                            (click)="clearStaff()">
+                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                        </button>
+                        <mat-error>Required field !!</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-sm-4" *ngIf="FilterModel.TakenBy == 2">
+                        <mat-label>Select {{recordPupil}}</mat-label>
+                        <input matInput name="PupilId" (ngModelChange)="filterPupilList($event)"
+                            placeholder="Search By Admission No - {{recordPupil}} Name "
+                            [(ngModel)]="FilterModel.SearchPupil" [matAutocomplete]="autoPupil">
+                        <mat-autocomplete #autoPupil="matAutocomplete" (optionSelected)="afterPupilSelected($event)">
+                            <mat-option *ngFor="let option of PupilList" id="{{option.PupilId}}"
+                                [value]="option.SearchPupil">{{option.SearchPupil}}</mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix *ngIf="FilterModel.SearchPupil" color="primary"
+                            (click)="clearPupil()">
+                            <mat-icon><i class="ri-close-circle-line"></i> </mat-icon>
+                        </button>
+                        <mat-error>Required field !!</mat-error>
+                    </mat-form-field>
+
+                    <div class="col-sm-12 text-center mb-2">
+                        <button mat-flat-button color="primary" (click)="getIssueBookList()"><i
+                                class="bi bi-search"></i>
+                            Search</button>
+                    </div>
+                </div>
+                <hr>
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <a class="text-link-sm" (click)="exportToExcel()">Export to Excel</a>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" #table_1>
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th (click)="sort('IssueDate')">Issue Date</th>
+                                <th (click)="sort('TakenByName')">Taken By</th>
+                                <th (click)="sort('BookStock.BookNo')">Accession No</th>
+                                <th (click)="sort('BookStock.Book.BookName')">Book Name</th>
+                                <th (click)="sort('BookStock.Book.Author')">Author</th>
+                                <th (click)="sort('BookStock.Book.Edition')">Edition</th>
+                                <th (click)="sort('BookStock.Book.Publisher')">Publisher</th>
+                                <th (click)="sort('ReturnDate')">Return Date</th>
+                                <th (click)="sort('FineAmount')">Fine Amount</th>
+                                <th (click)="sort('IssueBookStatus')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of IssueBookList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td class="no-wrap">{{item.IssueDate|date:'dd-MM-yyyy HH:mm a'}}</td>
+                                <td>{{item.TakenByName}}</td>
+                                <td>{{item.BookStock.BookNo}}</td>
+                                <td>{{item.BookStock.Book.BookName}}</td>
+                                <td>{{item.BookStock.Book.Author}}</td>
+                                <td>{{item.BookStock.Book.Edition}}</td>
+                                <td>{{item.BookStock.Book.Publisher}}</td>
+                                <td class="no-wrap">{{item.ReturnDate|date:'dd-MM-yyyy HH:mm a'}}</td>
+                                <td>{{item.FineAmount|money}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.IssueBookStatus == 3 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllIssueBookStatusList[item.IssueBookStatus]}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="p=$event" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

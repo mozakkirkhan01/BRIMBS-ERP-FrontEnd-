@@ -1,0 +1,421 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+	<div class="pagetitle">
+		<h1>{{action.MenuTitle}}</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+				<li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+				<li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+			</ol>
+		</nav>
+	</div>
+
+	<section class="section dashboard">
+		<div class="card">
+			<div class="card-body ">
+				<form #formRegistration="ngForm" autocomplete="off">
+					<div class="container">
+
+						<h3 class="header-text">Personal Information</h3>
+						<div class="row">
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Pupil Name</mat-label>
+								<input matInput name="PupilName" [(ngModel)]="Registration.PupilName" required>
+								<mat-error>Required field !!</mat-error>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Gender</mat-label>
+								<mat-select #Gender="ngModel" name="Gender" [(ngModel)]="Registration.Gender" required>
+									<mat-option [value]="gender.Key"
+										*ngFor="let gender of GenderList">{{gender.Value}}</mat-option>
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>DOB</mat-label>
+								<input matInput #DOB="ngModel" name="DOB" [(ngModel)]="Registration.DOB" required
+									[matDatepicker]="DOBPicker">
+								<mat-datepicker-toggle matIconSuffix [for]="DOBPicker"></mat-datepicker-toggle>
+								<mat-datepicker #DOBPicker></mat-datepicker>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Email</mat-label>
+								<input matInput pattern="^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$" #Email="ngModel"
+									name="Email" email="true" [(ngModel)]="Registration.Email">
+								<mat-error>Invalid field !!</mat-error>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Mobile No.</mat-label>
+								<input matInput pattern="[- +()0-9]{10,10}" type="number" name="MobileNo"
+									[(ngModel)]="Registration.MobileNo">
+								<mat-error>Invalid field !!</mat-error>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Whatsapp No.</mat-label>
+								<input matInput pattern="[- +()0-9]{10,10}" type="number" name="AlternateNo"
+									[(ngModel)]="Registration.AlternateNo">
+								<mat-error>Invalid field !!</mat-error>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Aadhaar No.</mat-label>
+								<input matInput pattern="[0-9]{12,12}" type="number" #AadhaarNo="ngModel"
+									name="AadhaarNo" [(ngModel)]="Registration.AadhaarNo">
+								<mat-error>Invalid field !!</mat-error>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Category</mat-label>
+								<mat-select #Category="ngModel" name="Category" [(ngModel)]="Registration.Category">
+									<mat-option [value]="category.Key"
+										*ngFor="let category of CategoryList">{{category.Value}}</mat-option>
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Blood Group</mat-label>
+								<mat-select #BloodGroup="ngModel" name="BloodGroup"
+									[(ngModel)]="Registration.BloodGroup">
+									<mat-option [value]="Blood.Key"
+										*ngFor="let Blood of BloodGroupList">{{Blood.Value}}</mat-option>
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Religion</mat-label>
+								<mat-select #Religion="ngModel" name="Religion" [(ngModel)]="Registration.Religion">
+									<mat-option [value]="religion.Key"
+										*ngFor="let religion of ReligionList">{{religion.Value}}</mat-option>
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-2">
+								<mat-label>Nationality</mat-label>
+								<mat-select #Nationality="ngModel" name="Nationality"
+									[(ngModel)]="Registration.Nationality">
+									<mat-option [value]="nationality.Key"
+										*ngFor="let nationality of NationalityList">{{nationality.Value}}</mat-option>
+								</mat-select>
+							</mat-form-field>
+						</div>
+						<h3 class="header-text">Guardian Information</h3>
+						<div class="row">
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Father's Name</mat-label>
+								<input matInput #FatherName="ngModel" name="FatherName"
+									[(ngModel)]="Registration.FatherName">
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Mother's Name</mat-label>
+								<input matInput #MotherName="ngModel" name="MotherName"
+									[(ngModel)]="Registration.MotherName">
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Father's Occupation</mat-label>
+								<input matInput #FatherOccupation="ngModel" name="FatherOccupation"
+									[(ngModel)]="Registration.FatherOccupation">
+							</mat-form-field>
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Guardian Mobile No.</mat-label>
+								<input matInput pattern="[- +()0-9]{10,10}" type="number" #GuardianMobileNo="ngModel"
+									name="GuardianMobileNo" [(ngModel)]="Registration.GuardianMobileNo">
+								<mat-error>Invalid field !!</mat-error>
+							</mat-form-field>
+
+						</div>
+
+						<h3 class="header-text">Correspondence Address</h3>
+						<div class="row">
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Correspondence Address</mat-label>
+								<textarea matInput #CorrespondenceAddress="ngModel" name="CorrespondenceAddress"
+									[(ngModel)]="Registration.CorrespondenceAddress"></textarea>
+							</mat-form-field>
+
+
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>State</mat-label>
+								<mat-select name="pState" (selectionChange)="onStateChange(1)"
+									[(ngModel)]="Registration.CorrespondenceStateId">
+									<mat-option [value]="option.StateId" *ngFor="let option of StateList;">
+										{{option.StateName}}
+									</mat-option>
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>City</mat-label>
+								<mat-select #CorrespondenceCityId="ngModel" name="CorrespondenceCityId"
+									[(ngModel)]="Registration.CorrespondenceCityId">
+									<mat-option [value]="option.CityId" *ngFor="let option of CorrespondenceCityList;">
+										{{option.CityName}}
+									</mat-option>
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline" class="col-sm-3">
+								<mat-label>Pincode</mat-label>
+								<input type="number" pattern="[0-9]{6,6}" matInput #CorrespondencePinCode="ngModel"
+									name="CorrespondencePinCode" [(ngModel)]="Registration.CorrespondencePinCode">
+								<mat-error>Invalid field !!</mat-error>
+							</mat-form-field>
+
+						</div>
+
+						<h3 class="header-text">Registration Details</h3>
+						<div class="row">
+							<div class="col-sm-6">
+								<div class="row">
+									<mat-form-field appearance="outline" class="col-sm-4">
+										<mat-label>Form No</mat-label>
+										<input type="text" matInput name="FormNo" [(ngModel)]="Registration.FormNo">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4">
+										<mat-label>Session</mat-label>
+										<mat-select name="Session" (selectionChange)="getFeeRegistrationList()"
+											[(ngModel)]="Registration.SessionId" required>
+											<mat-option [value]="option.SessionId" *ngFor="let option of SessionList;">
+												{{option.SessionName}}
+											</mat-option>
+										</mat-select>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4">
+										<mat-label>Class</mat-label>
+										<mat-select name="ClassId" (selectionChange)="getFeeRegistrationList()"
+											[(ngModel)]="Registration.ClassId" required>
+											<mat-option [value]="option.ClassId" *ngFor="let option of ClassList;">
+												{{option.ClassName}}
+											</mat-option>
+										</mat-select>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4">
+										<mat-label>Registration Date</mat-label>
+										<input matInput name="RegistrationDate"
+											[(ngModel)]="Registration.RegistrationDate" required
+											[matDatepicker]="RegistrationDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="RegistrationDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker #RegistrationDatePicker></mat-datepicker>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+									<div class="col-sm-12">
+										<h3 class="header-text">Payment Details</h3>
+									</div>
+									<div class="row mb-4" *ngIf="FeePaymentDetailList.length > 0">
+										<div class="col-sm-12 table-responsive">
+											<div class="table-reponsive">
+												<table class="table table-bordered table-sm">
+													<thead>
+														<tr>
+															<th>Head</th>
+															<th class="text-right">Fee</th>
+															<!-- <th *ngIf="action.CanCreate">Paid Amount</th> -->
+															<th>Waive Off Amount</th>
+															<th style="text-align: right;">Total</th>
+														</tr>
+													</thead>
+													<tbody *ngIf="action.CanCreate">
+														<tr *ngFor="let fee of FeePaymentDetailList;let i1 = index">
+															<td>{{fee.HeadName}}</td>
+															<td class="text-right" *ngIf="action.CanCreate">
+																{{fee.InitialAmount}}</td>
+															<!-- <td><input type="number"
+																	class="form-control form-control-sm width_money"
+																	[name]="'fee_amount_'+i1"
+																	(change)="changeAmount(fee,1)"
+																	[(ngModel)]="fee.FeeAmount"
+																	[disabled]="fee.IsCompulsory"></td> -->
+															<td><input type="number" [name]="'waive_off_amount_'+i1"
+																	class="form-control form-control-sm width_money"
+																	(change)="changeAmount(fee,2)"
+																	[(ngModel)]="fee.WaiveOffAmount">
+															</td>
+															<th style="text-align: right;">{{fee.TotalAmount | number
+																:'1.2-2'}}
+															</th>
+														</tr>
+													</tbody>
+
+													<tfoot>
+														<tr>
+															<th colspan="1">Total</th>
+															<th class="text-right">{{FeePayment.InitialAmount
+																|number:'1.2-2'}}</th>
+															<!-- <th class="text-right">{{FeePayment.FeeAmount | number :'1.2-2'}}</th> -->
+															<th>{{FeePayment.WaiveOffAmount | number :'1.2-2'}}</th>
+															<th style="text-align: right;">{{FeePayment.TotalAmount |
+																number
+																:'1.2-2'}}</th>
+														</tr>
+													</tfoot>
+												</table>
+											</div>
+										</div>
+									</div>
+
+
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="Registration.RegistrationId == null">
+										<mat-label>Paid Amount</mat-label>
+										<input type="number" [disabled]="true" placeholder="Paid Amount" matInput
+											name="PaidAmount" [(ngModel)]="FeePayment.PaidAmount">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<!-- <mat-form-field appearance="outline" class="col-sm-4">
+										<mat-label>Due Amount</mat-label>
+										<input type="number" class="text-bold text-danger" [disabled]="true" matInput
+											name="DueAmount" [(ngModel)]="FeePayment.DueAmount">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field> -->
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="Registration.RegistrationId == null">
+										<mat-label>Payment Date</mat-label>
+										<input matInput name="PaymentDate" [(ngModel)]="FeePayment.PaymentDate" required
+											[matDatepicker]="PaymentDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="PaymentDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker #PaymentDatePicker></mat-datepicker>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="Registration.RegistrationId == null">
+										<mat-label>Payment Mode</mat-label>
+										<mat-select name="PaymentMode" [(ngModel)]="FeePayment.PaymentMode" required>
+											<mat-option [value]="option.Key" *ngFor="let option of PaymentModeList;">
+												{{option.Value}}
+											</mat-option>
+										</mat-select>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="FeePayment.PaymentMode > 2">
+										<mat-label>Transaction No</mat-label>
+										<input type="test" placeholder="Transaction No" matInput name="TransactionNo"
+											[(ngModel)]="FeePayment.TransactionNo">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="FeePayment.PaymentMode == 2">
+										<mat-label>Cheque No</mat-label>
+										<input type="test" placeholder="Cheque No" matInput name="ChequeNo"
+											[(ngModel)]="FeePayment.ChequeNo">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="FeePayment.PaymentMode == 2">
+										<mat-label>Cheque Date</mat-label>
+										<input matInput name="ChequeDate" [(ngModel)]="FeePayment.ChequeDate"
+											[matDatepicker]="ChequeDatePicker">
+										<mat-datepicker-toggle matIconSuffix
+											[for]="ChequeDatePicker"></mat-datepicker-toggle>
+										<mat-datepicker #ChequeDatePicker></mat-datepicker>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="FeePayment.PaymentMode == 2">
+										<mat-label>Cheque Bank</mat-label>
+										<input type="test" placeholder="Cheque Bank" matInput name="ChequeBank"
+											[(ngModel)]="FeePayment.ChequeBank">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="FeePayment.PaymentMode == 2">
+										<mat-label>Bank Branch</mat-label>
+										<input type="test" placeholder="Bank Branch" matInput name="ChequeBankBranch"
+											[(ngModel)]="FeePayment.ChequeBankBranch">
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="isAccount && Registration.RegistrationId == null">
+										<mat-label>Account</mat-label>
+										<mat-select name="AccountId" [(ngModel)]="FeePayment.AccountId" required>
+											<mat-option [value]="option.AccountId" *ngFor="let option of AccountList;">
+												{{option.AccountNo}}
+											</mat-option>
+										</mat-select>
+										<mat-error>Required field !!</mat-error>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="Registration.RegistrationId == null">
+										<mat-label>Remarks</mat-label>
+										<textarea matInput name="Remarks" [(ngModel)]="FeePayment.Remarks"></textarea>
+									</mat-form-field>
+
+									<mat-form-field appearance="outline" class="col-sm-4"
+										*ngIf="FeePayment.WaiveOffAmount>0">
+										<mat-label>Remarks On Waive Off</mat-label>
+										<textarea matInput name="RemarksOnWaiveOff"
+											[(ngModel)]="FeePayment.RemarksOnWaiveOff"></textarea>
+									</mat-form-field>
+								</div>
+							</div>
+							<div class="col-sm-6">
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="card">
+											<div class="card-body profile-card flex-column align-items-center">
+												<label>STUDENT PHOTO</label>
+												<img [src]="StudentPhoto ? StudentPhoto:'assets/img/no-image.png'"
+													alt="Profile" class="img-responsive" style="width: 100%;">
+												<input type="file" accept="image/*" #StudentPhotoFile="ngModel"
+													(change)="setStudentPhotoFile($event)" name="StudentPhotoFile"
+													[(ngModel)]="Registration.StudentPhotoFile"
+													class="form-control mt-2 mb-4" placeholder="Enter Profile Photo *">
+											</div>
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="card">
+											<div class="card-body profile-card flex-column align-items-center">
+												<label>STUDENT SINGNATURE</label>
+												<img [src]="StudentSingnature ? StudentSingnature:'assets/img/no-image.png'"
+													alt="Profile" class="img-responsive" style="width: 100%;">
+												<input type="file" accept="image/*" #StudentSingnatureFile="ngModel"
+													name="StudentSingnatureFile"
+													(change)="setStudentSingnatureFile($event)"
+													[(ngModel)]="Registration.StudentSingnatureFile"
+													class="form-control mt-2 mb-4"
+													placeholder="Enter StudentSingnature">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="card-footer text-center" *ngIf="action.CanCreate">
+				<button mat-flat-button color="primary" (click)="saveRegistration()">{{Registration.RegistrationId >
+					0 ? 'Update':'Submit'}}</button>
+			</div>
+		</div>
+
+	</section>
+
+</main>

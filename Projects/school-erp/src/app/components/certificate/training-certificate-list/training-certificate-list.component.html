@@ -1,0 +1,134 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formTrainingCertificate="ngForm">
+                    <div class="row mt-2">
+                        <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Session</mat-label>
+                            <mat-select #SessionId="ngModel" name="SessionId" [(ngModel)]="FilterObj.SessionId">
+                                <mat-option value="0">--All Session--</mat-option>
+                                <mat-option [value]="session.SessionId"
+                                    *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Class</mat-label>
+                            <mat-select #ClassId="ngModel" name="ClassId" [(ngModel)]="FilterObj.ClassId"
+                                (selectionChange)="changeClass()">
+                                <mat-option value="0">--All Class--</mat-option>
+                                <mat-option [value]="class.ClassId"
+                                    *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Section</mat-label>
+                            <mat-select #SectionId="ngModel" name="SectionId" [(ngModel)]="FilterObj.SectionId">
+                                <mat-option value="0">--All Section--</mat-option>
+                                <mat-option [value]="s1.SectionId"
+                                    *ngFor="let s1 of SectionList">{{s1.SectionName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field> -->
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>From Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="FilterObj.FromDateString"
+                                [matDatepicker]="FromDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>To Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="FilterObj.ToDateString"
+                                [matDatepicker]="ToDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <div class="col-sm-2">
+                            <button mat-flat-button color="primary"
+                                (click)="getTrainingCertificateList()">Search</button>
+                        </div>
+                    </div>
+                </form>
+                <div *ngIf="TrainingCertificateList.length > 0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    <div class="table-container overflow-auto">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+                                    <th (click)="sort('CertificateNo')">Certificate No.</th>
+                                    <th (click)="sort('StaffName')">Staff Name</th>
+                                    <th (click)="sort('ConductedBy')">Conducted By</th>
+                                    <th (click)="sort('Topic')">Topic</th>
+                                    <th (click)="sort('TrainingDate')">Training Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of TrainingCertificateList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td class="no-wrap">
+                                        <a ngbTooltip="Print Marksheet"
+                                            (click)="printTrainingCertificate(1,true,item.TrainingCertificateId)" class="icon-print">
+                                            <i class="bi bi-printer-fill"></i>
+                                        </a>
+                                        <a ngbTooltip="Edit Record" *ngIf="action.CanEdit" class="icon-edit"
+                                            data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                            (click)="editTrainingCertificate(item)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a ngbTooltip="Delete Record" *ngIf="action.CanDelete" class="icon-delete"
+                                            (click)="deleteTrainingCertificate(item)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </td>
+                                    <td>{{item.CertificateNo }}</td>
+                                    <td>{{item.StaffName }}</td>
+                                    <td>{{item.ConductedBy }}</td>
+                                    <td>{{item.Topic }}</td>
+                                    <td class="no-wrap">{{item.TrainingDate|date:'dd-MM-yyyy'}}</td>
+                                   
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

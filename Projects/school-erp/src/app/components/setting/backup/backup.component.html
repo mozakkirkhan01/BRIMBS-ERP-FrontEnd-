@@ -1,0 +1,85 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+
+  <div class="row">
+    <div class="pagetitle dashboard col-sm-8">
+      <h1>{{action.MenuTitle}}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+          <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+          <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-sm-4">
+      <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+        (click)="saveBackup()">New
+        Backup</button>
+    </div>
+  </div>
+
+  <section class="section dashboard">
+    <div class="card">
+      <div class="card-body ">
+        <div class="table-container overflow-auto">
+          <div class="dataTable-top">
+            <div class="dataTable-dropdown d-flex">
+              <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+              </select>
+              <span class="ms-2">Entries per page</span>
+            </div>
+            <div class="dataTable-search">
+              <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search" placeholder="Search..."
+                type="text">
+            </div>
+          </div>
+
+          <table class="table table-sm table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th (click)="sort('CreatedOn')">Date</th>
+                <th (click)="sort('ErrorMessage')">Message</th>
+                <th (click)="sort('BackupStatus')">Status</th>
+                <th (click)="sort('EmployeeName')">Created By</th>
+                <th *ngIf="action.CanEdit || action.CanDelete">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let item of BackupList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; let i = index;">
+                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                <td>{{item.CreatedOn |date:'dd-MM-yyyy HH:mm a'}}</td>
+                <td>{{item.ErrorMessage}}</td>
+                <td>
+                  <span class="p-1" [ngClass]="item.BackupStatus == 3 ? 'badge text-bg-success':'badge text-bg-danger'">
+                    {{AllBackupStatusList[item.BackupStatus]}}
+                  </span>
+                </td>
+                <td>{{item.CreatedBy}}</td>
+
+                <td class="no-wrap" *ngIf="action.CanEdit || action.CanDelete">
+                  <a target="_blank" [href]="baseUrl + item.BackupFile" ngbTooltip="Downoad Backup File" class="icon-edit">
+                    <i class="bi bi-download"></i>
+                  </a>
+                  <a *ngIf="action.CanDelete" ngbTooltip="Delete Record" class="icon-delete"
+                    (click)="deleteBackup(item)">
+                    <i class="bi bi-trash-fill"></i>
+                  </a>
+                 
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="dataTable-bottom">
+            <pagination-controls (pageChange)="p=$event" style="float:right;"
+              class="my-pagination"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>

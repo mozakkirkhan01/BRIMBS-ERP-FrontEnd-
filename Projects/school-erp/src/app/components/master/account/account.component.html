@@ -1,0 +1,192 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-sm-4">
+            <button mat-raised-button color="primary" *ngIf="action.CanCreate" class="float-right"
+                data-bs-toggle="modal" data-bs-target="#staticBackdrop" (click)="resetForm()">New
+                Account</button>
+        </div>
+    </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <div class="dataTable-top">
+                    <div class="dataTable-dropdown d-flex">
+                        <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                            <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                        </select>
+                        <span class="ms-2">Entries per page</span>
+                    </div>
+                    <div class="dataTable-search">
+                        <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                            placeholder="Search..." type="text">
+                    </div>
+                </div>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanDelete || action.CanEdit">Action</th>
+                                <th (click)="sort('AccountNo')">Account No</th>
+                                <th (click)="sort('AccountHolderName')">Holder Name</th>
+                                <th (click)="sort('IFSC')">IFSC</th>
+                                <th (click)="sort('BankName')">Bank</th>
+                                <th (click)="sort('BankBranch')">Branch</th>
+                                <th (click)="sort('AccountType')">Account Type</th>
+                                <th (click)="sort('AvailableAmount')">Available Balance</th>
+                                <th (click)="sort('ReceiptStartChar')">Receipt First Letter</th>
+                                <th (click)="sort('Remarks')">Remarks</th>
+                                <th (click)="sort('Status')">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let item of AccountList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                <td *ngIf="action.CanDelete || action.CanEdit" class="no-wrap">
+                                    <a *ngIf="action.CanEdit" ngbTooltip="Edit Pupil Details" class="icon-edit"
+                                        (click)="editAccount(item)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a *ngIf="action.CanDelete" ngbTooltip="Delete Pupil" class="icon-delete"
+                                        (click)="deleteAccount(item)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                                <td>{{item.AccountNo}}</td>
+                                <td>{{item.AccountHolderName}}</td>
+                                <td>{{item.IFSC}}</td>
+                                <td>{{item.BankName}}</td>
+                                <td>{{item.BankBranch}}</td>
+                                <td>{{AllAccountType[item.AccountType] |enumCase}}</td>
+                                <td>{{item.AvailableAmount}}</td>
+                                <td>{{item.ReceiptStartChar}}</td>
+                                <td>{{item.Remarks}}</td>
+                                <td>
+                                    <span class="p-1"
+                                        [ngClass]="item.Status == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                        {{AllStatus[item.Status]}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dataTable-bottom">
+                    <pagination-controls (pageChange)="onTableDataChange($event)" style="float:right;"
+                        class="my-pagination"></pagination-controls>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <div *ngIf="action.CanEdit || action.CanCreate" class="modal fade" id="staticBackdrop" data-bs-backdrop="static"
+        data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{Account.AccountId > 0 ?
+                        'Update':'New'}}
+                        Account
+                    </h1>
+                    <button type=" button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        (click)="resetForm()"></button>
+                </div>
+                <div class="modal-body">
+                    <form #formAccount="ngForm">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Account No.</mat-label>
+                                    <input matInput name="AccountNo"
+                                        [(ngModel)]="Account.AccountNo" required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Holder Name</mat-label>
+                                    <input matInput name="AccountHolderName"
+                                        [(ngModel)]="Account.AccountHolderName">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>IFSC</mat-label>
+                                    <input matInput name="IFSC"
+                                        [(ngModel)]="Account.IFSC">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Bank Name</mat-label>
+                                    <input matInput name="BankName"
+                                        [(ngModel)]="Account.BankName">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Bank Branch</mat-label>
+                                    <input matInput name="BankBranch"
+                                        [(ngModel)]="Account.BankBranch">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Receipt First Letter</mat-label>
+                                    <input matInput name="ReceiptStartChar"
+                                        [(ngModel)]="Account.ReceiptStartChar">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Account Type</mat-label>
+                                    <mat-select name="AccountType" [(ngModel)]="Account.AccountType" required>
+                                        <mat-option [value]="p1.Key"
+                                            *ngFor="let p1 of AccountTypeList">{{p1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-6 form-group">
+                                    <mat-label>Status</mat-label>
+                                    <mat-select name="Status" [(ngModel)]="Account.Status" required>
+                                        <mat-option [value]="p1.Key"
+                                            *ngFor="let p1 of StatusList">{{p1.Value}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="col-sm-12 form-group">
+                                    <mat-label>Remarks</mat-label>
+                                    <input matInput name="Remarks"
+                                        [(ngModel)]="Account.Remarks">
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer mt-2">
+                    <button type="button" mat-raised-button color="warn" class="me-2" data-bs-dismiss="modal"
+                        (click)="resetForm()">Cancel</button>
+                    <button mat-raised-button color="primary" (click)="saveAccount()">{{Account.AccountId >
+                        0 ? 'Update':'Submit'}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>

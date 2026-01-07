@@ -1,0 +1,563 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body ">
+                <form #FilterObjForm="ngForm">
+                    <div class="row mt-2">
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Session</mat-label>
+                            <mat-select #SessionId="ngModel" name="SessionId" [(ngModel)]="FilterObj.SessionId" required
+                                autofocus>
+                                <!-- <mat-option value="">--All Session--</mat-option> -->
+                                <mat-option [value]="session.SessionId"
+                                    *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Class</mat-label>
+                            <mat-select #ClassId="ngModel" name="ClassId" [(ngModel)]="FilterObj.ClassId"
+                                (selectionChange)="onClassChange()">
+                                <mat-option [value]="0">--All Class--</mat-option>
+                                <mat-option [value]="class.ClassId"
+                                    *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2">
+                            <mat-label>Section</mat-label>
+                            <mat-select #SectionId="ngModel" name="SectionId" [(ngModel)]="FilterObj.SectionId">
+                                <mat-option [value]="0">--All Section--</mat-option>
+                                <mat-option [value]="s1.SectionId"
+                                    *ngFor="let s1 of SectionList">{{s1.SectionName}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>Pupli Type</mat-label>
+                            <mat-select #PupilTypeId="ngModel" name="PupilTypeId" [(ngModel)]="FilterObj.PupilTypeId">
+                                <mat-option [value]="0">--All Type--</mat-option>
+                                <mat-option [value]="pupil.PupilTypeId"
+                                    *ngFor="let pupil of PupilTypeList">{{pupil.PupilTypeName}}</mat-option>
+                            </mat-select>
+                            <!-- <mat-error
+                                    *ngIf="(PupilTypeName.dirty  || PupilTypeName.touched) || (PupilTypeName.invalid && isSubmitted)">
+                                    PupilType is <strong>required</strong>
+                                </mat-error> -->
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>Admission Type</mat-label>
+                            <mat-select #AdmissionType="ngModel" name="AdmissionType"
+                                [(ngModel)]="FilterObj.AdmissionType">
+                                <mat-option [value]="0">--All Type--</mat-option>
+                                <mat-option [value]="AdmissionType.Key"
+                                    *ngFor="let AdmissionType of AdmissionTypeList">{{AdmissionType.Value}}</mat-option>
+                            </mat-select>
+                            <!-- <mat-error
+                                    *ngIf="(AdmissionType.dirty  || AdmissionType.touched) || (AdmissionType.invalid && isSubmitted)">
+                                    AdmissionType is <strong>required</strong>
+                                </mat-error> -->
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>From Admission Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="FilterObj.FromDateString"
+                                [matDatepicker]="FromDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>To Admission Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="FilterObj.ToDateString"
+                                [matDatepicker]="ToDatePicker">
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-4">
+                            <button mat-flat-button color="primary" (click)="getPupilList()">Search</button>
+                            <!-- <button mat-flat-button (click)="exportToExcel()" color="primary" class="ml-10">Export To Excel</button>-->
+                            <button mat-flat-button color="primary" (click)="printPupilList(1,true)"
+                                class="ml-10">Print</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="row mb-3">
+                    <div class="col-sm-12">
+                        <h3 class="header-text">Field Selection</h3>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.SelectAll" class="form-check-input me-1"
+                                    (change)="changeSelectAll(pupilValidation.SelectAll)" id="val_SelectAll"
+                                    type="checkbox">
+                                <label for="val_SelectAll">Select All</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.AdmissionNo" class="form-check-input me-1"
+                                    id="val_AdmissionNo" type="checkbox">
+                                <label for="val_AdmissionNo">Admission No</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.PupilName" class="form-check-input me-1"
+                                    id="val_PupilName" type="checkbox">
+                                <label for="val_PupilName">Pupil Name</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.ClassName" class="form-check-input me-1"
+                                    id="val_ClassName" type="checkbox">
+                                <label for="val_ClassName">Class</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.SectionName" class="form-check-input me-1"
+                                    id="val_SectionName" type="checkbox">
+                                <label for="val_SectionName">Section</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.RollNo" class="form-check-input me-1"
+                                    id="val_RollNo" type="checkbox">
+                                <label for="val_RollNo">Roll No</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.FatherName" class="form-check-input me-1"
+                                    id="val_FatherName" type="checkbox">
+                                <label for="val_FatherName">Father's Name</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.MotherName" class="form-check-input me-1"
+                                    id="val_MotherName" type="checkbox">
+                                <label for="val_MotherName">Mother's Name</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.DOB" class="form-check-input me-1" id="val_DOB"
+                                    type="checkbox">
+                                <label for="val_DOB">DOB</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Gender" class="form-check-input me-1"
+                                    id="val_Gender" type="checkbox">
+                                <label for="val_Gender">Gender</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Category" class="form-check-input me-1"
+                                    id="val_Category" type="checkbox">
+                                <label for="val_Category">Caste</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.BloodGroup" class="form-check-input me-1"
+                                    id="val_BloodGroup" type="checkbox">
+                                <label for="val_BloodGroup">Blood Group</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Religion" class="form-check-input me-1"
+                                    id="val_Religion" type="checkbox">
+                                <label for="val_Religion">Religion</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Nationality" class="form-check-input me-1"
+                                    id="val_Nationality" type="checkbox">
+                                <label for="val_Nationality">Nationality</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.MobileNo" class="form-check-input me-1"
+                                    id="val_MobileNo" type="checkbox">
+                                <label for="val_MobileNo">Mobile No</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.AlternateNo" class="form-check-input me-1"
+                                    id="val_AlternateNo" type="checkbox">
+                                <label for="val_AlternateNo">Alternate No</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Email" class="form-check-input me-1" id="val_Email"
+                                    type="checkbox">
+                                <label for="val_Email">Email</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.AadhaarNo" class="form-check-input me-1"
+                                    id="val_AadhaarNo" type="checkbox">
+                                <label for="val_AadhaarNo">Aadhaar No</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Height" class="form-check-input me-1"
+                                    id="val_Height" type="checkbox">
+                                <label for="val_Height">Height</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Weight" class="form-check-input me-1"
+                                    id="val_Weight" type="checkbox">
+                                <label for="val_Weight">Weight</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.FatherOccupation" class="form-check-input me-1"
+                                    id="val_FatherOccupation" type="checkbox">
+                                <label for="val_FatherOccupation">Father's Occupation</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.MotherOccupation" class="form-check-input me-1"
+                                    id="val_MotherOccupation" type="checkbox">
+                                <label for="val_MotherOccupation">Mother's Occupation</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.FamilyAnnualIncome" class="form-check-input me-1"
+                                    id="val_FamilyAnnualIncome" type="checkbox">
+                                <label for="val_FamilyAnnualIncome">Family Annual Income</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.GuardianMobileNo" class="form-check-input me-1"
+                                    id="val_GuardianMobileNo" type="checkbox">
+                                <label for="val_GuardianMobileNo">Guardian's Mobile No</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.CorrespondenceAddress" class="form-check-input me-1"
+                                    id="val_CorrespondenceAddress" type="checkbox">
+                                <label for="val_CorrespondenceAddress">Corres. Address</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.PermanentAddress" class="form-check-input me-1"
+                                    id="val_PermanentAddress" type="checkbox">
+                                <label for="val_PermanentAddress">Permanent Address</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.PreviousSchoolName" class="form-check-input me-1"
+                                    id="val_PreviousSchoolName" type="checkbox">
+                                <label for="val_PreviousSchoolName">Previous School</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.Remarks" class="form-check-input me-1"
+                                    id="val_Remarks" type="checkbox">
+                                <label for="val_Remarks">Remarks</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.PupilTypeName" class="form-check-input me-1"
+                                    id="val_PupilTypeName" type="checkbox">
+                                <label for="val_PupilTypeName">Category</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.AdmissionType" class="form-check-input me-1"
+                                    id="val_AdmissionType" type="checkbox">
+                                <label for="val_AdmissionType">Admission Type</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.AdmissionDate" class="form-check-input me-1"
+                                    id="val_AdmissionDate" type="checkbox">
+                                <label for="val_AdmissionDate">Admission Date</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.JoinDate" class="form-check-input me-1"
+                                    id="val_JoinDate" type="checkbox">
+                                <label for="val_JoinDate">Join Date</label>
+                            </div>
+                            <div class="col-sm-2">
+                                <input [(ngModel)]="pupilValidation.PupilStatus" class="form-check-input me-1"
+                                    id="val_PupilStatus" type="checkbox">
+                                <label for="val_PupilStatus">Status</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="openPdfSetting(1)">Export
+                        To PDF</a>
+                    <!-- &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="printPupilList(2,false)">Export
+                        To Word</a> -->
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="openPdfSetting(2)">Print
+                        Report</a>
+
+                    &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="openPdfSetting(3)">Preview
+                        Report</a>
+                    <!-- &nbsp;&nbsp;||&nbsp;&nbsp;<a class="text-link text-link-sm" (click)="generatePdf()">Print PDF</a> -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">S.No</th>
+                                    <th rowspan="2" *ngIf="!isExporting">Action</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.AdmissionNo" (click)="sort('AdmissionNo')">
+                                        Admission No.</th>
+                                        <th rowspan="2" *ngIf="pupilValidation.Pen" (click)="sort('Pen')">
+                                        PEN</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.PupilName" (click)="sort('PupilName')">Pupil
+                                    </th>
+                                    <th rowspan="2" *ngIf="pupilValidation.ClassName"
+                                        (click)="sort('PupilAdmission.ClassName')">Class</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.SectionName"
+                                        (click)="sort('PupilAdmission.SectionName')">Section</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.RollNo"
+                                        (click)="sort('PupilAdmission.RollNo')">Roll No.</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.FatherName" (click)="sort('FatherName')">
+                                        Father Name</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.MotherName" (click)="sort('MotherName')">
+                                        Mother Name</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.DOB" (click)="sort('DOB')">DOB</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Gender" (click)="sort('Gender')">Gender</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Category" (click)="sort('Category')">Caste
+                                    </th>
+                                    <th rowspan="2" *ngIf="pupilValidation.BloodGroup" (click)="sort('BloodGroup')">
+                                        Blood Group</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Religion" (click)="sort('Religion')">Religion
+                                    </th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Nationality" (click)="sort('Nationality')">
+                                        Nationality</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.MobileNo" (click)="sort('MobileNo')">Mobile
+                                        No.</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.AlternateNo" (click)="sort('AlternateNo')">
+                                        Alternate No.</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Email" (click)="sort('Email')">Email</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.AadhaarNo" (click)="sort('AadhaarNo')">
+                                        Aadhaar No.</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Height"
+                                        (click)="sort('PupilAdmission.Height')">Height</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Weight"
+                                        (click)="sort('PupilAdmission.Weight')">Weight</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.FatherOccupation"
+                                        (click)="sort('FatherOccupation')">Father's Occupation</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.MotherOccupation"
+                                        (click)="sort('MotherOccupation')">Mother's Occupation</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.FamilyAnnualIncome"
+                                        (click)="sort('FamilyAnnualIncome')">Family Annual Income</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.GuardianMobileNo"
+                                        (click)="sort('GuardianMobileNo')">Guardian Mobile No.</th>
+                                    <th colspan="4" *ngIf="pupilValidation.CorrespondenceAddress" class="text-center">
+                                        Correspondence Address</th>
+                                    <th colspan="4" *ngIf="pupilValidation.PermanentAddress" class="text-center">
+                                        Permanent Address</th>
+                                    <th colspan="6" *ngIf="pupilValidation.PreviousSchoolName" class="text-center">
+                                        Previous School</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.Remarks" (click)="sort('Remarks')">Remarks
+                                    </th>
+                                    <th rowspan="2" *ngIf="pupilValidation.PupilTypeName"
+                                        (click)="sort('PupilTypeName')">Category</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.AdmissionType"
+                                        (click)="sort('PupilAdmission.AdmissionType')">Admission Type</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.AdmissionDate"
+                                        (click)="sort('PupilAdmission.AdmissionDate')">Admission Date</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.JoinDate" (click)="sort('JoinDate')">Join
+                                        Date</th>
+                                    <th rowspan="2" *ngIf="pupilValidation.PupilStatus" (click)="sort('PupilStatus')">
+                                        Status</th>
+                                </tr>
+                                <tr>
+                                    <th *ngIf="pupilValidation.CorrespondenceAddress"
+                                        (click)="sort('CorrespondenceAddress')">Address</th>
+                                    <th *ngIf="pupilValidation.CorrespondenceAddress"
+                                        (click)="sort('CorrespondenceCityName')">City</th>
+                                    <th *ngIf="pupilValidation.CorrespondenceAddress"
+                                        (click)="sort('CorrespondenceStateName')">State</th>
+                                    <th *ngIf="pupilValidation.CorrespondenceAddress"
+                                        (click)="sort('CorrespondencePinCode')">Pincode</th>
+                                    <th *ngIf="pupilValidation.PermanentAddress" (click)="sort('PermanentAddress')">
+                                        Address</th>
+                                    <th *ngIf="pupilValidation.PermanentAddress" (click)="sort('PermanentCityName')">
+                                        City</th>
+                                    <th *ngIf="pupilValidation.PermanentAddress" (click)="sort('PermanentStateName')">
+                                        State</th>
+                                    <th *ngIf="pupilValidation.PermanentAddress" (click)="sort('PermanentPinCode')">
+                                        Pincode</th>
+                                    <th *ngIf="pupilValidation.PreviousSchoolName" rowspan="2"
+                                        (click)="sort('PreviousSchoolName')">School</th>
+                                    <th *ngIf="pupilValidation.PreviousSchoolName" rowspan="2"
+                                        (click)="sort('PreviousSchoolBoard')">Board</th>
+                                    <th *ngIf="pupilValidation.PreviousSchoolName" rowspan="2"
+                                        (click)="sort('PreviousSchoolClass')">Class </th>
+                                    <th *ngIf="pupilValidation.PreviousSchoolName" rowspan="2"
+                                        (click)="sort('PreviousSchoolMedium')">Medium</th>
+                                    <th *ngIf="pupilValidation.PreviousSchoolName" rowspan="2"
+                                        (click)="sort('PreviousSchoolTCNo')">TC No.</th>
+                                    <th *ngIf="pupilValidation.PreviousSchoolName" rowspan="2"
+                                        (click)="sort('PreviousSchoolTCDate')">TC Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    *ngFor="let item of PupilList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 1}}</td>
+                                    <td *ngIf="!isExporting">
+                                        <!-- <a ngbTooltip="Print Quotaion" class="icon-print"
+                                            (click)="printQuotation(item)"> <i class="bi bi-printer-fill"></i>
+                                        </a>
+                                        <a ngbTooltip="Download Quotation" class="icon-delete"
+                                            (click)="downloadQuotation(item,1)"> <i
+                                                class="bi bi-file-earmark-pdf-fill"></i>
+                                        </a>
+                                        <a ngbTooltip="Download Quotation" class="icon-edit"
+                                            (click)="downloadQuotation(item,2)"> <i
+                                                class="bi bi-file-earmark-word-fill"></i>
+                                        </a>
+                                        <a class="icon-detail" ngbTooltip="View Details"
+                                            (click)="getQuotationDetail(item)">
+                                            <i class="bi bi-file-text"></i>
+                                        </a> -->
+                                        <a *ngIf="item.StudentPhoto" [href]="imageUrl + item.StudentPhoto"
+                                            target="_blank" ngbTooltip="Pupil Photo" class="icon-detail">
+                                            <i class="bi bi-file-person"></i>
+                                        </a>
+                                        <a *ngIf="action.CanEdit" ngbTooltip="Edit Pupil Details" class="icon-edit"
+                                            (click)="editRecord(item)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a *ngIf="action.CanDelete" ngbTooltip="Delete Pupil" class="icon-delete"
+                                            (click)="deletePupil(item.PupilAdmission,i)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
+                                    </td>
+                                    <td *ngIf="pupilValidation.AdmissionNo">{{item.AdmissionNo }}</td>
+                                    <td *ngIf="pupilValidation.Pen">{{item.Pen }}</td>
+                                    <td *ngIf="pupilValidation.PupilName">{{item.PupilName }}</td>
+                                    <td *ngIf="pupilValidation.ClassName">{{item.PupilAdmission.ClassName }}</td>
+                                    <td *ngIf="pupilValidation.SectionName">{{item.PupilAdmission.SectionName }}</td>
+                                    <td *ngIf="pupilValidation.RollNo">{{item.PupilAdmission.RollNo }}</td>
+                                    <td *ngIf="pupilValidation.FatherName">{{item.FatherName }}</td>
+                                    <td *ngIf="pupilValidation.MotherName">{{item.MotherName }}</td>
+                                    <td *ngIf="pupilValidation.DOB" style="white-space: nowrap;">{{item.DOB | date :
+                                        "dd-MM-yyyy"}}</td>
+                                    <td *ngIf="pupilValidation.Gender">{{AllGenderList[item.Gender]|enumCase }}</td>
+                                    <td *ngIf="pupilValidation.Category">{{AllCategoryList[item.Category]|enumCase }}
+                                    </td>
+                                    <td *ngIf="pupilValidation.BloodGroup">{{AllBloodGroupList[item.BloodGroup]|enumCase
+                                        }}</td>
+                                    <td *ngIf="pupilValidation.Religion">{{AllReligionList[item.Religion]|enumCase}}
+                                    </td>
+                                    <td *ngIf="pupilValidation.Nationality">
+                                        {{AllNationalityList[item.Nationality]|enumCase }}</td>
+                                    <td *ngIf="pupilValidation.MobileNo">{{item.MobileNo }}</td>
+                                    <td *ngIf="pupilValidation.AlternateNo">{{item.AlternateNo }}</td>
+                                    <td *ngIf="pupilValidation.Email">{{item.Email }}</td>
+                                    <td *ngIf="pupilValidation.AadhaarNo">{{item.AadhaarNo }}</td>
+                                    <td *ngIf="pupilValidation.Height">{{item.PupilAdmission.Height }}</td>
+                                    <td *ngIf="pupilValidation.Weight">{{item.PupilAdmission.Weight }}</td>
+                                    <td *ngIf="pupilValidation.FatherOccupation">{{item.FatherOccupation }}</td>
+                                    <td *ngIf="pupilValidation.MotherOccupation">{{item.MotherOccupation }}</td>
+                                    <td *ngIf="pupilValidation.FamilyAnnualIncome">{{item.FamilyAnnualIncome }}</td>
+                                    <td *ngIf="pupilValidation.GuardianMobileNo">{{item.GuardianMobileNo }}</td>
+                                    <td *ngIf="pupilValidation.CorrespondenceAddress">{{item.CorrespondenceAddress }}
+                                    </td>
+                                    <td *ngIf="pupilValidation.CorrespondenceAddress">{{item.CorrespondenceCityName }}
+                                    </td>
+                                    <td *ngIf="pupilValidation.CorrespondenceAddress">{{item.CorrespondenceStateName }}
+                                    </td>
+                                    <td *ngIf="pupilValidation.CorrespondenceAddress">{{item.CorrespondencePinCode }}
+                                    </td>
+                                    <td *ngIf="pupilValidation.PermanentAddress">{{item.PermanentAddress }}</td>
+                                    <td *ngIf="pupilValidation.PermanentAddress">{{item.PermanentCityName }}</td>
+                                    <td *ngIf="pupilValidation.PermanentAddress">{{item.PermanentStateName }}</td>
+                                    <td *ngIf="pupilValidation.PermanentAddress">{{item.PermanentPinCode }}</td>
+                                    <td *ngIf="pupilValidation.PreviousSchoolName">{{item.PreviousSchoolName }}</td>
+                                    <td *ngIf="pupilValidation.PreviousSchoolName">{{item.PreviousSchoolBoard }}</td>
+                                    <td *ngIf="pupilValidation.PreviousSchoolName">{{item.PreviousSchoolClass }}</td>
+                                    <td *ngIf="pupilValidation.PreviousSchoolName">{{item.PreviousSchoolMedium }}</td>
+                                    <td *ngIf="pupilValidation.PreviousSchoolName">{{item.PreviousSchoolTCNo }}</td>
+                                    <td *ngIf="pupilValidation.PreviousSchoolName">
+                                        {{item.PreviousSchoolTCDate|date:'dd-MM-yyyy' }}</td>
+                                    <td *ngIf="pupilValidation.Remarks">{{item.Remarks }}</td>
+                                    <td *ngIf="pupilValidation.PupilTypeName">{{item.PupilTypeName }}</td>
+                                    <td *ngIf="pupilValidation.AdmissionType">
+                                        {{AllAdmissionTypeList[item.PupilAdmission.AdmissionType] |enumCase}}</td>
+                                    <td *ngIf="pupilValidation.AdmissionDate" style="white-space: nowrap;">
+                                        {{item.PupilAdmission.AdmissionDate | date
+                                        :"dd-MM-yyyy"}}</td>
+                                    <td *ngIf="pupilValidation.JoinDate" style="white-space: nowrap;">{{item.JoinDate |
+                                        date : "dd-MM-yyyy" }}</td>
+                                    <td *ngIf="pupilValidation.PupilStatus">
+                                        <span class="p-1"
+                                            [ngClass]="item.PupilStatus == 1 ? 'badge text-bg-success':'badge text-bg-danger'">
+                                            {{AllPupilStatusList[item.PupilStatus]|enumCase}}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="modal_pdf_setting" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form #formPdfSetting="ngForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Page Setting</h1>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Page Size</mat-label>
+                                    <mat-select name="pageSize" [(ngModel)]="pdfSetting.pageSize" required>
+                                        <mat-option [value]="e1"
+                                            *ngFor="let e1 of predefinedPageSizes">{{e1}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Page Orientation</mat-label>
+                                    <mat-select name="pageOrientation" [(ngModel)]="pdfSetting.pageOrientation" required>
+                                        <mat-option [value]="e1" *ngFor="let e1 of pageOrientations">{{e1}}</mat-option>
+                                    </mat-select>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Page Margin</mat-label>
+                                    <input matInput type="number" name="pageMargins"
+                                        [(ngModel)]="pdfSetting.pageMargins" required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>Font Size</mat-label>
+                                    <input matInput type="number" name="fontSize" [(ngModel)]="pdfSetting.fontSize"
+                                        required>
+                                    <mat-error>Required Field !!</mat-error>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="col-sm-6">
+                                    <mat-label>PDF Password</mat-label>
+                                    <input matInput name="userPassword" [(ngModel)]="pdfSetting.userPassword">
+                                    <!-- <mat-error>Required Field !!</mat-error> -->
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer mt-2">
+                        <button type="button" mat-raised-button color="warn" class="me-2"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button mat-raised-button color="primary" (click)="generatePdf()">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>

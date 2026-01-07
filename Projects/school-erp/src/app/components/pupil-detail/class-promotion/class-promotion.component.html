@@ -1,0 +1,153 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+            <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+            <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+          </ol>
+        </nav>
+      </div>
+
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body mt-3" style="padding-bottom: 15px;">
+                <form #formPupil="ngForm">
+                    <div class="row mt-2">
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Session</mat-label>
+                            <mat-select #SessionId="ngModel" name="SessionId" [(ngModel)]="Pupil.SessionId" required
+                                [autofocus]="true">
+                                <mat-option [value]="session.SessionId"
+                                    *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Class</mat-label>
+                            <mat-select #ClassId="ngModel" name="ClassId" (selectionChange)="changeClass()"
+                                [(ngModel)]="Pupil.ClassId" required [autofocus]="true">
+                                <mat-option [value]="class.ClassId"
+                                    *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Class is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Section</mat-label>
+                            <mat-select #SectionId="ngModel" name="SectionId" [(ngModel)]="Pupil.SectionId" required
+                                [autofocus]="true">
+                                <mat-option [value]="Section.SectionId"
+                                    *ngFor="let Section of SectionList">{{Section.SectionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Section is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Session</mat-label>
+                            <mat-select #PromotedSessionId="ngModel" name="PromotedSessionId"
+                                [(ngModel)]="Pupil.PromotedSessionId" required [autofocus]="true">
+                                <mat-option [value]="session.SessionId"
+                                    *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Session is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Class</mat-label>
+                            <mat-select #PromotedClassId="ngModel" name="PromotedClassId"
+                                (selectionChange)="changePromotedClass()" [(ngModel)]="Pupil.PromotedClassId" required
+                                [autofocus]="true">
+                                <mat-option [value]="class.ClassId"
+                                    *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Class is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-2 form-group">
+                            <mat-label>Section</mat-label>
+                            <mat-select #PromotedSectionId="ngModel" (selectionChange)="changePromotedSection()"
+                                name="PromotedSectionId" [(ngModel)]="Pupil.PromotedSectionId" required
+                                [autofocus]="true">
+                                <mat-option [value]="Section.SectionId"
+                                    *ngFor="let Section of PromotionSectionList">{{Section.SectionName}}</mat-option>
+                            </mat-select>
+                            <mat-error>
+                                Section is <strong>required</strong>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-12 text-center pb-4">
+                            <button mat-raised-button color="primary"
+                                (click)="getPupilListForPromotion()">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="container" *ngIf="PupilList.length>0">
+                    <div class="table-reponsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th><input type="checkbox" [(ngModel)]="Pupil.SelectAll" (change)="selectAll()"> </th>
+                                    <th style="cursor:pointer;" (click)="sort('AdmissionNo')">Admission No</th>
+                                    <th style="cursor:pointer;" (click)="sort('PupilName')">Pupil Name</th>
+                                    <th style="cursor:pointer;" (click)="sort('RollNo')">Roll No</th>
+                                    <!-- <th style="cursor:pointer;" (click)="sort('TotalDueAmount')">Due Amount</th>
+                                    <th style="cursor:pointer;" (click)="sort('DuePeriod')">Due Detail</th> -->
+                                    <th style="cursor:pointer;" (click)="sort('SectionId')">Section</th>
+                                    <th style="cursor:pointer;" (click)="sort('AdmissionType')">Type</th>
+                                    <th style="cursor:pointer;" (click)="sort('RollNo')">New Roll No</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of PupilList; let i=index;">
+                                    <td>{{i+1}}</td>
+                                    <th><input type="checkbox" [(ngModel)]="item.IsSelected"></th>
+                                    <td>{{item.AdmissionNo}}</td>
+                                    <td>{{item.PupilName}}</td>
+                                    <td>{{item.OldRollNo}}</td>
+                                    <!-- <td>{{item.TotalDueAmount}}</td>
+                                    <td>{{item.DuePeriod}}</td> -->
+                                    <td>
+                                        <select [(ngModel)]="item.SectionId" class="form-select">
+                                            <option *ngFor="let s1 of PromotionSectionList" [value]="s1.SectionId">
+                                                {{s1.SectionName}}</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select [(ngModel)]="item.AdmissionType" class="form-select">
+                                            <option *ngFor="let s1 of AdmissionTypeList" [value]="s1.Key">
+                                                {{s1.Value}}</option>
+                                        </select>
+                                    </td>
+                                    <td><input [(ngModel)]="item.RollNo" type="text" class="form-control"
+                                            style="width: 80px;"></td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer" style="text-align: center;" *ngIf="PupilList.length > 0 && (action.CanEdit || action.CanCreate)">
+                <button class="btn btn-primary" (click)="pupilPromotion()">Submit</button>
+            </div>
+        </div>
+    </section>
+</main>

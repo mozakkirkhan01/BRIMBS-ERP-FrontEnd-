@@ -1,0 +1,160 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main  class="main" *ngIf="action.ResponseReceived">
+
+    <div class="pagetitle">
+        <h1>{{action.MenuTitle}}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+
+        <div class="card">
+            <div class="card-body mt-3">
+                <form #formFeeClass="ngForm">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="row mt-2">
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Class</mat-label>
+                                        <mat-select name="ClassId" [(ngModel)]="FeeClass.ClassId" required>
+                                            <mat-option [value]="class.ClassId"
+                                                *ngFor="let class of ClassList">{{class.ClassName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Session</mat-label>
+                                        <mat-select name="SessionId" [(ngModel)]="FeeClass.SessionId" required>
+                                            <mat-option [value]="session.SessionId"
+                                                *ngFor="let session of SessionList">{{session.SessionName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="col-sm-3">
+                                        <mat-label>Pupil Type</mat-label>
+                                        <mat-select name="PupilTypeId" [(ngModel)]="FeeClass.PupilTypeId" required>
+                                            <mat-option [value]="pupil.PupilTypeId"
+                                                *ngFor="let pupil of PupilTypeList">{{pupil.PupilTypeName}}</mat-option>
+                                        </mat-select>
+                                        <mat-error>Required field !!</mat-error>
+                                    </mat-form-field>
+
+                                    <div class="col-sm-3">
+                                        <button mat-flat-button color="primary"
+                                            (click)="getAllFeeClassList()">Search</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-4 mb-1 text-right border-left">
+                                <label class="text-link text-blue text-bold">Settings :-</label>
+                                <br>
+                                <input class="form-check-input me-1" name="isChangeAll" type="checkbox"
+                                    [(ngModel)]="FilterModel.isChangeAll" id="isChangeAll">
+                                <label for="isChangeAll" class="text-link text-blue">{{RowChangesMessage}} </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div *ngFor="let month of MonthList;let i1 = index" style="margin-bottom: 0;">
+                    <div>
+                        <h3 class="header-text">{{month.MonthName}}</h3>
+                        <!-- <span>
+                            <label for="id-month_{{month.MonthId}}" class="form-check-label text-link mb-2"
+                                style="font-weight: 600;color: blue;">{{month.MonthName
+                                }}</label>
+                        </span> -->
+                        <div class="row">
+                            <div class="col-lg-12 table-responsive">
+                                <h4 class="no-item" *ngIf="month.FeeClassList.length == 0">No Head is Available for this
+                                    month.
+                                    <a class="text-link" [routerLink]="['/admin/fee-class-head']">Click here to add
+                                        head</a>
+                                </h4>
+                                <table class="table table-sm table-bordered table-hover"
+                                    *ngIf="month.FeeClassList.length > 0">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th>
+                                            <th (click)="sort('HeadName')">Head</th>
+                                            <th (click)="sort('FeeFor')">Fee For</th>
+                                            <th (click)="sort('FeeAmount')">Amount</th>
+                                            <th (click)="sort('IsActive')">Active</th>
+                                            <th (click)="sort('IsCompulsory')">Compulsory</th>
+                                            <th (click)="sort('IsRefundable')">Refundable</th>
+                                            <th (click)="sort('Remarks')">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngIf="action.CanEdit || action.CanCreate">
+                                        <tr *ngFor="let item of month.FeeClassList; let i=index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{item.HeadName}}</td>
+                                            <td>
+                                                <select [name]="'feeFor_' + i" [(ngModel)]="item.FeeFor"
+                                                    (change)="changeSelection(i1,item)"
+                                                    class="form-control form-select form-select-sm">
+                                                    <option [value]="m1.Key" *ngFor="let m1 of FeeForList">{{m1.Value}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td><input [(ngModel)]="item.FeeAmount" (change)="changeSelection(i1,item)"
+                                                    type="number" class="form-control"></td>
+                                            <td style="text-align: center;">
+                                                <mat-checkbox [(ngModel)]="item.IsActive"
+                                                    (change)="changeSelection(i1,item)" color="primary"></mat-checkbox>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <mat-checkbox [(ngModel)]="item.IsCompulsory"
+                                                    (change)="changeSelection(i1,item)" color="primary"></mat-checkbox>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <mat-checkbox [(ngModel)]="item.IsRefundable"
+                                                    (change)="changeSelection(i1,item)" color="primary"></mat-checkbox>
+                                            </td>
+                                            <td><input [(ngModel)]="item.Remarks" type="text" class="form-control"></td>
+                                        </tr>
+                                    </tbody>
+
+                                    <tbody *ngIf="!action.CanEdit && !action.CanCreate">
+                                        <tr *ngFor="let item of month.FeeClassList; let i=index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{item.HeadName}}</td>
+                                            <td>{{AllFeeFor[item.FeeFor]|enumCase}}</td>
+                                            <td>{{item.FeeAmount|money}}</td>
+                                            <td>{{item.IsActive?"Yes":"No"}}</td>
+                                            <td>{{item.IsCompulsory?"Yes":"No"}}</td>
+                                            <td>{{item.IsRefundable?"Yes":"No"}}</td>
+                                            <td>{{item.Remarks}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- <div class="col-lg-2 col-3" *ngFor="let head of month.FeeClassList">
+                                <input id="id{{head.HeadId}}_month_{{month.MonthId}}" [(ngModel)]="head.IsSelected"
+                                    class="form-check-input me-2" type="checkbox">
+                                <label for="id{{head.HeadId}}_month_{{month.MonthId}}"
+                                    class="form-check-label text-link">{{head.HeadName}}</label>
+                            </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer" style="text-align: center;"
+                *ngIf="MonthList.length > 0 && (action.CanEdit || action.CanCreate)">
+                <button class="btn btn-primary" (click)="saveFeeClass()">Submit</button>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>

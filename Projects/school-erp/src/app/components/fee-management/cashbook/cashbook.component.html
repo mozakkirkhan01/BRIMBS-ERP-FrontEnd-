@@ -1,0 +1,130 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card">
+            <div class="card-body">
+                <form #formCashbook="ngForm">
+                    <div class="row mt-2">
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>Select Account </mat-label>
+                            <mat-select name="AccountId" [(ngModel)]="Cashbook.AccountId" required>
+                                <mat-option [value]="p1.AccountId"
+                                    *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                            </mat-select>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>From Date</mat-label>
+                            <input matInput name="FromDate" [(ngModel)]="Cashbook.FromDateString"
+                                [matDatepicker]="FromDatePicker" required>
+                            <mat-datepicker-toggle matIconSuffix [for]="FromDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #FromDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-sm-3">
+                            <mat-label>To Date</mat-label>
+                            <input matInput name="ToDate" [(ngModel)]="Cashbook.ToDateString"
+                                [matDatepicker]="ToDatePicker" required>
+                            <mat-datepicker-toggle matIconSuffix [for]="ToDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #ToDatePicker></mat-datepicker>
+                            <mat-error>required !!</mat-error>
+                        </mat-form-field>
+
+                        <div class="col-sm-2">
+                            <button mat-flat-button color="primary" (click)="getCashbookBankbookList()">Search</button>
+                        </div>
+                    </div>
+                </form>
+                <div *ngIf="BankbookList.length > 0">
+                    <div class="dataTable-top">
+                        <div class="dataTable-dropdown d-flex">
+                            <select class="dataTable-selector form-select form-select-sm" [(ngModel)]="itemPerPage">
+                                <option *ngFor="let option of PageSize" [value]="option">{{option}} </option>
+                            </select>
+                            <span class="ms-2">Entries per page</span>
+                        </div>
+                        <div class="dataTable-search">
+                            <input class="dataTable-input form-control form-control-sm" [(ngModel)]="Search"
+                                placeholder="Search..." type="text">
+                        </div>
+                    </div>
+                    <a class="text-link text-link-sm" (click)="exportToExcel()">Export To Excel</a>
+                    &nbsp;|| &nbsp;
+                    <a class="text-link text-link-sm" (click)="printCashbookBankbook(2,false)">Export To Word</a>
+                    &nbsp;|| &nbsp;
+                    <a class="text-link text-link-sm" (click)="printCashbookBankbook(1,false)">Export To PDF</a>
+                    &nbsp;|| &nbsp;
+                    <a class="text-link text-link-sm" (click)="printCashbookBankbook(1,true)">Print Report</a>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" #table_1>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <!-- <th *ngIf="action.CanEdit || action.CanDelete">Action</th> -->
+                                    <th (click)="sort('Date')">Date</th>
+                                    <th (click)="sort('LedgerName')">Ledger</th>
+                                    <th (click)="sort('Narration')">Narration</th>
+                                    <th class="text-right" (click)="sort('Income')">{{recordIncome}}</th>
+                                    <th class="text-right" (click)="sort('Expense')">{{recordExpense}}</th>
+                                    <th class="text-right" (click)="sort('ClosingBalance')">Closing Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>{{BankBookMaster.OpeningDate|date:'dd-MM-yyyy'}}</td>
+                                    <td>{{BankBookMaster.OpeningParticulars}}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-right text-bold"
+                                        [ngClass]="BankBookMaster.OpeningBalance < 0 ?'text-danger':'text-success'">
+                                        {{BankBookMaster.OpeningBalance < 0 ?
+                                            -BankBookMaster.OpeningBalance:BankBookMaster.OpeningBalance}}
+                                            {{BankBookMaster.OpeningBalance < 0 ?' Cr':' Dr'}}</td>
+                                </tr>
+                                <tr
+                                    *ngFor="let item of BankbookList |filter:Search|orderBy:sortKey:reverse|paginate: { itemsPerPage: itemPerPage, currentPage: p } ; ; let i = index;">
+                                    <td>{{(itemPerPage * (p -1)) +i+ 2}}</td>
+                                    <td class="no-wrap">{{item.Date|date:'dd-MM-yyyy'}}</td>
+                                    <td>{{item.LedgerName}}</td>
+                                    <td>{{item.Narration}}</td>
+                                    <td class="no-wrap text-right text-success text-bold">{{item.Income}} </td>
+                                    <td class="no-wrap text-right text-danger text-bold">{{item.Expense}} </td>
+                                    <td class="no-wrap text-right text-bold"
+                                        [ngClass]="item.ClosingBalance < 0 ?'text-danger':'text-success'">
+                                        {{item.ClosingBalance < 0 ? -item.ClosingBalance:item.ClosingBalance }} {{item.ClosingBalance < 0 ?' Cr':' Dr'}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4">Total</th>
+                                    <th class="no-wrap text-right text-success text-bold">{{Cashbook.Income|money}}</th>
+                                    <th class="no-wrap text-right text-danger text-bold">{{Cashbook.Expense|money}}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="dataTable-bottom">
+                        <pagination-controls (pageChange)="p=$event" style="float:right;"
+                            class="my-pagination"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

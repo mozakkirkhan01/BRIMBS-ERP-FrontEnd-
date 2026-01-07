@@ -1,0 +1,124 @@
+<app-progress *ngIf="dataLoading"></app-progress>
+<main class="main" *ngIf="action.ResponseReceived">
+    <div class="row">
+        <div class="pagetitle col-sm-8">
+            <h1>{{action.MenuTitle}}</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a routerLink="admin/admin-dashboard">Home</a></li>
+                    <li class="breadcrumb-item">{{action.ParentMenuTitle}}</li>
+                    <li class="breadcrumb-item active">{{action.MenuTitle}}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <section class="section dashboard">
+        <div class="card" *ngIf="action.CanCreate || (action.CanEdit && Cashbook.CashbookId > 0)">
+            <div class="card-body">
+                <form #formCashbook="ngForm">
+                    <div class="container">
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Cashbook Date</mat-label>
+                                <input matInput name="CashbookDate" [(ngModel)]="Cashbook.CashbookDateString" required
+                                    [matDatepicker]="CashbookDatePicker">
+                                <mat-datepicker-toggle matIconSuffix [for]="CashbookDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #CashbookDatePicker></mat-datepicker>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field>
+
+                            <!-- <mat-form-field appearance="outline" class="col-sm-2">
+                                <mat-label>Account </mat-label>
+                                <mat-select name="AccountId"
+                                    [(ngModel)]="Cashbook.AccountId" required>
+                                    <mat-option [value]="p1.AccountId"
+                                        *ngFor="let p1 of AccountList">{{p1.AccountNo}}</mat-option>
+                                </mat-select>
+                                <mat-error>required !!</mat-error>
+                            </mat-form-field> -->
+
+
+                            <div class="col-sm-2">
+                                <button mat-flat-button color="primary" (click)="getCashbookForEntry()">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body" *ngIf="CashbookList.length > 0">
+                <h3 class="header-text">Closing Details</h3>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th (click)="sort('AccountNo')">Account</th>
+                                <th class=" text-right" (click)="sort('OpeningBalance')">Opening Balance</th>
+                                <th class=" text-right" (click)="sort('Income')">Income</th>
+                                <th class=" text-right" (click)="sort('Expenese')">Expenese</th>
+                                <th class=" text-right" (click)="sort('ReceiveAmount')">Receive Amount</th>
+                                <th class=" text-right" (click)="sort('DepositeAmount')">Deposite Amount</th>
+                                <th class=" text-right" (click)="sort('ClosingBalance')">Closing Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of CashbookList; let i = index;">
+                                <td>{{i+1}}</td>
+                                <td>{{item.AccountNo}}</td>
+                                <th class="no-wrap text-right">{{item.OpeningBalance}}</th>
+                                <th class="no-wrap text-right text-success">{{item.Income}}</th>
+                                <th class="no-wrap text-right text-danger">{{item.Expenese}}</th>
+                                <th class="no-wrap text-right text-success">{{item.ReceiveAmount}}</th>
+                                <th class="no-wrap text-right text-danger">{{item.DepositeAmount}}</th>
+                                <th class="no-wrap text-right">{{item.ClosingBalance}}</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-center" *ngIf="CashbookList.length > 0">
+                <button mat-flat-button color="primary" (click)="saveCashbook()">Submit</button>
+            </div>
+            <div class="card-body" *ngIf="LastCashbookList.length > 0">
+                <h3 class="header-text">Past Closings</h3>
+                <div class="table-container overflow-auto">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th *ngIf="action.CanDelete">Action</th>
+                                <th (click)="sort('CashbookDate')">Date</th>
+                                <th (click)="sort('AccountNo')">Account</th>
+                                <th (click)="sort('OpeningBalance')">Opening Balance</th>
+                                <th (click)="sort('Income')">Income</th>
+                                <th (click)="sort('Expenese')">Expenese</th>
+                                <th (click)="sort('ReceiveAmount')">Receive Amount</th>
+                                <th (click)="sort('DepositeAmount')">Deposite Amount</th>
+                                <th (click)="sort('ClosingBalance')">Closing Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of LastCashbookList; let i = index;">
+                                <td>{{i+1}}</td>
+                                <th *ngIf="action.CanDelete">
+                                    <a ngbTooltip="Delete Expense" *ngIf="i==0"  class="icon-delete"
+                                    (click)="deleteCashbook(item)">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                                </th>
+                                <td class="no-wrap">{{item.CashbookDate|date:'dd-MM-yyyy'}}</td>
+                                <td>{{item.AccountNo}}</td>
+                                <td class="no-wrap">{{item.OpeningBalance}}</td>
+                                <td class="no-wrap">{{item.Income}}</td>
+                                <td class="no-wrap">{{item.Expenese}}</td>
+                                <td class="no-wrap">{{item.ReceiveAmount}}</td>
+                                <td class="no-wrap">{{item.DepositeAmount}}</td>
+                                <td class="no-wrap">{{item.ClosingBalance}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
