@@ -28,8 +28,8 @@ export class ConstantData {
     private static readonly examKey = "3431F73D-D88B-4FE7-B5B3-EAB2063A30A4";
     private static readonly adminKey = "7918CCB7-21F0-4E8C-814F-AA66061E15CA";
     
-    private static readonly baseUrl: string = "http://localhost:44335/";
-    private static readonly baseUrlNew: string = "https://localhost:7121/";
+   // private static readonly baseUrl: string = "http://localhost:44335/";
+   // private static readonly baseUrlNew: string = "https://localhost:7121/";
     // private static readonly schoolNo: number = SchoolNos.PPS_Chas;
 
     //Active
@@ -51,7 +51,15 @@ export class ConstantData {
 
     // private static readonly baseUrlNew: string = "https://rpsintercollegeapi.winnexcode.com/";
     // private static readonly baseUrl: string = "https://api.rpsintercollege.edu.in/";
+    // private static readonly schoolNo: number = SchoolNos.RPS_Inter_College;
+
+
+    //https://brimbsapi.brimbsbokaro.edu.in/
+
+    private static readonly baseUrlNew: string = "https://brimbscollegeapi.winnexcode.com/";
+    private static readonly baseUrl: string = "https://brimbsapi.brimbsbokaro.edu.in";
     private static readonly schoolNo: number = SchoolNos.Brimbs_Bokaro;
+
 
     //private static readonly baseUrl: string = "https://api.gyandarshanpublicschool.org/";
     // private static readonly schoolNo: number = SchoolNos.Gyandarsan_Jodadih;
