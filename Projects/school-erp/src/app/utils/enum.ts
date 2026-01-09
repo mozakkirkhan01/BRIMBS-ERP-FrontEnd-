@@ -105,7 +105,7 @@ export enum SchoolNos {
     Gyandarsan_Jodadih = 5,
     MKPS_Garhwa = 6,
     WinnexCode_school = 50,
-     Brimbs_Bokaro = 7,
+    Brimbs_Bokaro = 7,
 }
 
 export enum FormFor {
@@ -214,22 +214,14 @@ export enum AdmissionType {
     ClassBack = 3
 }
 export enum ClassNos {
-    PreNursery = 1,
-    Nursery = 2,
-    LKG = 3,
-    UKG = 4,
-    One = 8,
-    Two = 9,
-    Three = 10,
-    Four = 11,
-    Five = 12,
-    Six = 13,
-    Seven = 14,
-    Eight = 15,
-    Nine = 16,
-    Ten = 17,
-    Eleven = 18,
-    Twelve = 19,
+    DMLT = 1,
+    DOA = 2,
+    DXT = 3,
+    DECGT = 4,
+    DAA = 8,
+    DOTA = 9,
+    DSI = 10,
+    CDresser = 11,
 }
 export enum ExamAttendance {
     Present = 1,
