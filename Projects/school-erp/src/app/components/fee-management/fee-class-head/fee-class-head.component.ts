@@ -58,6 +58,7 @@ export class FeeClassHeadComponent {
     this.getClassList();
     this.getPupilTypeList();
     this.getSessionList();
+    
   }
 
   validiateMenu() {
@@ -156,6 +157,8 @@ export class FeeClassHeadComponent {
       let response = r1 as any
       if (response.Message == ConstantData.SuccessMessage) {
         this.MonthList = response.MonthList;
+    console.log("monthlist",this.MonthList);
+
       } else {
         this.toastr.error(response.Message)
       }
