@@ -245,6 +245,20 @@ export class FeePaymentComponent {
         if (response.Message == ConstantData.SuccessMessage) {
           this.PaidFeePaymentDetailList = response.PaidFeePaymentDetailList;
           this.FeeSessionList = response.FeeSessionList;
+
+          this.setFeePaymentDetailList();
+          // ✅ Auto-select all months
+          this.FeeSessionList.forEach(session => {
+            session.IsExpand = true;
+
+            session.FeePaymentMonthList.forEach(month => {
+              if (month.FeePaymentMonthId === 0) {
+                month.IsSelected = true;
+              }
+            });
+          });
+
+          // Recalculate totals again
           this.setFeePaymentDetailList();
         } else {
           this.toastr.error(response.Message)
