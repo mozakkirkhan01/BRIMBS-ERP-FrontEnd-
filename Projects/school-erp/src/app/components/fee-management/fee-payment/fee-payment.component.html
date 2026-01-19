@@ -221,6 +221,7 @@
                                         <mat-select name="PaymentMode" [(ngModel)]="FeePayment.PaymentMode" required>
                                             <mat-option [value]="option.Key" *ngFor="let option of PaymentModeList;">
                                                 {{option.Value}}
+                                                
                                             </mat-option>
                                         </mat-select>
                                         <mat-error>Required field !!</mat-error>
